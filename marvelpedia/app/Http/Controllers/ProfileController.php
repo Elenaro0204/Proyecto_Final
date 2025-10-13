@@ -12,6 +12,16 @@ use Illuminate\View\View;
 class ProfileController extends Controller
 {
     /**
+     * Display the user's profile.
+     */
+    public function show(Request $request): View
+    {
+        return view('dashboar', [
+            'user' => $request->user(),
+        ]);
+    }
+
+    /**
      * Display the user's profile form.
      */
     public function edit(Request $request): View
@@ -24,17 +34,41 @@ class ProfileController extends Controller
     /**
      * Update the user's profile information.
      */
-    public function update(ProfileUpdateRequest $request): RedirectResponse
+    public function update(Request $request)
     {
-        $request->user()->fill($request->validated());
+        $user = Auth::user();
 
-        if ($request->user()->isDirty('email')) {
-            $request->user()->email_verified_at = null;
-        }
+        $request->validate([
+            'name' => 'required|string|max:255',
+            'nickname' => 'nullable|string|max:255',
+            'email' => 'required|email|max:255|unique:users,email,' . $user->id,
+            'avatar_url' => 'nullable|url|max:255',
+            'bio' => 'nullable|string|max:1000',
+            'fecha_nacimiento' => 'nullable|date',
+            'twitter' => 'nullable|url|max:255',
+            'instagram' => 'nullable|url|max:255',
+            'pais' => 'nullable|string|max:255',
+            'favorito_personaje' => 'nullable|string|max:255',
+            'favorito_comic' => 'nullable|string|max:255',
+        ]);
 
+        // Asignar los valores
+        $user->name = $request->name;
+        $user->nickname = $request->nickname;
+        $user->email = $request->email;
+        $user->avatar_url = $request->avatar_url;
+        $user->bio = $request->bio;
+        $user->fecha_nacimiento = $request->fecha_nacimiento;
+        $user->twitter = $request->twitter;
+        $user->instagram = $request->instagram;
+        $user->pais = $request->pais;
+        $user->favorito_personaje = $request->favorito_personaje;
+        $user->favorito_comic = $request->favorito_comic;
+
+        // Guardar en la base de datos
         $request->user()->save();
 
-        return Redirect::route('profile.edit')->with('status', 'profile-updated');
+        return redirect()->route('dashboard')->with('status', 'profile-updated');
     }
 
     /**

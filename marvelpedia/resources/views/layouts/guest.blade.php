@@ -7,7 +7,7 @@
     <meta name="csrf-token" content="{{ csrf_token() }}">
 
     <title>{{ config('app.name', 'Marvelpedia') }}</title>
-    
+
     <!-- Fonts -->
     <link rel="preconnect" href="https://fonts.bunny.net">
     <link href="https://fonts.bunny.net/css?family=figtree:400,500,600&display=swap" rel="stylesheet" />
@@ -19,10 +19,11 @@
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
 </head>
 <body class="bg-gray-100 font-sans antialiased">
-    <div class="min-h-screen flex justify-center items-center bg-gray-100">
+    @include('layouts.navigation')
 
+    <main class="min-h-screen flex justify-center items-center bg-gray-100 pt-5">
         <!-- Contenedor central -->
-        <div class="flex flex-col justify-center items-center bg-gray-100 px-4 pt-100 w-full max-w-md vh-100">
+        <div class="flex flex-col justify-center items-center bg-gray-100 px-4 w-full max-w-md">
             <!-- Logo -->
             <a class="mb-6 flex items-center" href="{{ route('dashboard') }}">
                 <x-application-logo class="me-2" style="height: 40px; width: auto;" />
@@ -34,10 +35,23 @@
                 @yield('content')
             </div>
         </div>
-
+    </main>
 
         <!-- Footer -->
         <x-footer />
-    </div>
+
 </body>
 </html>
+
+<script>
+    document.getElementById('navbarContent').addEventListener('shown.bs.collapse', function() {
+        this.style.height = 'auto';
+    });
+</script>
+
+<style>
+    .navbar-collapse {
+    overflow: visible; /* permite que el contenido se vea durante la animación */
+}
+
+</style>

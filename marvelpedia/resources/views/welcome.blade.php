@@ -1,12 +1,13 @@
+<!-- resources/views/welcome.blade.php -->
 
 @extends('layouts.app')
 
 @section('content')
     <!-- Sección de bienvenida -->
-    <x-welcome-section 
-    title="¡Bienvenido a Marvelpedia!" 
-    subtitle="Tu enciclopedia de personajes Marvel favorita." 
-    bgImage="{{ asset('build/assets/images/fondo_imagen_inicio.jpg') }}" />
+    <x-welcome-section
+    title="¡Bienvenido a Marvelpedia!"
+    subtitle="Tu enciclopedia de personajes Marvel favorita."
+    bgImage="{{ asset('images/fondo_imagen_inicio.jpeg') }}" />
 
     <!-- Carrusel de contenido destacado -->
     @php
@@ -14,35 +15,59 @@
         [
             'title' => 'Personajes',
             'text' => 'Conoce a los héroes y villanos más icónicos de Marvel.',
-            'image' => asset('build/assets/images/personajes.jpg'),
+            'image' => asset('images/fondo-personajes.jpg'),
             'link' => route('personajes')
         ],
         [
             'title' => 'Cómics',
             'text' => 'Explora las historias más épicas de los cómics.',
-            'image' => asset('build/assets/images/comics.jpg'),
+            'image' => asset('images/fondo-comics.jpeg'),
             'link' => route('comics')
         ],
         [
             'title' => 'Películas',
             'text' => 'Revive las películas más emocionantes del MCU.',
-            'image' => asset('build/assets/images/peliculas.jpg'),
+            'image' => asset('images/fondo-peliculas.jpeg'),
             'link' => route('peliculas')
         ],
         [
             'title' => 'Series',
             'text' => 'Disfruta de las series más entretenidas de Marvel.',
-            'image' => asset('build/assets/images/series.jpg'),
+            'image' => asset('images/fondo-series.jpg'),
             'link' => route('series')
+        ],
+        [
+            'title' => 'Foros',
+            'text' => 'Participa en discusiones, comparte opiniones y conecta con otros fans.',
+            'image' => asset('images/fondo-foros.jpg'),
+            'link' => route('foros')
+        ],
+        [
+            'title' => 'Descubre',
+            'text' => 'Explora curiosidades, novedades y contenidos exclusivos de Marvel.',
+            'image' => asset('images/fondo-descubre.jpg'),
+            'link' => route('descubre')
+        ],
+        [
+            'title' => 'Reseñas',
+            'text' => 'Lee y comparte reseñas de cómics, películas y series.',
+            'image' => asset('images/fondo-resenas.jpeg'),
+            'link' => route('resenas')
+        ],
+        [
+            'title' => 'Ayuda',
+            'text' => 'Encuentra respuestas a tus dudas y aprende a navegar en Marvelpedia.',
+            'image' => asset('images/fondo-ayuda.jpeg'),
+            'link' => route('ayuda')
         ],
     ];
     @endphp
 
-    <x-carrusel 
-        title="Explora nuestro contenido" 
-        subtitle="Descubre personajes, cómics, películas y series de Marvel." 
-        :cards="$cards" 
-        carouselId="carrusel_destacados"
+    <x-carrusel
+        title="Explora nuestro contenido"
+        subtitle="Descubre personajes, cómics, películas y series de Marvel."
+        :cards="$cards"
+        :carouselId="'carrusel_destacados'"
     />
 
     <!-- Carrusel de reseñas destacadas -->
@@ -75,11 +100,11 @@
     ];
     @endphp
 
-    <x-carrusel 
-        title="Reseñas más valoradas" 
-        subtitle="Descubre qué es lo que ha encantado a nuestros usuarios." 
-        :cards="$cards" 
-        carouselId="carrusel_resenas"
+    <x-carrusel
+        title="Reseñas más valoradas"
+        subtitle="Descubre qué es lo que ha encantado a nuestros usuarios."
+        :cards="$cards"
+        :carouselId="'carrusel_resenas'"
     />
 
     <!-- Carrusel de foros destacados -->
@@ -112,11 +137,11 @@
     ];
     @endphp
 
-    <x-carrusel 
-        title="Foros Destacados" 
-        subtitle="Únete a la conversación y descubre lo que está moviendo a la comunidad." 
-        :cards="$cards" 
-        carouselId="carrusel_foros"
+    <x-carrusel
+        title="Foros Destacados"
+        subtitle="Únete a la conversación y descubre lo que está moviendo a la comunidad."
+        :cards="$cards"
+        :carouselId="'carrusel_foros'"
     />
 
 

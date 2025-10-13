@@ -30,6 +30,8 @@
             <div class="col-md-4 mb-4 text-center text-md-start">
                 <h6 class="text-uppercase mb-3">Menú</h6>
                 <ul class="list-unstyled">
+                    <li><a href="{{ route('inicio') }}" class="text-light text-decoration-none">Inicio</a></li>
+                    <li><a href="{{ route('descubre') }}" class="text-light text-decoration-none">Descubre</a></li>
                     <li><a href="{{ route('personajes') }}" class="text-light text-decoration-none">Personajes</a></li>
                     <li><a href="{{ route('comics') }}" class="text-light text-decoration-none">Cómics</a></li>
                     <li><a href="{{ route('peliculas') }}" class="text-light text-decoration-none">Películas</a></li>
@@ -45,22 +47,22 @@
     <h6 class="text-uppercase mb-3">Galería</h6>
         <div class="row g-2">
             <div class="col-4">
-                <img src="{{ asset('build/assets/images/thumb1.jpg') }}" alt="Imagen 1" class="img-fluid rounded" style="object-fit:cover; width:100%; height:70px;">
+                <img src="{{ asset('images/fondo-ayuda.jpeg') }}" alt="Imagen 1" class="img-fluid rounded" style="object-fit:cover; width:100%; height:70px;">
             </div>
             <div class="col-4">
-                <img src="{{ asset('build/assets/images/thumb2.jpg') }}" alt="Imagen 2" class="img-fluid rounded" style="object-fit:cover; width:100%; height:70px;">
+                <img src="{{ asset('images/fondo-descubre.jpg') }}" alt="Imagen 2" class="img-fluid rounded" style="object-fit:cover; width:100%; height:70px;">
             </div>
             <div class="col-4">
-                <img src="{{ asset('build/assets/images/thumb3.jpg') }}" alt="Imagen 3" class="img-fluid rounded" style="object-fit:cover; width:100%; height:70px;">
+                <img src="{{ asset('images/fondo-foros.jpg') }}" alt="Imagen 3" class="img-fluid rounded" style="object-fit:cover; width:100%; height:70px;">
             </div>
             <div class="col-4">
-                <img src="{{ asset('build/assets/images/thumb4.jpg') }}" alt="Imagen 4" class="img-fluid rounded" style="object-fit:cover; width:100%; height:70px;">
+                <img src="{{ asset('images/fondo-personajes.jpg') }}" alt="Imagen 4" class="img-fluid rounded" style="object-fit:cover; width:100%; height:70px;">
             </div>
             <div class="col-4">
-                <img src="{{ asset('build/assets/images/thumb5.jpg') }}" alt="Imagen 5" class="img-fluid rounded" style="object-fit:cover; width:100%; height:70px;">
+                <img src="{{ asset('images/fondo-peliculas.jpeg') }}" alt="Imagen 5" class="img-fluid rounded" style="object-fit:cover; width:100%; height:70px;">
             </div>
             <div class="col-4">
-                <img src="{{ asset('build/assets/images/thumb6.jpg') }}" alt="Imagen 6" class="img-fluid rounded" style="object-fit:cover; width:100%; height:70px;">
+                <img src="{{ asset('images/fondo-series.jpg') }}" alt="Imagen 6" class="img-fluid rounded" style="object-fit:cover; width:100%; height:70px;">
             </div>
         </div>
     </div>
