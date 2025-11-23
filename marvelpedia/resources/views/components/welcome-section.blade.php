@@ -5,7 +5,7 @@
 ])
 
 <div class="welcome-section relative text-center text-white flex items-center justify-center"
-     style="background: url('{{ $bgImage }}') no-repeat center center; background-size: cover; min-height: 100vh;">
+     style="background: url('{{ $bgImage }}') no-repeat center center; background-size: cover; min-height: 50vh;">
 
     <!-- Overlay oscuro -->
     <div class="absolute inset-0 bg-black bg-opacity-50 z-0"></div>

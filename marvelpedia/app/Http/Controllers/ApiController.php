@@ -20,11 +20,17 @@ class ApiController extends Controller
             'hash' => $this->hash
         ])->json()['data']['results'] ?? [];
 
-        $peliculas = Http::get('https://gateway.marvel.com/v1/public/events', [
-            'ts' => $this->ts,
-            'apikey' => $this->apikey,
-            'hash' => $this->hash
-        ])->json()['data']['results'] ?? [];
+        // $peliculas = Http::get('https://gateway.marvel.com/v1/public/events', [
+        //     'ts' => $this->ts,
+        //     'apikey' => $this->apikey,
+        //     'hash' => $this->hash
+        // ])->json()['data']['results'] ?? [];
+
+        $peliculas = Http::get('http://www.omdbapi.com/', [
+            'apikey' => '1f00bd0e',
+            's' => 'Marvel',
+            'type' => 'movie',
+        ])->json()['results'] ?? [];
 
         $personajes = Http::get('http://www.omdbapi.com/', [
             'apikey' => '1f00bd0e',
@@ -32,11 +38,17 @@ class ApiController extends Controller
             'type' => 'movie',
         ])->json()['data']['results'] ?? [];
 
-        $series = Http::get('https://gateway.marvel.com/v1/public/series', [
-            'ts' => $this->ts,
-            'apikey' => $this->apikey,
-            'hash' => $this->hash
-        ])->json()['data']['results'] ?? [];
+        // $series = Http::get('https://gateway.marvel.com/v1/public/series', [
+        //     'ts' => $this->ts,
+        //     'apikey' => $this->apikey,
+        //     'hash' => $this->hash
+        // ])->json()['data']['results'] ?? [];
+
+        $series = Http::get('http://www.omdbapi.com/', [
+            'apikey' => '1f00bd0e',
+            's' => 'Marvel',
+            'type' => 'series',
+        ])->json()['results'] ?? [];
 
         // Pasar todas las variables a la vista Blade
         return view('descubre.index', compact('comics', 'peliculas', 'personajes', 'series'));
@@ -77,35 +89,82 @@ class ApiController extends Controller
     // 🔹 Mostrar todas las series
     public function indexSeries()
     {
-        $response = Http::get('https://gateway.marvel.com/v1/public/series', [
-            'title' => 'Avengers',
-            'ts' => $this->ts,
-            'apikey' => $this->apikey,
-            'hash' => $this->hash
+        $search = 'Marvel'; // palabra clave para buscar películas de Marvel
+        $page = 1; // primera página de resultados
+
+        $response = Http::get('http://www.omdbapi.com/', [
+            'apikey' => '1f00bd0e',
+            's' => $search,
+            'type' => 'series',
+            'page' => $page,
         ]);
 
         $data = $response->json();
-        $series = $data['data']['results'] ?? [];
+        $series = $data['Search'] ?? []; // obtenemos solo los resultados de búsqueda
 
         return view('series.index', compact('series'));
     }
 
-    // 🔹 Mostrar detalle de una serie específica
+    // 🔹 Mostrar detalle de una serie específica con episodios por temporada
     public function showSeries($id)
     {
-        $response = Http::get("https://gateway.marvel.com/v1/public/series/{$id}", [
-            'ts' => $this->ts,
-            'apikey' => $this->apikey,
-            'hash' => $this->hash
+        // Llamada a OMDb para la información general de la serie
+        $response = Http::get('http://www.omdbapi.com/', [
+            'apikey' => '1f00bd0e',
+            'i' => $id,
+            'plot' => 'full'
         ]);
 
         $data = $response->json();
-        $serie = $data['data']['results'][0] ?? null;
 
-        return view('series.show', compact('serie'));
+        if (!$response->ok() || ($data['Response'] ?? 'False') === 'False') {
+            abort(404, 'Serie no encontrada');
+        }
+
+        // Mapear datos para la vista
+        $serie = [
+            'id' => $data['imdbID'],
+            'titulo' => $data['Title'] ?? 'Sin título',
+            'anio' => $data['Year'] ?? 'Desconocido',
+            'genero' => $data['Genre'] ?? 'Desconocido',
+            'director' => $data['Director'] ?? 'Desconocido',
+            'actores' => $data['Actors'] ?? 'Desconocido',
+            'sinopsis' => $data['Plot'] ?? 'Sin información disponible.',
+            'poster' => ($data['Poster'] ?? '') !== 'N/A' ? $data['Poster'] : '',
+            'puntuacion' => $data['imdbRating'] ?? 'N/A',
+            'pais' => $data['Country'] ?? 'Desconocido',
+            'idioma' => $data['Language'] ?? 'Desconocido',
+            'temporadas' => $data['totalSeasons'] ?? 0,
+            'tipo' => $data['Type'] ?? 'series',
+            'imdbID' => $data['imdbID'] ?? 'N/A',
+        ];
+
+        dd($serie);
+        $serie = $response->json();
+
+        // Inicializamos los episodios por temporada
+        $episodiosPorTemporada = [];
+        $totalSeasons = isset($serie['temporadas']) && is_numeric($serie['temporadas']) ? (int)$serie['temporadas'] : 0;
+
+        for ($s = 1; $s <= $totalSeasons; $s++) {
+            $resp = Http::get('http://www.omdbapi.com/', [
+                'apikey' => '1f00bd0e',
+                'i' => $serie['id'],
+                'Season' => $s
+            ]);
+
+            $dataSeason = $resp->json();
+            $episodiosPorTemporada[$s] = $dataSeason['Episodes'] ?? [];
+        }
+
+        dd($episodiosPorTemporada);
+        $episodiosPorTemporada = $response->json();
+
+        // Retornar la vista asegurando que todas las variables existen
+        return view('series.show', compact('serie', 'episodiosPorTemporada'));
     }
 
-   // 🔹 Mostrar todas las películas de Marvel
+    // 🔹 Mostrar todas las películas de Marvel
     public function indexPeliculas()
     {
         $search = 'Marvel'; // palabra clave para buscar películas de Marvel
@@ -205,13 +264,12 @@ class ApiController extends Controller
         // Series
         $series = [];
         if ($query !== '') {
-            $response = Http::get('https://gateway.marvel.com/v1/public/series', [
-                'ts' => $this->ts,
-                'apikey' => $this->apikey,
-                'hash' => $this->hash,
-                'titleStartsWith' => $query,
+            $response = Http::get('http://www.omdbapi.com/', [
+                'apikey' => '1f00bd0e',
+                's' => $query,
+                'type' => 'series',
             ]);
-            $series = $response->json()['data']['results'] ?? [];
+            $series = $response->json()['Search'] ?? [];
         }
 
         // Películas (OMDB)
@@ -233,4 +291,50 @@ class ApiController extends Controller
         ]);
     }
 
+    // Endpoint AJAX para buscar por tipo y texto
+    public function buscarAjaxReseñas(Request $request)
+    {
+        $query = $request->input('q', '');
+        $type = $request->input('type', ''); // tipo: comic, serie, pelicula, personaje
+
+        if ($query === '' || $type === '') {
+            return response()->json(['results' => []]);
+        }
+
+        $results = [];
+
+        switch ($type) {
+            case 'personaje':
+                $response = Http::get('https://gateway.marvel.com/v1/public/characters', [
+                    'ts' => $this->ts,
+                    'apikey' => $this->apikey,
+                    'hash' => $this->hash,
+                    'nameStartsWith' => $query,
+                ]);
+                $results = $response->json()['data']['results'] ?? [];
+                break;
+
+            case 'comic':
+                $response = Http::get('https://gateway.marvel.com/v1/public/comics', [
+                    'ts' => $this->ts,
+                    'apikey' => $this->apikey,
+                    'hash' => $this->hash,
+                    'titleStartsWith' => $query,
+                ]);
+                $results = $response->json()['data']['results'] ?? [];
+                break;
+
+            case 'serie':
+            case 'pelicula':
+                $response = Http::get('http://www.omdbapi.com/', [
+                    'apikey' => '1f00bd0e',
+                    's' => $query,
+                    'type' => $type === 'serie' ? 'series' : 'movie',
+                ]);
+                $results = $response->json()['Search'] ?? [];
+                break;
+        }
+
+        return response()->json(['results' => $results]);
+    }
 }

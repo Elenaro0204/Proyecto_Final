@@ -20,13 +20,6 @@
                 <p><strong>Fecha de nacimiento:</strong> {{ \Carbon\Carbon::parse(Auth::user()->fecha_nacimiento)->format('d/m/Y') }}</p>
             @endif
 
-            @if(Auth::user()->twitter)
-                <p><strong>Twitter:</strong> <a href="{{ Auth::user()->twitter }}" target="_blank">{{ Auth::user()->twitter}}</a></p>
-            @endif
-
-            @if(Auth::user()->instagram)
-                <p><strong>Instagram:</strong> <a href="{{ Auth::user()->instagram }}" target="_blank">{{ Auth::user()->instagram }}</a></p>
-            @endif
 
             @if(Auth::user()->pais)
                 <p><strong>País:</strong> {{ Auth::user()->pais }}</p>
@@ -40,8 +33,44 @@
                 <p><strong>Cómic favorito:</strong> {{ Auth::user()->favorito_comic }}</p>
             @endif
 
+            @if(Auth::user()->twitter && Auth::user()->instagram)
+                <div class="d-flex justify-content-center justify-content-md-start gap-2 m-2">
+
+                    @if(Auth::user()->twitter)
+                        <a href="{{ Auth::user()->twitter }}" target="_blank"
+                        class="px-3 py-1 rounded-pill d-flex align-items-center gap-2"
+                        style="background:rgba(29, 155, 240, 0.2); border:1px solid rgba(29, 155, 240, 0.5); text-decoration:none; transition:0.3s;">
+                            <i class="bi bi-twitter"></i> <span>Twitter</span>
+                        </a>
+                    @endif
+
+                    @if(Auth::user()->instagram)
+                        <a href="{{ Auth::user()->instagram }}" target="_blank"
+                        class="px-3 py-1 rounded-pill d-flex align-items-center gap-2"
+                        style="background:rgba(225, 48, 108, 0.2); border:1px solid rgba(225, 48, 108, 0.5); text-decoration:none; transition:0.3s;">
+                            <i class="bi bi-instagram"></i> <span>Instagram</span>
+                        </a>
+                    @endif
+
+                </div>
+            @endif
+
             <p><strong>Fecha de registro:</strong> {{ Auth::user()->created_at->format('d/m/Y') }}</p>
+
         </div>
+
+        <!-- Opciones de administrador -->
+        @if(Auth::user()->role === 'admin')
+            <div class="mt-6 bg-blue-50 p-4 rounded shadow mb-6">
+                <h3 class="text-xl font-semibold mb-2">⚙️ Panel de Administrador</h3>
+                <ul class="list-disc ml-5">
+                    <li><a href="{{ route('admin.dashboard') }}" class="text-blue-600 hover:underline">Ver todos los usuarios</a></li>
+                    <li><a href="{{ route('admin.manage-content') }}" class="text-blue-600 hover:underline">Gestionar contenido</a></li>
+                    <li><a href="{{ route('admin.reports') }}" class="text-blue-600 hover:underline">Ver reportes</a></li>
+                    <li><a href="{{ route('admin.settings') }}" class="text-blue-600 hover:underline">Configuración del sitio</a></li>
+                </ul>
+            </div>
+        @endif
 
         {{-- Aquí luego añadimos secciones dinámicas como reseñas, foros, favoritos --}}
         <div class="bg-gray-100 p-4 rounded shadow">
@@ -50,3 +79,12 @@
         </div>
     </div>
 @endsection
+
+
+<style>
+    a:hover {
+        filter: brightness(1.2);
+        transform: scale(1.05);
+    }
+
+</style>

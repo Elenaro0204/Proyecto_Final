@@ -5,64 +5,40 @@ namespace App\Http\Controllers;
 use Illuminate\Http\Request;
 use Illuminate\Pagination\LengthAwarePaginator;
 use Illuminate\Support\Facades\Http;
+use App\Http\Controllers\ResenaController;
+use App\Models\Review;
 
 class SerieController extends Controller
 {
+    protected $apiKey = '1f00bd0e';
+    protected $baseUrl = 'http://www.omdbapi.com/';
+
     public function index(Request $request)
     {
-        $apikey = '4ce916eb12f534d995b7f03d80470b48';
-        $hash = 'ae21b0b6b32d7da943ba2a57cb21a70b';
-        $ts = '1758626088';
-
         $page = $request->query('page', 1);
-        $perPage = 12;
-        $offset = ($page - 1) * $perPage;
+        $query = $request->query('search', 'Marvel'); // valor por defecto
 
-        $params = [
-            'ts' => $ts,
-            'apikey' => $apikey,
-            'hash' => $hash,
-            'limit' => $perPage,
-            'offset' => $offset,
-        ];
+        $response = Http::get($this->baseUrl, [
+            'apikey' => $this->apiKey,
+            's' => $query,
+            'type' => 'series',
+            'page' => $page
+        ]);
 
-        if ($request->filled('search')) {
-            $params['titleStartsWith'] = $request->search;
+        $data = $response->json();
+        $seriesArray = $data['Search'] ?? [];
+        $total = isset($data['totalResults']) ? (int)$data['totalResults'] : count($seriesArray);
+
+        // Adaptar datos para Blade
+        foreach ($seriesArray as &$p) {
+            $p['poster_path'] = $p['Poster'] != 'N/A' ? $p['Poster'] : '';
+            $p['description_es'] = '';
         }
 
-        // Obtener series
-        $response = Http::get('https://gateway.marvel.com/v1/public/series', $params);
-        $data = $response->json()['data'] ?? [];
-        $seriesArray = $data['results'] ?? [];
-        $total = $data['total'] ?? count($seriesArray);
-
-        // 🔹 Traducir descripciones al español
-        foreach ($seriesArray as &$s) {
-            if (!empty($s['description'])) {
-                try {
-                    $translateResponse = Http::withHeaders([
-                        'Content-Type' => 'application/json',
-                    ])->post('https://libretranslate.com/translate', [
-                        'q' => $s['description'],
-                        'source' => 'en',
-                        'target' => 'es',
-                        'format' => 'text',
-                    ]);
-
-                    $s['description_es'] = $translateResponse->json()['translatedText'] ?? $s['description'];
-                } catch (\Exception $e) {
-                    $s['description_es'] = $s['description'];
-                }
-            } else {
-                $s['description_es'] = '';
-            }
-        }
-
-        // Paginación
         $series = new LengthAwarePaginator(
             $seriesArray,
             $total,
-            $perPage,
+            12, // items por página
             $page,
             ['path' => $request->url(), 'query' => $request->query()]
         );
@@ -74,31 +50,115 @@ class SerieController extends Controller
     {
         $search = $request->query('q');
 
-        if (!$search) {
-            return response()->json([]);
-        }
+        if (!$search) return response()->json([]);
 
-        $apikey = '4ce916eb12f534d995b7f03d80470b48';
-        $hash = 'ae21b0b6b32d7da943ba2a57cb21a70b';
-        $ts = '1758626088';
-
-        $response = Http::get('https://gateway.marvel.com/v1/public/series', [
-            'ts' => $ts,
-            'apikey' => $apikey,
-            'hash' => $hash,
-            'titleStartsWith' => $search,
-            'limit' => 10,
+        $response = Http::get($this->baseUrl, [
+            'apikey' => $this->apiKey,
+            's' => $search,
+            'type' => 'series',
+            'page' => 1
         ]);
 
-        $seriesArray = $response->json()['data']['results'] ?? [];
+        $series = $response->json()['Search'] ?? [];
 
-        $resultados = array_map(function ($s) {
+        $resultados = array_map(function ($p) {
             return [
-                'id' => $s['id'],
-                'title' => $s['title'],
+                'id' => $p['imdbID'],
+                'title' => $p['Title'],
             ];
-        }, $seriesArray);
+        }, $series);
 
         return response()->json($resultados);
+    }
+
+    public function show($id)
+    {
+        // Llamada a la API para obtener los detalles de la serie por ID
+        $response = Http::get($this->baseUrl, [
+            'apikey' => $this->apiKey,
+            'i' => $id,
+            'plot' => 'full'
+        ]);
+
+        $data = $response->json();
+
+        if (!$response->ok() || ($data['Response'] ?? 'False') === 'False') {
+            abort(404, 'Serie no encontrada');
+        }
+
+        // Adaptar datos
+        $serie = [
+            'id' => $data['imdbID'],
+            'titulo' => $data['Title'] ?? 'Sin título',
+            'anio' => $data['Year'] ?? 'Desconocido',
+            'genero' => $data['Genre'] ?? 'Desconocido',
+            'director' => $data['Director'] ?? 'Desconocido',
+            'actores' => $data['Actors'] ?? 'Desconocido',
+            'sinopsis' => $data['Plot'] ?? 'Sin información disponible.',
+            'poster' => ($data['Poster'] ?? '') !== 'N/A' ? $data['Poster'] : '',
+            'puntuacion' => $data['imdbRating'] ?? 'N/A',
+            'pais' => $data['Country'] ?? 'Desconocido',
+            'idioma' => $data['Language'] ?? 'Desconocido',
+            'temporadas' => $data['totalSeasons'] ?? 0,
+            'tipo' => $data['Type'] ?? 'series',
+            'imdbID' => $data['imdbID'] ?? 'N/A',
+        ];
+
+        // IMÁGENES DE LOS ACTORES
+        $serie['actores_imagenes'] = [];
+        if (!empty($data['Actors'])) {
+            $apiKeyTMDB = env('TMDB_API_KEY'); // añade tu TMDB API Key en .env
+            foreach (explode(',', $data['Actors']) as $actor) {
+                $actor = trim($actor);
+                $img = 'https://upload.wikimedia.org/wikipedia/commons/8/89/Portrait_Placeholder.png';
+
+                // Buscar actor en TMDB
+                $resp = Http::get('https://api.themoviedb.org/3/search/person', [
+                    'api_key' => $apiKeyTMDB,
+                    'query' => $actor
+                ]);
+
+                if ($resp->ok() && !empty($resp['results'])) {
+                    $img = 'https://image.tmdb.org/t/p/w200' . $resp['results'][0]['profile_path'];
+                }
+
+                $serie['actores_imagenes'][$actor] = $img;
+            }
+        }
+
+        // Reseñas de BD
+        $reseñas = Review::with('user')
+            ->where('entity_id', $id)
+            ->where('type', 'serie')
+            ->latest()
+            ->get();
+
+        // Episodios por temporada
+        $episodiosPorTemporada = [];
+
+        for ($s = 1; $s <= (int)$data['totalSeasons']; $s++) {
+            $responseSeason = Http::get($this->baseUrl, [
+                'apikey' => $this->apiKey,
+                'i' => $id,
+                'Season' => $s
+            ]);
+
+            $dataSeason = $responseSeason->json();
+            $episodios = $dataSeason['Episodes'] ?? [];
+
+            // Obtener información completa de cada episodio
+            foreach ($episodios as $key => $ep) {
+                $epResp = Http::get($this->baseUrl, [
+                    'apikey' => $this->apiKey,
+                    'i' => $ep['imdbID'],
+                    'plot' => 'full'
+                ]);
+                $episodios[$key] = $epResp->json();
+            }
+
+            $episodiosPorTemporada[$s] = $episodios;
+        }
+
+        return view('series.show', compact('serie', 'reseñas', 'episodiosPorTemporada'));
     }
 }
