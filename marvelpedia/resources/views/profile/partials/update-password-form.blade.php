@@ -1,3 +1,5 @@
+<!-- resources/views/profile/partials/update-password-form.blade.php -->
+
 <section class="space-y-6">
 
     <!-- Header -->

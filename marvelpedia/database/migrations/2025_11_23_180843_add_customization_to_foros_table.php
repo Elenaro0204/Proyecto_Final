@@ -14,7 +14,7 @@ return new class extends Migration
         Schema::table('foros', function (Blueprint $table) {
             $table->string('color_fondo')->nullable();
             $table->string('color_titulo')->nullable();
-            $table->string('imagen_portada')->nullable();
+            $table->string('imagen')->nullable();
             $table->enum('visibilidad', ['publico', 'privado'])->default('publico');
         });
     }
@@ -25,7 +25,7 @@ return new class extends Migration
     public function down(): void
     {
         Schema::table('foros', function (Blueprint $table) {
-            $table->dropColumn(['color_fondo', 'color_titulo', 'imagen_portada', 'visibilidad']);
+            $table->dropColumn(['color_fondo', 'color_titulo', 'imagen', 'visibilidad']);
         });
     }
 };

@@ -1,3 +1,5 @@
+<!-- resources/views/admin/mensajes/viewreport.blade.php -->
+
 @extends('layouts.app')
 
 @section('content')
@@ -19,7 +21,8 @@
                             Mensaje ID: {{ $report->mensaje->id }}
                         </h2>
                         <p class="text-gray-600 capitalize mb-2">
-                            Usuario: <span class="font-semibold">{{ $report->mensaje->user->name ?? 'Usuario eliminado' }}</span>
+                            Usuario: <span
+                                class="font-semibold">{{ $report->mensaje->user->name ?? 'Usuario eliminado' }}</span>
                         </p>
                         <p class="text-gray-700 mb-3">
                             Contenido: <span class="font-semibold">{{ $report->mensaje->contenido }}</span>
@@ -33,9 +36,10 @@
                     {{-- Tiempo restante y acciones --}}
                     <div class="flex flex-col items-center md:items-end gap-2">
                         @php $expires = $report->deadline; @endphp
+
                         @if ($expires)
                             <span class="countdown px-3 py-1 rounded-lg font-mono font-bold shadow"
-                                  data-end="{{ $expires->toIso8601String() }}">
+                                data-end="{{ $expires->toIso8601String() }}">
                                 Cargando...
                             </span>
                         @else
@@ -43,27 +47,26 @@
                         @endif
 
                         {{-- Acciones --}}
-                        <form action="{{ route('admin.mensajes.report.cancel', $report->id) }}" method="POST"
-                              class="mt-3">
-                            @csrf
-                            @method('DELETE')
-                            <button type="submit"
+                        <div class="flex justify-between mt-3 gap-2">
+                            <a href="{{ url()->previous() }}"
+                                class="bg-gray-200 hover:bg-gray-300 px-4 py-2 rounded-lg shadow font-semibold transition-colors">
+                                Cancelar
+                            </a>
+                            <form action="{{ route('admin.mensajes.report.cancel', $report->id) }}" method="POST">
+                                @csrf
+                                @method('DELETE')
+                                <input type="hidden" name="redirect_to" value="{{ url()->previous() }}">
+                                <button type="submit"
                                     class="bg-red-500 hover:bg-red-600 text-white px-4 py-2 rounded-lg shadow font-semibold transition-colors">
-                                Cancelar Reporte
-                            </button>
-                        </form>
+                                    Cancelar Reporte
+                                </button>
+                            </form>
+                        </div>
                     </div>
                 </div>
             </div>
         @empty
-            <div class="bg-gray-100 p-6 rounded shadow text-center text-gray-500">
-                No hay reportes activos de mensajes para mostrar.
-
-                <button onclick="goBackAndReload()"
-                        class="bg-gray-500 hover:bg-gray-600 text-white px-4 py-2 rounded-lg shadow font-semibold transition-colors">
-                    ⬅ Volver
-                </button>
-            </div>
+            <p class="text-gray-500 text-center">No hay reportes para este mensaje.</p>
         @endforelse
     </div>
 @endsection
@@ -94,25 +97,51 @@
                 let minutes = endDate.getMinutes() - now.getMinutes();
                 let seconds = endDate.getSeconds() - now.getSeconds();
 
-                if (seconds < 0) { seconds += 60; minutes--; }
-                if (minutes < 0) { minutes += 60; hours--; }
-                if (hours < 0) { hours += 24; days--; }
-                if (days < 0) { const prevMonthDays = new Date(endDate.getFullYear(), endDate.getMonth(), 0).getDate(); days += prevMonthDays; months--; }
-                if (months < 0) { months += 12; years--; }
+                if (seconds < 0) {
+                    seconds += 60;
+                    minutes--;
+                }
+                if (minutes < 0) {
+                    minutes += 60;
+                    hours--;
+                }
+                if (hours < 0) {
+                    hours += 24;
+                    days--;
+                }
+                if (days < 0) {
+                    const prevMonthDays = new Date(endDate.getFullYear(), endDate.getMonth(), 0).getDate();
+                    days += prevMonthDays;
+                    months--;
+                }
+                if (months < 0) {
+                    months += 12;
+                    years--;
+                }
 
                 const parts = [];
-                if (years > 0) parts.push(`<span class="bg-yellow-200 text-yellow-800 px-2 py-1 rounded-lg">${years}año${years>1?'s':''}</span>`);
-                if (months > 0) parts.push(`<span class="bg-blue-200 text-blue-800 px-2 py-1 rounded-lg">${months}mes${months>1?'es':''}</span>`);
-                if (days > 0) parts.push(`<span class="bg-green-200 text-green-800 px-2 py-1 rounded-lg">${days}día${days>1?'s':''}</span>`);
-                if (hours > 0) parts.push(`<span class="bg-purple-200 text-purple-800 px-2 py-1 rounded-lg">${hours}h</span>`);
-                if (minutes > 0) parts.push(`<span class="bg-pink-200 text-pink-800 px-2 py-1 rounded-lg">${minutes}m</span>`);
-                if (seconds >= 0) parts.push(`<span class="bg-gray-200 text-gray-800 px-2 py-1 rounded-lg">${seconds}s</span>`);
+                if (years > 0) parts.push(
+                    `<span class="bg-yellow-200 text-yellow-800 px-2 py-1 rounded-lg">${years}año${years>1?'s':''}</span>`
+                );
+                if (months > 0) parts.push(
+                    `<span class="bg-blue-200 text-blue-800 px-2 py-1 rounded-lg">${months}mes${months>1?'es':''}</span>`
+                );
+                if (days > 0) parts.push(
+                    `<span class="bg-green-200 text-green-800 px-2 py-1 rounded-lg">${days}día${days>1?'s':''}</span>`
+                );
+                if (hours > 0) parts.push(
+                    `<span class="bg-purple-200 text-purple-800 px-2 py-1 rounded-lg">${hours}h</span>`);
+                if (minutes > 0) parts.push(
+                    `<span class="bg-pink-200 text-pink-800 px-2 py-1 rounded-lg">${minutes}m</span>`);
+                if (seconds >= 0) parts.push(
+                    `<span class="bg-gray-200 text-gray-800 px-2 py-1 rounded-lg">${seconds}s</span>`);
 
                 el.innerHTML = parts.join(' ');
             }
 
             document.querySelectorAll('.countdown').forEach(el => {
-                el.classList.add('inline-block', 'px-3', 'py-1', 'rounded-lg', 'font-mono', 'font-bold', 'shadow', 'bg-red-100', 'text-red-600');
+                el.classList.add('inline-block', 'px-3', 'py-1', 'rounded-lg', 'font-mono', 'font-bold',
+                    'shadow', 'bg-red-100', 'text-red-600');
                 updateCountdown(el);
                 setInterval(() => updateCountdown(el), 1000);
             });

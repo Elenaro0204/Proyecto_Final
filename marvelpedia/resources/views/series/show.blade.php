@@ -5,62 +5,103 @@
 @section('title', $serie['titulo'])
 
 @section('content')
-    <div class="container mt-5">
+    <x-breadcrumb-drawer :items="[
+        ['label' => 'Inicio', 'url' => route('inicio'), 'level' => 0],
+        ['label' => 'Series', 'url' => route('series'), 'level' => 1],
+        ['label' => $serie['titulo'], 'url' => route('serie.show', $serie['id']), 'level' => 2],
+    ]" />
+
+    <div class="container mx-auto px-4 py-8 space-y-12">
 
         {{-- Cabecera con imagen y título --}}
-        <div class="row mb-4">
-            <div class="col-md-4 text-center">
-                @if ($serie['poster'])
-                    <img src="{{ $serie['poster'] }}" alt="{{ $serie['titulo'] }}" class="img-fluid rounded shadow">
-                @else
-                    <img src="{{ asset('img/no-poster.png') }}" alt="Sin póster" class="img-fluid rounded shadow">
-                @endif
+        <div class="flex flex-col lg:flex-row items-start gap-8">
+            <div class="flex-shrink-0 w-full lg:w-1/3 relative">
+                <div class="aspect-w-2 aspect-h-3">
+                    <img src="{{ $serie['poster'] ?? asset('img/no-poster.png') }}" alt="{{ $serie['titulo'] }}"
+                        class="w-full rounded-xl shadow-lg object-cover">
+                </div>
             </div>
-            <div class="col-md-8">
-                <h1 class="fw-bold">{{ $serie['titulo'] }}</h1>
-                <p class="text-muted">{{ $serie['anio'] }} | {{ ucfirst($serie['tipo']) }}</p>
 
-                <div class="mb-3">
-                    <span class="badge bg-primary">{{ $serie['genero'] }}</span>
-                    <span class="badge bg-secondary">⭐ {{ $serie['puntuacion'] }}</span>
-                    <span class="badge bg-info">Temporadas: {{ $serie['temporadas'] }}</span>
+            {{-- Información --}}
+            <div class="flex-1 space-y-4">
+                <h1 class="text-3xl font-extrabold text-gray-900">{{ $serie['titulo'] }}</h1>
+                <p class="text-gray-500 text-lg">{{ $serie['anio'] }} | {{ ucfirst($serie['tipo']) }}</p>
+
+                {{-- Badges --}}
+                <div class="flex flex-wrap gap-2">
+                    <span class="bg-indigo-600 text-white px-3 py-1 rounded-full text-sm">{{ $serie['genero'] }}</span>
+                    <span class="bg-yellow-400 text-indigo-900 px-3 py-1 rounded-full text-sm">⭐
+                        {{ $serie['puntuacion'] }}</span>
+                    <span class="bg-red-400 text-white px-3 py-1 rounded-full text-sm">Temporadas:
+                        {{ $serie['temporadas'] }}</span>
                 </div>
 
-                <p><strong>Director:</strong> {{ $serie['director'] }}</p>
-                <p><strong>Actores:</strong> {{ $serie['actores'] }}</p>
-                <p><strong>País:</strong> {{ $serie['pais'] }}</p>
-                <p><strong>Idioma:</strong> {{ $serie['idioma'] }}</p>
+                {{-- Datos adicionales --}}
+                <div class="grid grid-cols-1 sm:grid-cols-2 gap-6 mt-6">
+                    <div class="bg-indigo-50 p-4 rounded-xl shadow hover:shadow-lg transition flex items-center gap-3">
+                        <i class="bi bi-person-video text-indigo-500 text-2xl"></i>
+                        <div>
+                            <p class="text-sm text-gray-500">Director</p>
+                            <p class="font-semibold text-gray-800">{{ $serie['director'] }}</p>
+                        </div>
+                    </div>
 
-                <hr>
+                    <div class="bg-indigo-50 p-4 rounded-xl shadow hover:shadow-lg transition flex items-center gap-3">
+                        <i class="bi bi-people text-indigo-500 text-2xl"></i>
+                        <div>
+                            <p class="text-sm text-gray-500">Actores</p>
+                            <p class="font-semibold text-gray-800 line-clamp-2">{{ $serie['actores'] }}</p>
+                        </div>
+                    </div>
+
+                    <div class="bg-indigo-50 p-4 rounded-xl shadow hover:shadow-lg transition flex items-center gap-3">
+                        <i class="bi bi-geo-alt text-indigo-500 text-2xl"></i>
+                        <div>
+                            <p class="text-sm text-gray-500">País</p>
+                            <p class="font-semibold text-gray-800">{{ $serie['pais'] }}</p>
+                        </div>
+                    </div>
+
+                    <div class="bg-indigo-50 p-4 rounded-xl shadow hover:shadow-lg transition flex items-center gap-3">
+                        <i class="bi bi-translate text-indigo-500 text-2xl"></i>
+                        <div>
+                            <p class="text-sm text-gray-500">Idioma</p>
+                            <p class="font-semibold text-gray-800">{{ $serie['idioma'] }}</p>
+                        </div>
+                    </div>
+                </div>
 
                 {{-- Botones de acción --}}
-                <div class="d-flex flex-wrap gap-2 mt-8">
-                    <button class="btn btn-outline-primary"><i class="bi bi-heart"></i> Añadir a favoritos</button>
-                    <button class="btn btn-outline-success"><i class="bi bi-bookmark"></i> Ver más tarde</button>
-
+                <div class="flex flex-wrap gap-3 mt-4">
                     @if (isset($serie['imdbID']))
                         <a href="{{ route('resenas.create.withparams', [
                             'type' => 'serie',
                             'entity_id' => $serie['imdbID'],
                             'title' => $serie['titulo'] ?? 'Serie',
                         ]) }}"
-                            class="btn btn-outline-warning">
+                            class="bg-yellow-400 text-indigo-900 px-4 py-2 rounded-lg shadow hover:bg-yellow-500 transition flex items-center gap-2">
                             <i class="bi bi-pencil-square"></i>
                             Escribir reseña
                         </a>
                     @endif
 
-                    <div class="dropdown">
-                        <button class="btn btn-outline-danger dropdown-toggle" type="button" id="shareDropdown"
-                            data-bs-toggle="dropdown" aria-expanded="false">
+                    {{-- Compartir --}}
+                    <div class="relative">
+                        <button
+                            class="bg-red-500 text-white px-4 py-2 rounded-lg shadow hover:bg-red-600 transition flex items-center gap-2">
                             <i class="bi bi-share"></i> Compartir
                         </button>
-                        <ul class="dropdown-menu" aria-labelledby="shareDropdown">
-                            <li><a class="dropdown-item" href="#" id="nativeShare">Compartir directamente</a></li>
-                            <li><a class="dropdown-item" href="#" id="copyLink">Copiar enlace</a></li>
-                            <li><a class="dropdown-item" href="#" id="shareTwitter" target="_blank">Twitter</a></li>
-                            <li><a class="dropdown-item" href="#" id="shareWhatsApp" target="_blank">WhatsApp</a></li>
-                            <li><a class="dropdown-item" href="#" id="shareFacebook" target="_blank">Facebook</a></li>
+                        <ul class="absolute top-full mt-2 left-0 bg-white shadow-lg rounded-lg overflow-hidden hidden">
+                            <li><a href="#" id="nativeShare" class="block px-4 py-2 hover:bg-gray-100">Compartir
+                                    directamente</a></li>
+                            <li><a href="#" id="copyLink" class="block px-4 py-2 hover:bg-gray-100">Copiar enlace</a>
+                            </li>
+                            <li><a href="#" id="shareTwitter" target="_blank"
+                                    class="block px-4 py-2 hover:bg-gray-100">Twitter</a></li>
+                            <li><a href="#" id="shareWhatsApp" target="_blank"
+                                    class="block px-4 py-2 hover:bg-gray-100">WhatsApp</a></li>
+                            <li><a href="#" id="shareFacebook" target="_blank"
+                                    class="block px-4 py-2 hover:bg-gray-100">Facebook</a></li>
                         </ul>
                     </div>
                 </div>
@@ -68,30 +109,32 @@
         </div>
 
         {{-- Sinopsis --}}
-        <div class="card mb-5 shadow-sm border-0">
-            <div class="card-body">
-                <h4 class="mb-3">Sinopsis</h4>
-                <p>{{ $serie['sinopsis'] }}</p>
-            </div>
+        <div class="bg-white rounded-xl shadow p-6">
+            <h2 class="text-2xl font-bold mb-3">Sinopsis</h2>
+            <p class="text-gray-700">
+                {{ $serie['sinopsis_es'] ?? $serie['sinopsis'] }}
+            </p>
         </div>
 
         {{-- Actores destacados --}}
         @if (!empty($serie['actores']))
-            <div class="mt-8 mb-8">
-                <h3 class="text-xl font-bold mb-3 text-gray-800">🎭 Actores</h3>
-                <div class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-4">
-                    @foreach ($serie['actores_imagenes'] as $actor => $img)
-                        <div
-                            class="bg-white border rounded-lg shadow hover:shadow-lg transition p-3 flex flex-col items-center text-center">
-                            <img src="{{ $img }}" alt="{{ $actor }}"
-                                class="w-24 h-24 object-cover rounded-full mb-2 border border-gray-300">
-
-                            <a href="https://es.wikipedia.org/wiki/{{ str_replace(' ', '_', $actor) }}" target="_blank"
-                                class="font-semibold text-indigo-600 hover:underline">
-                                {{ $actor }}
-                            </a>
-                            <small class="text-gray-500 mt-1">Ver en Wikipedia</small>
-                        </div>
+            <div>
+                <h3 class="text-2xl font-bold mb-4">🎭 Actores</h3>
+                <div class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-6">
+                    @foreach (explode(',', $serie['actores']) as $actor)
+                        @php
+                            $actor = trim($actor);
+                            $wikiUrl = 'https://es.wikipedia.org/wiki/' . str_replace(' ', '_', $actor);
+                            $imgDefault =
+                                'https://upload.wikimedia.org/wikipedia/commons/8/89/Portrait_Placeholder.png';
+                        @endphp
+                        <a href="{{ $wikiUrl }}" target="_blank"
+                            class="flex flex-col items-center text-center bg-white rounded-xl shadow hover:shadow-lg p-3 transition">
+                            <img src="{{ $imgDefault }}" alt="{{ $actor }}"
+                                class="w-24 h-24 rounded-full mb-2 border border-gray-200 object-cover">
+                            <span class="font-semibold text-indigo-600 hover:underline">{{ $actor }}</span>
+                            <small class="text-gray-400">Ver en Wikipedia</small>
+                        </a>
                     @endforeach
                 </div>
             </div>
@@ -212,37 +255,36 @@
             </div>
         @endif
 
-        {{-- Enlaces a otras secciones --}}
-        <div class="card mb-5 shadow-sm border-0">
-            <div class="card-body">
-                <h4 class="mb-3">Descubre más</h4>
-                <div class="d-flex flex-wrap gap-3">
-                    <a href="{{ route('peliculas.index') }}" class="btn btn-outline-dark">🎬 Películas</a>
-                    <a href="{{ route('series') }}" class="btn btn-outline-dark">📺 Series</a>
-                    <a href="{{ route('comics') }}" class="btn btn-outline-dark">📚 Cómics</a>
-                    <a href="{{ route('personajes') }}" class="btn btn-outline-dark">🦸 Personajes</a>
-                </div>
-            </div>
-        </div>
-
         {{-- Reseñas desde la base de datos --}}
-        <div class="card mb-5 shadow-sm border-0">
-            <div class="card-body">
-                <h4 class="mb-3">Reseñas de usuarios</h4>
+        <div class="bg-white rounded-xl shadow p-6">
+            <div class="flex items-center justify-between mb-4">
+                <h3 class="text-2xl font-bold mb-4">Reseñas de usuarios</h3>
+                @if (isset($serie['imdbID']))
+                    <a href="{{ route('resenas.create.withparams', [
+                        'type' => 'serie',
+                        'entity_id' => $serie['imdbID'],
+                        'title' => $serie['titulo'] ?? 'serie',
+                    ]) }}"
+                        class="inline-block mb-4 px-6 py-2 bg-indigo-600 text-white rounded-lg shadow hover:bg-indigo-700 transition">
+                        Escribir reseña
+                    </a>
+                @endif
+            </div>
 
-                @if ($reseñas->isEmpty())
-                    <p class="text-muted">Aún no hay reseñas para esta serie. ¡Sé el primero en opinar!</p>
-                @else
+            @if ($reseñas->isEmpty())
+                <p class="text-gray-500 italic">Aún no hay reseñas para esta serie. ¡Sé el primero en opinar!</p>
+            @else
+                <div class="space-y-4">
                     @foreach ($reseñas as $r)
-                        <div class="border-bottom pb-3 mb-3">
+                        <div class="border-b pb-3">
                             {{-- Avatar --}}
                             <div class="flex items-center gap-2 mb-1">
                                 <div class="flex-shrink-0 mr-2">
                                     <img src="{{ $review->user->avatar_url ?? asset('images/default-avatar.jpeg') }}"
                                         alt="Avatar de {{ $review->user->name ?? 'Usuario' }}"
-                                        class="w-12 h-12 rounded-full object-cover border-2 border-yellow-400" />
+                                        class="w-12 h-12 rounded-full border-2 border-yellow-400 object-cover" />
                                 </div>
-                                <strong class="text-primary">{{ $r->user->name ?? 'Anónimo' }}</strong>
+                                <strong>{{ $r->user->name ?? 'Anónimo' }}</strong>
                             </div>
 
                             {{-- Puntuación --}}
@@ -253,17 +295,17 @@
                             </div>
 
                             {{-- Contenido --}}
-                            <p class="mb-1 text-gray-700">{{ $r->content }}</p>
+                            <p class="text-gray-700">{{ $r->content }}</p>
 
                             {{-- Fecha --}}
-                            <small class="text-muted">{{ $r->created_at->diffForHumans() }}</small>
+                            <small class="text-gray-400">{{ $r->created_at->diffForHumans() }}</small>
 
                             {{-- Botones Editar / Eliminar solo para el autor --}}
                             @auth
                                 @if (Auth::id() === $r->user_id)
                                     <div class="mt-2 flex gap-2">
                                         <a href="{{ route('resenas.edit', $r->id) }}"
-                                            class="text-blue-500 hover:underline">Editar</a>
+                                            class="text-indigo-600 hover:underline">Editar</a>
                                         <form action="{{ route('resenas.destroy', $r->id) }}" method="POST"
                                             onsubmit="return confirm('¿Seguro que quieres eliminar esta reseña?');">
                                             @csrf
@@ -275,20 +317,7 @@
                             @endauth
                         </div>
                     @endforeach
-                @endif
-
-                {{-- Botón para escribir nueva reseña --}}
-                @if (isset($pelicula['imdbID']))
-                    <a href="{{ route('resenas.create.withparams', [
-                        'type' => 'pelicula',
-                        'entity_id' => $pelicula['imdbID'],
-                        'title' => $pelicula['titulo'] ?? 'pelicula',
-                    ]) }}"
-                        class="px-4 py-2 my-4 bg-indigo-600 text-white rounded hover:bg-indigo-700 transition">
-                        Escribir reseña
-                    </a>
-                @endif
-            </div>
+            @endif
         </div>
     </div>
 @endsection

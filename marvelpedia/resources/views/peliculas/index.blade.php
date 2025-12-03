@@ -1,56 +1,53 @@
-<!-- resources/views/peliculas.blade.php -->
+<!-- resources/views/peliculas/index.blade.php -->
+
 @extends('layouts.app')
 
 @section('content')
+    <x-breadcrumb-drawer :items="[
+        ['label' => 'Inicio', 'url' => route('inicio'), 'level' => 0],
+        ['label' => 'Descubre', 'url' => route('descubre'), 'level' => 1],
+        ['label' => 'Películas', 'url' => route('peliculas.index'), 'level' => 3],
+    ]" />
+
     <x-welcome-section title="Películas del Multiverso Marvel"
         subtitle="Explora todas las películas disponibles y descubre sus historias."
         bgImage="{{ asset('images/fondo_imagen_inicio.jpeg') }}" />
 
-    <div class="container mx-auto px-4 py-6">
-
-        <h1 class="text-4xl font-bold mb-6 text-gray-800 text-center">Películas Marvel</h1>
+    <div class="container mx-auto px-4 py-8 space-y-12">
 
         <!-- Formulario de búsqueda -->
-        <form class="relative w-full sm:w-1/2 mx-auto">
+        <form class="relative w-full sm:w-2/3 md:w-1/2 mx-auto">
             <input type="text" id="searchInput" placeholder="Buscar película..."
-                class="w-full px-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500">
-            <ul id="searchResults" class="absolute w-full bg-white border mt-1 rounded-lg shadow z-50 hidden"></ul>
+                class="w-full px-4 py-3 border rounded-xl focus:outline-none focus:ring-2 focus:ring-indigo-500 shadow-md transition">
+            <ul id="searchResults"
+                class="absolute w-full bg-white border mt-1 rounded-lg shadow-lg z-50 hidden max-h-60 overflow-y-auto"></ul>
         </form>
 
         <!-- Grid de películas -->
-        <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6 mt-6">
+        <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-8 mt-6">
             @foreach ($peliculas as $pelicula)
-                <div
-                    class="border rounded-lg p-4 bg-white shadow hover:shadow-lg transition flex flex-col justify-between h-full">
-
-                    <!-- Imagen arriba -->
-                    <img class="w-full h-48 object-cover mb-2"
-                        src="{{ $pelicula['poster_path'] ?: asset('images/no-poster.png') }}"
-                        alt="{{ $pelicula['Title'] }}">
-
-                    <!-- Contenido central -->
-                    <div class="flex-1 mt-2">
-                        <h2 class="font-bold text-lg mb-1">{{ $pelicula['Title'] }}</h2>
-                        <p class="text-sm text-gray-600 line-clamp-3">{{ $pelicula['anio'] }} |
-                            {{ $pelicula['genero'] }}</p>
-                        <p class="text-sm text-gray-600 line-clamp-3">
-                            {{ $pelicula['sinopsis'] }}
-                        </p>
+                <a href="{{ route('pelicula.show', $pelicula['imdbID']) }}" class="group">
+                    <div
+                        class="relative rounded-xl overflow-hidden shadow-lg transform hover:scale-105 hover:shadow-2xl transition duration-500 ease-in-out bg-gradient-to-b from-indigo-900 to-indigo-800">
+                        <img class="w-full h-64 object-cover transition-transform duration-500 group-hover:scale-110"
+                            src="{{ $pelicula['poster_path'] ? $pelicula['poster_path'] : asset('images/fondo-peliculas.jpeg') }}"
+                            alt="{{ $pelicula['Title'] }}">
+                        <div
+                            class="absolute inset-0 bg-black/50 flex flex-col justify-center items-center text-center px-4 z-10">
+                            <h2 class="text-white font-bold text-lg md:text-xl truncate">{{ $pelicula['Title'] }}</h2>
+                            <p class="text-gray-200 text-sm md:text-base mt-1 line-clamp-2">{{ $pelicula['anio'] }}</p>
+                            <span
+                                class="mt-3 px-4 py-2 bg-yellow-400 text-indigo-900 font-semibold rounded-md shadow hover:bg-yellow-500 transition-colors cursor-pointer">
+                                Ver más
+                            </span>
+                        </div>
                     </div>
-
-                    <!-- Botón abajo -->
-                    <div class="flex justify-center mt-4">
-                        <a href="{{ route('pelicula.show', $pelicula['imdbID']) }}"
-                            class="px-4 py-2 bg-indigo-600 text-white font-semibold rounded-md hover:bg-indigo-700 transition">
-                            Ver más
-                        </a>
-                    </div>
-                </div>
+                </a>
             @endforeach
         </div>
 
         <!-- Paginación -->
-        <div id="pagination" class="mt-6 w-full">
+        <div id="pagination" class="mt-8 flex justify-center">
             {{ $peliculas->links('pagination::tailwind') }}
         </div>
 
@@ -69,31 +66,24 @@
                 peliculasGrid.innerHTML = '';
                 if (!peliculas.length) {
                     peliculasGrid.innerHTML =
-                        `<p class="text-gray-500 italic col-span-full">No se encontraron resultados.</p>`;
+                        `<p class="text-gray-500 italic col-span-full text-center w-full">No se encontraron resultados.</p>`;
                     return;
                 }
 
                 peliculas.forEach(p => {
-                    const div = document.createElement('div');
-                    div.className =
-                        'border rounded-lg p-4 bg-white shadow hover:shadow-lg transition flex flex-col justify-between h-full';
+                    const div = document.createElement('a');
+                    div.href = `/pelicula/${p.imdbID}`;
+                    div.className = 'group';
                     div.innerHTML = `
-                        <img class="w-full h-48 object-cover mb-2" src="${p.poster_path || '/images/no-poster.png'}" alt="${p.title}">
-                        <div class="flex-1 mt-2">
-                            <h2 class="font-bold text-lg mb-1">${p.title}</h2>
-                            <p class="text-sm text-gray-600 line-clamp-3">
-                                ${p.anio || 'Desconocido'} | ${p.tipo ? p.tipo.charAt(0).toUpperCase() + p.tipo.slice(1) : 'Película'}
-                            </p>
-                            <p class="text-sm ${p.sinopsis ? 'text-gray-600' : 'text-gray-400 italic'} line-clamp-3">
-                                ${p.sinopsis || 'Sin descripción disponible'}
-                            </p>
-                        </div>
-                        <div class="flex justify-center mt-4">
-                            <a href="/pelicula/${p.imdbID}" class="px-4 py-2 bg-indigo-600 text-white font-semibold rounded-md hover:bg-indigo-700 transition">
-                                Ver más
-                            </a>
-                        </div>
-                    `;
+                <div class="relative rounded-xl overflow-hidden shadow-lg transform hover:scale-105 hover:shadow-2xl transition duration-500 ease-in-out bg-gradient-to-b from-indigo-900 to-indigo-800">
+                    <img class="w-full h-64 object-cover transition-transform duration-500 group-hover:scale-110" src="${p.poster_path || '/images/fondo-peliculas.jpeg'}" alt="${p.title}">
+                    <div class="absolute inset-0 bg-black/50 flex flex-col justify-center items-center text-center px-4 z-10">
+                        <h2 class="text-white font-bold text-lg md:text-xl truncate">${p.title}</h2>
+                        <p class="text-gray-200 text-sm md:text-base mt-1 line-clamp-2">${p.anio || 'Desconocido'}</p>
+                        <span class="mt-3 px-4 py-2 bg-yellow-400 text-indigo-900 font-semibold rounded-md shadow hover:bg-yellow-500 transition-colors cursor-pointer">Ver más</span>
+                    </div>
+                </div>
+            `;
                     peliculasGrid.appendChild(div);
                 });
             }
@@ -104,17 +94,14 @@
                 if (!query) {
                     results.innerHTML = '';
                     results.classList.add('hidden');
-                    pagination.style.display = 'block'; // mostrar paginación cuando no hay búsqueda
+                    pagination.style.display = 'flex';
                     return;
                 }
 
                 fetch(`{{ route('peliculas.buscar') }}?q=${encodeURIComponent(query)}`)
                     .then(res => res.json())
                     .then(data => {
-                        // ocultar paginación al buscar
                         pagination.style.display = 'none';
-
-                        // Mostrar sugerencias
                         results.innerHTML = '';
                         if (data.length) {
                             data.forEach(p => {
@@ -125,8 +112,6 @@
                                 li.addEventListener('click', () => {
                                     input.value = p.title;
                                     results.classList.add('hidden');
-
-                                    // Renderizar todos los resultados en el grid
                                     renderGrid(data);
                                 });
                                 results.appendChild(li);
@@ -134,7 +119,7 @@
                             results.classList.remove('hidden');
                         } else {
                             results.classList.add('hidden');
-                            renderGrid([]); // mostrar mensaje de "no se encontraron resultados"
+                            renderGrid([]);
                         }
                     });
             });

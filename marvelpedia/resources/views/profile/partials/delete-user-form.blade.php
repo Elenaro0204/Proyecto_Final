@@ -1,3 +1,5 @@
+<!-- resources/views/profile/partials/delete-user-form.blade.php -->
+
 <section class="space-y-6">
 
     <!-- Header -->

@@ -1,80 +1,56 @@
-<!-- resources/views/descubre.blade.php -->
+<!-- resources/views/descubre/index.blade.php -->
 @extends('layouts.app')
 
 @section('content')
+    <x-breadcrumb-drawer :items="[
+        ['label' => 'Inicio', 'url' => route('inicio'), 'level' => 0],
+        ['label' => 'Descubre', 'url' => route('descubre'), 'level' => 1],
+    ]" />
+
     <x-welcome-section title="Explora el Multiverso Marvel"
-        subtitle="Cada recarga te trae nuevos personajes, películas, cómics y series para descubrir."
+        subtitle="Cada recarga te trae nuevos películas y series para descubrir."
         bgImage="{{ asset('images/fondo_imagen_inicio.jpeg') }}" />
 
-    <div class="container mx-auto space-y-12 px-4 py-6">
-        <h1 class="text-6xl text-center font-bold mb-6 text-gray-800">Multiverso Marvel</h1>
+    <div class="container mx-auto px-4 sm:px-6 lg:px-8 py-8 space-y-16">
 
-        <!-- PERSONAJES -->
-        <section>
-            <div class="flex flex-col md:flex-row justify-between items-start md:items-center mb-6 gap-2">
-                <!-- Izquierda: título y subtítulo -->
-                <div>
-                    <h2 class="text-2xl font-semibold text-gray-800">Personajes</h2>
-                    <p class="mt-1 text-gray-600">Cada héroe tiene una historia… ¿quieres descubrirla?</p>
-                </div>
+        <div class="max-w-3xl mx-auto mb-8">
+            <input id="globalSearch" type="text" placeholder="Buscar series o películas"
+                class="w-full px-4 py-3 border rounded-lg focus:ring-2 focus:ring-yellow-400" autocomplete="off">
+        </div>
 
-                <!-- Derecha: botón -->
-                <a href="{{ route('personajes') }}"
-                    class="px-4 py-2 bg-indigo-600 text-white rounded-lg shadow hover:bg-indigo-700 transition">
-                    Ver más personajes
-                </a>
-            </div>
-
-            <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6">
-                @php
-                    $personajesCollection = collect($personajes)->shuffle();
-                @endphp
-                @foreach ($personajesCollection->take(8) as $personaje)
-                    <a href="{{ route('personaje.show', $personaje['id']) }}">
-                        <div
-                            class="relative border rounded-xl overflow-hidden shadow-lg transform hover:scale-105 transition duration-300 bg-white">
-                            <img class="w-full h-52 object-cover"
-                                src="{{ $personaje['thumbnail']['path'] }}.{{ $personaje['thumbnail']['extension'] }}"
-                                alt="{{ $personaje['name'] }}">
-                            <div class="absolute bottom-0 w-full bg-gradient-to-t from-black/70 to-transparent p-3">
-                                <h2 class="text-white font-semibold text-lg truncate">{{ $personaje['name'] }}</h2>
-                            </div>
-                        </div>
-                    </a>
-                @endforeach
-            </div>
-        </section>
+        <div id="loading" class="text-center text-gray-600 mb-6">
+            Cargando contenido por defecto...
+        </div>
 
         <!-- SERIES -->
-        <section>
+        <section
+            class="bg-gradient-to-r from-red-900 via-red-700 to-red-900 rounded-xl p-6 shadow-xl hover:shadow-2xl transition-shadow duration-500">
             <div class="flex flex-col md:flex-row justify-between items-start md:items-center mb-6 gap-2">
-                <!-- Izquierda: título y subtítulo -->
                 <div>
-                    <h2 class="text-2xl font-semibold text-gray-800">Series</h2>
-                    <p class="mt-1 text-gray-600">Cada serie cuenta un universo, ¿listo para explorarlo?</p>
+                    <h2 class="text-2xl sm:text-3xl md:text-4xl font-extrabold text-yellow-400 drop-shadow-lg">Series</h2>
+                    <p class="mt-2 text-gray-200 text-base sm:text-lg md:text-xl">Cada serie cuenta un universo, ¿listo para
+                        explorarlo?</p>
                 </div>
-
-                <!-- Derecha: botón -->
                 <a href="{{ route('series') }}"
-                    class="px-4 py-2 bg-indigo-600 text-white rounded-lg shadow hover:bg-indigo-700 transition">
+                    class="mt-3 md:mt-0 px-4 sm:px-6 lg:px-8 py-2 sm:py-3 bg-yellow-400 text-red-900 font-bold rounded-lg shadow-lg hover:bg-yellow-500 hover:scale-105 transition-transform duration-300">
                     Ver más series
                 </a>
             </div>
 
             <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6">
-                @php
-                    $seriesCollection = collect($series)->shuffle();
-                @endphp
-                @foreach ($seriesCollection->take(8) as $series)
-                    <a href="{{ route('serie.show', $series['imdbID']) }}">
+                @php $seriesCollection = collect($series)->shuffle(); @endphp
+                @foreach ($seriesCollection->take(8) as $serie)
+                    <a href="{{ route('serie.show', $serie['imdbID']) }}">
                         <div
-                            class="relative border rounded-xl overflow-hidden shadow-lg transform hover:scale-105 transition duration-300 bg-white">
-                            <img class="w-full h-52 object-cover mb-2"
-                                src="{{ $series['Poster'] != 'N/A' ? $series['Poster'] : asset('images/default-movie.png') }}"
-                                alt="{{ $series['Title'] }}">
-                            <div class="absolute bottom-0 w-full bg-gradient-to-t from-black/70 to-transparent p-3">
-                                <h2 class="text-white font-semibold text-lg truncate">{{ $series['Title'] }}</h2>
+                            class="relative rounded-xl overflow-hidden shadow-lg transform hover:scale-105 hover:shadow-2xl transition duration-500 ease-in-out bg-black/10">
+                            <img class="w-full h-52 sm:h-60 md:h-64 lg:h-72 object-cover"
+                                src="{{ $serie['Poster'] != 'N/A' ? $serie['Poster'] : asset('images/default-movie.png') }}"
+                                alt="{{ $serie['Title'] }}">
+                            <div class="absolute bottom-0 w-full bg-gradient-to-t from-black/80 to-transparent p-3">
+                                <h2 class="text-white font-bold text-sm sm:text-base md:text-lg lg:text-xl truncate">
+                                    {{ $serie['Title'] }}</h2>
                             </div>
+
                         </div>
                     </a>
                 @endforeach
@@ -82,77 +58,102 @@
         </section>
 
         <!-- PELÍCULAS -->
-        <section>
+        <section
+            class="bg-gradient-to-r from-indigo-900 via-indigo-700 to-indigo-900 rounded-xl p-6 shadow-xl hover:shadow-2xl transition-shadow duration-500">
             <div class="flex flex-col md:flex-row justify-between items-start md:items-center mb-6 gap-2">
-                <!-- Izquierda: título y subtítulo -->
                 <div>
-                    <h2 class="text-2xl font-semibold text-gray-800">Películas</h2>
-                    <p class="mt-1 text-gray-600">Cada película, una aventura épica que no te puedes perder.</p>
+                    <h2 class="text-2xl sm:text-3xl md:text-4xl font-extrabold text-yellow-400 drop-shadow-lg">Películas
+                    </h2>
+                    <p class="mt-2 text-gray-200 text-base sm:text-lg md:text-xl">Cada película, una aventura épica que no
+                        te puedes perder.</p>
                 </div>
-
-                <!-- Derecha: botón -->
                 <a href="{{ route('peliculas.index') }}"
-                    class="px-4 py-2 bg-indigo-600 text-white rounded-lg shadow hover:bg-indigo-700 transition">
+                    class="mt-3 md:mt-0 px-4 sm:px-6 lg:px-8 py-2 sm:py-3 bg-yellow-400 text-red-900 font-bold rounded-lg shadow-lg hover:bg-yellow-500 hover:scale-105 transition-transform duration-300">
                     Ver más películas
                 </a>
             </div>
 
             <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6">
-                @php
-                    $peliculasCollection = collect($peliculas)->shuffle();
-                @endphp
+                @php $peliculasCollection = collect($peliculas)->shuffle(); @endphp
                 @foreach ($peliculasCollection->take(8) as $pelicula)
                     <a href="{{ route('pelicula.show', $pelicula['imdbID']) }}">
                         <div
-                            class="relative border rounded-xl overflow-hidden shadow-lg transform hover:scale-105 transition duration-300 bg-white">
-                            <img class="w-full h-52 object-cover mb-2"
+                            class="relative rounded-xl overflow-hidden shadow-lg transform hover:scale-105 hover:shadow-2xl transition duration-500 ease-in-out bg-black/10">
+                            <img class="w-full h-52 sm:h-60 md:h-64 lg:h-72 object-cover"
                                 src="{{ $pelicula['Poster'] != 'N/A' ? $pelicula['Poster'] : asset('images/default-movie.png') }}"
                                 alt="{{ $pelicula['Title'] }}">
-                            <div class="absolute bottom-0 w-full bg-gradient-to-t from-black/70 to-transparent p-3">
-                                <h2 class="text-white font-semibold text-lg truncate">{{ $pelicula['Title'] }}</h2>
+                            <div class="absolute bottom-0 w-full bg-gradient-to-t from-black/80 to-transparent p-3">
+                                <h2 class="text-white font-bold text-sm sm:text-base md:text-lg lg:text-xl truncate">
+                                    {{ $pelicula['Title'] }}</h2>
                             </div>
                         </div>
                     </a>
                 @endforeach
             </div>
         </section>
-
-
-        <!-- COMICS -->
-        <section>
-            <div class="flex flex-col md:flex-row justify-between items-start md:items-center mb-6 gap-2">
-                <!-- Izquierda: título y subtítulo -->
-                <div>
-                    <h2 class="text-2xl font-semibold text-gray-800">Cómics</h2>
-                    <p class="mt-1 text-gray-600">Sumérgete en los orígenes y secretos del multiverso.</p>
-                </div>
-
-                <!-- Derecha: botón -->
-                <a href="{{ route('comics') }}"
-                    class="px-4 py-2 bg-indigo-600 text-white rounded-lg shadow hover:bg-indigo-700 transition">
-                    Ver más cómics
-                </a>
-            </div>
-
-            <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6">
-                @php
-                    $comicsCollection = collect($comics)->shuffle();
-                @endphp
-                @foreach ($comicsCollection->take(8) as $comic)
-                    <a href="{{ route('comic.show', $comic['id']) }}">
-                        <div
-                            class="relative border rounded-xl overflow-hidden shadow-lg transform hover:scale-105 transition duration-300 bg-white">
-                            <img class="w-full h-52 object-cover"
-                                src="{{ $comic['thumbnail']['path'] }}.{{ $comic['thumbnail']['extension'] }}"
-                                alt="{{ $comic['title'] }}">
-                            <div class="absolute bottom-0 w-full bg-gradient-to-t from-black/70 to-transparent p-3">
-                                <h2 class="text-white font-semibold text-lg truncate">{{ $comic['title'] }}</h2>
-                            </div>
-                        </div>
-                    </a>
-                @endforeach
-            </div>
-        </section>
-
     </div>
+@endsection
+
+@section('scripts')
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            const input = document.getElementById('globalSearch');
+            const loading = document.getElementById('loading');
+            const seriesGrid = document.querySelector('section:nth-of-type(1) .grid');
+            const peliculasGrid = document.querySelector('section:nth-of-type(2) .grid');
+
+            const renderCards = (container, items) => {
+                container.innerHTML = '';
+                items.forEach(item => {
+                    const card = document.createElement('a');
+                    card.href = item.imdbID ? `/serie/${item.imdbID}` : '#';
+                    card.innerHTML = `
+                <div class="relative rounded-xl overflow-hidden shadow-lg transform hover:scale-105 hover:shadow-2xl transition duration-500 ease-in-out bg-black/10">
+                    <img class="w-full h-52 sm:h-60 md:h-64 lg:h-72 object-cover"
+                         src="${item.Poster || '/images/default-movie.png'}"
+                         alt="${item.Title}">
+                    <div class="absolute bottom-0 w-full bg-gradient-to-t from-black/80 to-transparent p-3">
+                        <h2 class="text-white font-bold text-sm sm:text-base md:text-lg lg:text-xl truncate">
+                            ${item.Title}
+                        </h2>
+                    </div>
+                </div>
+            `;
+                    container.appendChild(card);
+                });
+            };
+
+            const loadResults = async (query) => {
+                try {
+                    loading.style.display = 'block';
+                    loading.textContent = query ? 'Buscando...' : 'Cargando contenido por defecto...';
+
+                    const url = `/api/buscar?q=${encodeURIComponent(query || 'Marvel')}`;
+                    const response = await fetch(url);
+                    const data = await response.json();
+
+                    renderCards(seriesGrid, data.series || []);
+                    renderCards(peliculasGrid, data.peliculas || []);
+
+                    loading.style.display = 'none';
+                } catch (error) {
+                    console.error(error);
+                    loading.textContent = 'Error al buscar. Intenta de nuevo.';
+                }
+            };
+
+            // Cargar resultados por defecto
+            loadResults('');
+
+            // Actualizar resultados al escribir
+            let debounceTimer;
+            input.addEventListener('input', () => {
+                clearTimeout(debounceTimer);
+                debounceTimer = setTimeout(() => {
+                    const query = input.value.trim();
+                    loadResults(query);
+                }, 400); // espera 400ms tras escribir
+            });
+        });
+    </script>
 @endsection

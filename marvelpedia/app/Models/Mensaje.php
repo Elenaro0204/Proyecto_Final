@@ -18,7 +18,7 @@ class Mensaje extends Model
 
     public function foro()
     {
-        return $this->belongsTo(Foro::class);
+        return $this->belongsTo(Foro::class, 'foro_id');
     }
 
     public function autor()

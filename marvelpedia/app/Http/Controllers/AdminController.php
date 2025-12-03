@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use Illuminate\Http\Request;
 use App\Models\User;
 use App\Http\Middleware\IsAdmin;
+use App\Mail\ContenidoReportadoMail;
 use App\Models\Foro;
 use App\Models\ForoReport;
 use App\Models\Mensaje;
@@ -15,6 +16,7 @@ use App\Models\ReviewReport;
 use App\Notifications\ReviewReported;
 use Carbon\Carbon;
 use Illuminate\Support\Facades\Http;
+use Illuminate\Support\Facades\Mail;
 
 class AdminController extends Controller
 {
@@ -98,17 +100,26 @@ class AdminController extends Controller
     }
 
     // Gestión de contenido
-    public function manageContent()
+    public function manageContent(Request $request)
     {
-        // Solo el admin debería poder acceder (opcional si tienes roles)
-        $reviews = Review::with(['user', 'report' => function ($query) {
-            $query->with('reporter');
-        }])->latest()->paginate(10);
+        // ------------------ RESEÑAS ------------------
+        $reviewsQuery = Review::with(['user', 'report.reporter'])->latest();
 
-        // Agregar el título de la entidad a cada reseña
+        if ($request->filled('q')) {
+            $reviewsQuery->where(function ($q) use ($request) {
+                $q->where('content', 'like', "%{$request->q}%")
+                    ->orWhere('entity_id', 'like', "%{$request->q}%");
+            });
+        }
+
+        if ($request->filled('type')) {
+            $reviewsQuery->where('type', $request->type);
+        }
+
+        $reviews = $reviewsQuery->paginate(10);
+
         $reviews->getCollection()->transform(function ($review) {
             $review->entity_title = null;
-
             if (in_array($review->type, ['pelicula', 'serie'])) {
                 $response = Http::get('https://www.omdbapi.com/', [
                     'apikey' => env('OMDB_API_KEY'),
@@ -117,15 +128,24 @@ class AdminController extends Controller
                 $data = $response->json();
                 $review->entity_title = $data['Title'] ?? $review->entity_id;
             }
-
             return $review;
         });
 
-        // Paginación de foros
-        $foros = Foro::withCount('mensajes')
-            ->with('user')
-            ->latest()
-            ->paginate(10, ['*'], 'foros_page'); // nombre de página personalizado
+        // ------------------ FOROS ------------------
+        $forosQuery = Foro::withCount('mensajes')->with('user')->latest();
+
+        if ($request->filled('q_foros')) {
+            $forosQuery->where('titulo', 'like', "%{$request->q_foros}%")
+                ->orWhereHas('user', function ($query) use ($request) {
+                    $query->where('name', 'like', "%{$request->q_foros}%");
+                });
+        }
+
+        $foros = $forosQuery->paginate(10, ['*'], 'foros_page');
+
+        if ($request->ajax() && $request->type_ajax === 'foros') {
+            return view('admin.foros.partials.foros-table', compact('foros'))->render();
+        }
 
         return view('admin.manage-content', compact('reviews', 'foros'));
     }
@@ -165,7 +185,7 @@ class AdminController extends Controller
         // Comprobar si ya existe reporte
         $report = ReviewReport::where('review_id', $review->id)->where('reported_by', Auth::id())->first();
         if ($report) {
-            return redirect()->route('admin.resenas.showreport', $review);
+            return redirect()->route('admin.resenas.viewreport', $review);
         }
         return view('admin.resenas.addreport', compact('review'));
     }
@@ -204,15 +224,43 @@ class AdminController extends Controller
             'deadline' => 'nullable|date|after_or_equal:today',
         ]);
 
-        ReviewReport::create([
-            'review_id' => $review->id,
+        // Crear el reporte
+        $reporte = ReviewReport::create([
+            'review_id'  => $review->id,
             'reported_by' => Auth::id(),
             'resolved'    => $request->resolved,
-            'deadline' => $request->deadline ? Carbon::parse($request->deadline) : Carbon::now()->addHours(24),
+            'deadline'    => $request->deadline
+                ? Carbon::parse($request->deadline)
+                : Carbon::now()->addHours(24),
         ]);
 
-        return redirect()->route('admin.manage-content')->with('success', 'Reporte enviado correctamente.');
+        // Dueño del contenido
+        $owner = $review->user;
+
+        // Usuario que reporta
+        $reporter = Auth::user();
+
+        // Tipo
+        $tipo = 'reseña';
+
+        $link = route('resenas.show', [
+            'type' => $review->type,
+            'id'   => $review->id
+        ]);
+
+        // Enviar email al dueño
+        Mail::to($owner->email)->send(
+            new ContenidoReportadoMail($owner, $review, $reporter, $reporte, $link, $tipo)
+        );
+
+        // Copia al admin
+        Mail::to("elenaro0240@gmail.com")->send(
+            new ContenidoReportadoMail($owner, $review, $reporter, $reporte, $link, $tipo)
+        );
+
+        return back()->with('success', 'Reporte enviado correctamente.');
     }
+
 
     // Guardar reporte foros
     public function storeReportForos(Request $request, Foro $foro)
@@ -222,14 +270,38 @@ class AdminController extends Controller
             'deadline' => 'nullable|date|after_or_equal:today',
         ]);
 
-        ForoReport::create([
+        $reporte=ForoReport::create([
             'foro_id' => $foro->id,
             'reported_by' => Auth::id(),
             'resolved'    => $request->resolved,
             'deadline' => $request->deadline ? Carbon::parse($request->deadline) : Carbon::now()->addHours(24),
         ]);
 
-        return redirect()->route('admin.manage-content')->with('success', 'Reporte enviado correctamente.');
+        // Dueño del contenido
+        $owner = $foro->user;
+
+        // Tipo
+        $tipo = 'foro';
+
+        // Usuario que reporta
+        $reporter = Auth::user();
+
+        $link = route('foros.show', [
+            'foro'   => $foro->id
+        ]);
+
+        // Enviar email al dueño
+        Mail::to($owner->email)->send(
+            new ContenidoReportadoMail($owner, $foro, $reporter, $reporte, $link, $tipo)
+        );
+
+        // Copia al admin
+        Mail::to("elenaro0240@gmail.com")->send(
+            new ContenidoReportadoMail($owner, $foro, $reporter, $reporte, $link, $tipo)
+        );
+
+        return redirect($request->input('redirect_to', url()->previous()))
+            ->with('success', 'Reporte enviado correctamente.');
     }
 
     // Guardar reporte mensajes
@@ -240,15 +312,38 @@ class AdminController extends Controller
             'deadline' => 'nullable|date|after_or_equal:today',
         ]);
 
-        $mensaje->reports()->create([
+        $reporte = $mensaje->reports()->create([
             'reported_by' => Auth::id(),
             'resolved' => $request->resolved,
             'deadline' => $request->deadline ? Carbon::parse($request->deadline) : Carbon::now()->addHours(24),
         ]);
 
+                // Dueño del contenido
+        $owner = $mensaje->user;
+
+        // Usuario que reporta
+        $reporter = Auth::user();
+
+        // Tipo
+        $tipo = 'mensaje';
+
+        $link = route('foros.show', [
+            'foro'   => $mensaje->foro_id,
+        ]);
+
+        // Enviar email al dueño
+        Mail::to($owner->email)->send(
+            new ContenidoReportadoMail($owner, $mensaje, $reporter, $reporte, $link, $tipo)
+        );
+
+        // Copia al admin
+        Mail::to("elenaro0240@gmail.com")->send(
+            new ContenidoReportadoMail($owner, $mensaje, $reporter, $reporte, $link, $tipo)
+        );
+
         // Redirige de vuelta al listado del foro con un hash para abrir el modal
-        return redirect()->route('admin.manage-content', ['#foro-' . $mensaje->foro_id])
-            ->with('success', 'Mensaje reportado correctamente');
+        return redirect($request->input('redirect_to', url()->previous()))
+            ->with('success', 'Reporte enviado correctamente.');
     }
 
     // Ver detalle del reporte de reseñas
@@ -289,54 +384,52 @@ class AdminController extends Controller
     }
 
     // Cancelar reporte reseñas
-    public function cancelReportResena(ReviewReport $report)
+    public function cancelReportResena(Request $request, ReviewReport $report)
     {
-        $review = $report->review; // la reseña asociada
+        $review = $report->review;
 
-        // 1. Borrar el reporte
         $report->delete();
 
-        // 2. Ver si aún hay reportes activos para esa reseña
         $remainingReports = ReviewReport::where('review_id', $review->id)->count();
 
-        // 3. Si ya no hay mas, marcar la reseña como no reportada
         if ($remainingReports === 0) {
             $review->update(['resolved' => false]);
         }
 
-        return back()->with('success', 'Reporte cancelado.');
+        return redirect($request->input('redirect_to', url()->previous()))
+            ->with('success', 'Reporte cancelado.');
     }
 
     // Cancelar reporte foros
-    public function cancelReportForo(ForoReport $report)
+    public function cancelReportForo(Request $request, ForoReport $report)
     {
-        $foro = $report->foro; // el foro asociado
+        $foro = $report->foro;
 
-        // 1. Borrar el reporte
         $report->delete();
 
-        // 2. Ver si aún hay reportes activos para ese foro
         $remainingReports = ForoReport::where('foro_id', $foro->id)->count();
 
-        // 3. Si ya no hay más, marcar el foro como no reportado
         if ($remainingReports === 0) {
             $foro->update(['resolved' => false]);
         }
 
-        return back()->with('success', 'Reporte cancelado.');
+        return redirect($request->input('redirect_to', url()->previous()))
+            ->with('success', 'Reporte cancelado.');
     }
 
     // Cancelar reporte mensajes
-    public function cancelReportMensaje(MensajeReport $report)
+    public function cancelReportMensaje(Request $request, MensajeReport $report)
     {
         $mensaje = $report->mensaje;
+
         $report->delete();
 
         if ($mensaje->reports()->count() === 0) {
             $mensaje->update(['resolved' => false]);
         }
 
-        return back()->with('success', 'Reporte cancelado.');
+        return redirect($request->input('redirect_to', url()->previous()))
+            ->with('success', 'Reporte cancelado.');
     }
 
     // Obtener mensajes de un foro

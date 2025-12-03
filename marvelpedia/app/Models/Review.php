@@ -13,6 +13,7 @@ class Review extends Model
         'user_id',
         'type',
         'entity_id',
+        'entity_title',
         'rating',
         'content',
     ];
@@ -25,5 +26,10 @@ class Review extends Model
     public function report()
     {
         return $this->hasMany(ReviewReport::class);
+    }
+
+    public function isReported()
+    {
+        return $this->reports()->exists();
     }
 }

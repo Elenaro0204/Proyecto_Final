@@ -71,6 +71,6 @@ class ForoReportController extends Controller
             }
         );
 
-        return redirect()->route('admin.manage-content')->with('success', 'Reporte del foro enviado correctamente.');
+        return redirect()->back()->with('success', 'Reporte del foro enviado correctamente.');
     }
 }

@@ -38,7 +38,6 @@
 </head>
 
 <body class="bg-gray-100 font-sans antialiased">
-    @include('layouts.navigation')
 
     <main class="min-h-screen flex justify-center items-center bg-gray-100 pt-5">
         <!-- Contenedor central -->
@@ -55,9 +54,6 @@
             </div>
         </div>
     </main>
-
-    <!-- Footer -->
-    <x-footer />
 
     @yield('scripts')
 </body>

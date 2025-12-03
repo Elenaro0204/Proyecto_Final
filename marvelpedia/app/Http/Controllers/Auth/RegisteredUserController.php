@@ -47,9 +47,6 @@ class RegisteredUserController extends Controller
 
         Auth::login($user);
 
-        // Enviar correo de bienvenida
-        Mail::to($user->email)->send(new WelcomeUserMail($user));
-
         return redirect(route('dashboard', absolute: false));
     }
 }

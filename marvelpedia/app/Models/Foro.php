@@ -17,7 +17,7 @@ class Foro extends Model
         'ultima_actividad',
         'color_fondo',
         'color_titulo',
-        'imagen_portada',
+        'imagen',
         'visibilidad',
     ];
 

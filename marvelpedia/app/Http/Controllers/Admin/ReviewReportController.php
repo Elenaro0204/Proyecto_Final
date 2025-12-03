@@ -11,6 +11,10 @@ use Illuminate\Support\Facades\Mail;
 
 class ReviewReportController extends Controller
 {
+    protected $casts = [
+        'deadline' => 'datetime',
+    ];
+
     public function report(Request $request, Review $review)
     {
         // Evitar reportar varias veces la misma reseña
@@ -65,6 +69,6 @@ class ReviewReportController extends Controller
             }
         );
 
-        return redirect()->route('admin.manage-content')->with('success', 'Reporte enviado correctamente.');
+        return redirect()->back()->with('success', 'Reporte enviado correctamente.');
     }
 }

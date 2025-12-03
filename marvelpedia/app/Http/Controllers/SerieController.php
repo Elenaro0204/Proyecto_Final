@@ -17,28 +17,40 @@ class SerieController extends Controller
     {
         $page = $request->query('page', 1);
         $query = $request->query('search', 'Marvel'); // valor por defecto
+        $perPage = 20;
 
-        $response = Http::get($this->baseUrl, [
-            'apikey' => $this->apiKey,
-            's' => $query,
-            'type' => 'series',
-            'page' => $page
-        ]);
+        // OMDb devuelve máximo 10 por página
+        $pagesNeeded = ceil($perPage / 10);
+        $seriesArray = [];
 
-        $data = $response->json();
-        $seriesArray = $data['Search'] ?? [];
-        $total = isset($data['totalResults']) ? (int)$data['totalResults'] : count($seriesArray);
+        for ($i = 0; $i < $pagesNeeded; $i++) {
+            $response = Http::get($this->baseUrl, [
+                'apikey' => $this->apiKey,
+                's' => $query,
+                'type' => 'series',
+                'page' => $page + $i
+            ])->json();
+
+            if (isset($response['Search'])) {
+                $seriesArray = array_merge($seriesArray, $response['Search']);
+            }
+        }
+
+        $total = $response['totalResults'] ?? count($seriesArray);
 
         // Adaptar datos para Blade
         foreach ($seriesArray as &$p) {
             $p['poster_path'] = $p['Poster'] != 'N/A' ? $p['Poster'] : '';
-            $p['description_es'] = '';
+            $p['anio'] = $p['Year'] ?? 'Desconocido';
+            $p['tipo'] = $p['Type'] ?? 'película';
+            $p['description_es'] = $p['description_es'] ?? 'Sin información disponible.';
+            $p['genero'] = 'Desconocido';
         }
 
         $series = new LengthAwarePaginator(
-            $seriesArray,
+            array_slice($seriesArray, 0, $perPage),
             $total,
-            12, // items por página
+            $perPage,
             $page,
             ['path' => $request->url(), 'query' => $request->query()]
         );
@@ -55,16 +67,19 @@ class SerieController extends Controller
         $response = Http::get($this->baseUrl, [
             'apikey' => $this->apiKey,
             's' => $search,
-            'type' => 'series',
+            'type' => 'series', // corregido
             'page' => 1
         ]);
 
         $series = $response->json()['Search'] ?? [];
 
-        $resultados = array_map(function ($p) {
+        $resultados = array_map(function ($s) {
             return [
-                'id' => $p['imdbID'],
-                'title' => $p['Title'],
+                'id' => $s['imdbID'],
+                'imdbID' => $s['imdbID'],
+                'title' => $s['Title'],
+                'anio' => $s['Year'] ?? 'Desconocido',
+                'poster_path' => $s['Poster'] != 'N/A' ? $s['Poster'] : '/images/no-poster.png',
             ];
         }, $series);
 

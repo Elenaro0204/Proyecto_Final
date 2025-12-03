@@ -37,7 +37,7 @@ class WelcomeUserMail extends Mailable
     public function build()
     {
         return $this->subject('¡Bienvenido a Marvelpedia!')
-                    ->view('email.welcome')
+                    ->view('emails.welcome')
                     ->with([
                         'user' => $this->user,
                     ]);

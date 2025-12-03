@@ -5,13 +5,14 @@ namespace App\Notifications;
 use Illuminate\Auth\Notifications\VerifyEmail as VerifyEmailBase;
 use Illuminate\Notifications\Messages\MailMessage;
 use Illuminate\Support\Carbon;
+use Illuminate\Support\Facades\Config;
 use Illuminate\Support\Facades\URL;
 
 class CustomVerifyEmail extends VerifyEmailBase
 {
     protected function verificationUrl($notifiable)
     {
-    $hash = sha1($notifiable->getEmailForVerification());
+        $hash = sha1($notifiable->getEmailForVerification());
 
         return URL::temporarySignedRoute(
             'verification.verify',
@@ -25,13 +26,18 @@ class CustomVerifyEmail extends VerifyEmailBase
 
     public function toMail($notifiable)
     {
-        $verificationUrl = $this->verificationUrl($notifiable);
+        // Generar la URL de verificación
+        $verificationUrl = URL::temporarySignedRoute(
+            'verification.verify', // Ruta que definiremos
+            Carbon::now()->addMinutes(Config::get('auth.verification.expire', 60)),
+            ['id' => $notifiable->id, 'hash' => sha1($notifiable->email)]
+        );
 
         return (new MailMessage)
-            ->subject('¡Bienvenido a Marvelpedia! Verifica tu correo')
-            ->view('email.welcome', [
+            ->subject('Verifica tu correo en Marvelpedia')
+            ->view('emails.verificacion', [
                 'user' => $notifiable,
-                'verificationUrl' => $verificationUrl
+                'verificationUrl' => $verificationUrl,
             ]);
     }
 }

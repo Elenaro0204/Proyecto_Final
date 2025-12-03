@@ -1,3 +1,5 @@
+<!-- resources/views/foros/edit.blade.php -->
+
 @extends('layouts.app')
 
 @section('content')
@@ -83,11 +85,11 @@
                     <!-- Imagen de portada -->
                     <div>
                         <label class="block text-gray-700 font-semibold mb-2">Imagen de portada</label>
-                        <input type="file" name="imagen_portada" class="mb-2">
+                        <input type="file" name="imagen" class="mb-2">
 
-                        @if ($foro->imagen_portada)
+                        @if ($foro->imagen)
                             <div class="relative mb-4">
-                                <img src="{{ asset('storage/' . $foro->imagen_portada) }}" alt="Portada"
+                                <img src="{{ asset('storage/' . $foro->imagen) }}" alt="Portada"
                                     class="w-full h-48 object-cover rounded-lg shadow-sm">
                                 <label
                                     class="absolute top-2 right-2 inline-flex items-center bg-red-500 text-white px-3 py-1 rounded-full cursor-pointer hover:bg-red-600">
@@ -112,10 +114,14 @@
                         </select>
                     </div>
 
-                    <!-- Botón de Guardar -->
-                    <div class="text-center">
+                    <!-- Botones -->
+                    <div class="flex justify-between mt-4">
+                        <a href="{{ url()->previous() }}" class="px-4 py-2 rounded bg-gray-200 hover:bg-gray-300">
+                            Cancelar
+                        </a>
+
                         <button type="submit"
-                            class="px-6 py-3 bg-indigo-600 text-white font-semibold rounded-lg hover:bg-indigo-700 transition">
+                            class="px-4 py-2 bg-indigo-600 text-white font-semibold rounded-lg hover:bg-indigo-700 transition">
                             Guardar Cambios
                         </button>
                     </div>

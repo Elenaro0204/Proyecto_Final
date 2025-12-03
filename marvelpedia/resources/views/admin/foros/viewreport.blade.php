@@ -1,6 +1,13 @@
+<!-- resources/views/admin/foros/viewreport.blade.php -->
+
 @extends('layouts.app')
 
 @section('content')
+    <x-breadcrumb-drawer :items="[
+        ['label' => 'Inicio', 'url' => route('inicio'), 'level' => 0],
+        ['label' => 'Reportes', 'url' => route('manage-content'), 'level' => 1],
+    ]" />
+
     <div class="container mx-auto py-6">
         <h1 class="text-3xl font-extrabold mb-6 text-center text-red-600">🛑 Detalle del Reporte</h1>
 
@@ -68,26 +75,23 @@
                         @endif
 
                         {{-- Acciones --}}
-                        <form action="{{ route('admin.foro.report.cancel', $report->id) }}" method="POST" class="mt-3">
-                            @csrf
-                            @method('DELETE')
-                            <button type="submit"
-                                class="bg-red-500 hover:bg-red-600 text-white px-4 py-2 rounded-lg shadow font-semibold transition-colors">
-                                Cancelar Reporte
-                            </button>
-                        </form>
+                        <div class="flex justify-between mt-3 gap-2">
+                            <a href="{{ url()->previous() }}"
+                                class="bg-gray-200 hover:bg-gray-300  px-4 py-2 rounded-lg shadow font-semibold transition-colors">
+                                Cancelar
+                            </a>
+                            <form action="{{ route('admin.foro.report.cancel', $report->id) }}" method="POST">
+                                @csrf
+                                @method('DELETE')
+                                <input type="hidden" name="redirect_to" value="{{ url()->previous() }}">
+                                <button type="submit"
+                                    class="bg-red-500 hover:bg-red-600 text-white px-4 py-2 rounded-lg shadow font-semibold transition-colors">
+                                    Cancelar Reporte
+                                </button>
+                            </form>
+                        </div>
                     </div>
-
                 </div>
-            </div>
-        @empty
-            <div class="bg-gray-100 p-6 rounded shadow text-center text-gray-500">
-                No hay reportes activos para mostrar.
-
-                <button onclick="goBackAndReload()"
-                    class="bg-gray-500 hover:bg-gray-600 text-white px-4 py-2 rounded-lg shadow font-semibold transition-colors">
-                    ⬅ Volver
-                </button>
             </div>
         @endforelse
     </div>

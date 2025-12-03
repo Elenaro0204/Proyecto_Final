@@ -14,35 +14,11 @@ class ApiController extends Controller
     public function index()
     {
         // Obtener datos de la API para cada sección
-        $comics = Http::get('https://gateway.marvel.com/v1/public/comics', [
-            'ts' => $this->ts,
-            'apikey' => $this->apikey,
-            'hash' => $this->hash
-        ])->json()['data']['results'] ?? [];
-
-        // $peliculas = Http::get('https://gateway.marvel.com/v1/public/events', [
-        //     'ts' => $this->ts,
-        //     'apikey' => $this->apikey,
-        //     'hash' => $this->hash
-        // ])->json()['data']['results'] ?? [];
-
         $peliculas = Http::get('http://www.omdbapi.com/', [
             'apikey' => '1f00bd0e',
             's' => 'Marvel',
             'type' => 'movie',
         ])->json()['results'] ?? [];
-
-        $personajes = Http::get('http://www.omdbapi.com/', [
-            'apikey' => '1f00bd0e',
-            's' => 'Marvel',
-            'type' => 'movie',
-        ])->json()['data']['results'] ?? [];
-
-        // $series = Http::get('https://gateway.marvel.com/v1/public/series', [
-        //     'ts' => $this->ts,
-        //     'apikey' => $this->apikey,
-        //     'hash' => $this->hash
-        // ])->json()['data']['results'] ?? [];
 
         $series = Http::get('http://www.omdbapi.com/', [
             'apikey' => '1f00bd0e',
@@ -51,39 +27,7 @@ class ApiController extends Controller
         ])->json()['results'] ?? [];
 
         // Pasar todas las variables a la vista Blade
-        return view('descubre.index', compact('comics', 'peliculas', 'personajes', 'series'));
-    }
-
-
-    // 🔹 Mostrar todos los comics
-    public function indexComics()
-    {
-        $response = Http::get('https://gateway.marvel.com/v1/public/comics', [
-            'title' => 'Avengers',
-            'ts' => $this->ts,
-            'apikey' => $this->apikey,
-            'hash' => $this->hash
-        ]);
-
-        $data = $response->json();
-        $comics = $data['data']['results'] ?? [];
-
-        return view('comics.index', compact('comics'));
-    }
-
-    // 🔹 Mostrar detalle de un comic específico
-    public function showComic($id)
-    {
-        $response = Http::get("https://gateway.marvel.com/v1/public/comics/{$id}", [
-            'ts' => $this->ts,
-            'apikey' => $this->apikey,
-            'hash' => $this->hash
-        ]);
-
-        $data = $response->json();
-        $comic = $data['data']['results'][0] ?? null;
-
-        return view('comic.show', compact('comic'));
+        return view('descubre.index', compact( 'peliculas', 'series'));
     }
 
     // 🔹 Mostrar todas las series
@@ -196,36 +140,6 @@ class ApiController extends Controller
         return view('peliculas.show', compact('pelicula'));
     }
 
-    // 🔹 Mostrar todos los personajes
-    public function indexPersonajes()
-    {
-        $response = Http::get('https://gateway.marvel.com/v1/public/characters', [
-            'ts' => $this->ts,
-            'apikey' => $this->apikey,
-            'hash' => $this->hash
-        ]);
-
-        $data = $response->json();
-        $personajes = $data['data']['results'] ?? [];
-
-        return view('personajes.index', compact('personajes'));
-    }
-
-    // 🔹 Mostrar detalle de un personaje específico
-    public function showPersonaje($id)
-    {
-        $response = Http::get("https://gateway.marvel.com/v1/public/characters/{$id}", [
-            'ts' => $this->ts,
-            'apikey' => $this->apikey,
-            'hash' => $this->hash
-        ]);
-
-        $data = $response->json();
-        $personaje = $data['data']['results'][0] ?? null;
-
-        return view('personaje.show', compact('personaje'));
-    }
-
     // Mostrar la vista de búsqueda
     public function buscarView()
     {
@@ -236,30 +150,6 @@ class ApiController extends Controller
     public function buscarAjax(Request $request)
     {
         $query = $request->input('q', '');
-
-        // Personajes
-        $personajes = [];
-        if ($query !== '') {
-            $response = Http::get('https://gateway.marvel.com/v1/public/characters', [
-                'ts' => $this->ts,
-                'apikey' => $this->apikey,
-                'hash' => $this->hash,
-                'nameStartsWith' => $query,
-            ]);
-            $personajes = $response->json()['data']['results'] ?? [];
-        }
-
-        // Cómics
-        $comics = [];
-        if ($query !== '') {
-            $response = Http::get('https://gateway.marvel.com/v1/public/comics', [
-                'ts' => $this->ts,
-                'apikey' => $this->apikey,
-                'hash' => $this->hash,
-                'titleStartsWith' => $query,
-            ]);
-            $comics = $response->json()['data']['results'] ?? [];
-        }
 
         // Series
         $series = [];
@@ -284,8 +174,6 @@ class ApiController extends Controller
         }
 
         return response()->json([
-            'personajes' => $personajes,
-            'comics' => $comics,
             'series' => $series,
             'peliculas' => $peliculas,
         ]);
@@ -295,7 +183,7 @@ class ApiController extends Controller
     public function buscarAjaxReseñas(Request $request)
     {
         $query = $request->input('q', '');
-        $type = $request->input('type', ''); // tipo: comic, serie, pelicula, personaje
+        $type = $request->input('type', '');
 
         if ($query === '' || $type === '') {
             return response()->json(['results' => []]);
@@ -304,26 +192,6 @@ class ApiController extends Controller
         $results = [];
 
         switch ($type) {
-            case 'personaje':
-                $response = Http::get('https://gateway.marvel.com/v1/public/characters', [
-                    'ts' => $this->ts,
-                    'apikey' => $this->apikey,
-                    'hash' => $this->hash,
-                    'nameStartsWith' => $query,
-                ]);
-                $results = $response->json()['data']['results'] ?? [];
-                break;
-
-            case 'comic':
-                $response = Http::get('https://gateway.marvel.com/v1/public/comics', [
-                    'ts' => $this->ts,
-                    'apikey' => $this->apikey,
-                    'hash' => $this->hash,
-                    'titleStartsWith' => $query,
-                ]);
-                $results = $response->json()['data']['results'] ?? [];
-                break;
-
             case 'serie':
             case 'pelicula':
                 $response = Http::get('http://www.omdbapi.com/', [

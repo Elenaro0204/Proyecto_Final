@@ -1,11 +1,14 @@
+<!-- resources/admin/foros/addreport.blade.php -->
+
 @extends('layouts.app')
 
 @section('content')
-    <div class="container mx-auto py-6 max-w-lg bg-white p-6 rounded-lg shadow">
+    <div class="container mx-auto mt-20 mb-12 max-w-lg bg-white p-6 rounded-lg shadow">
         <h2 class="text-xl font-bold mb-4">Reportar Foro</h2>
 
         <form action="{{ route('admin.foros.report.store', $foro) }}" method="POST" class="space-y-4">
             @csrf
+            <input type="hidden" name="redirect_to" value="{{ url()->previous() }}">
 
             {{-- Campo autogenerado: ID del foro --}}
             <div>
@@ -51,9 +54,15 @@
                     required>
             </div>
 
-            <button type="submit" class="bg-yellow-500 text-white px-4 py-2 rounded hover:bg-yellow-600">
-                Enviar reporte
-            </button>
+            <div class="flex justify-between mt-4">
+                <a href="{{ url()->previous() }}" class="px-4 py-2 rounded bg-gray-200 hover:bg-gray-300">
+                    Cancelar
+                </a>
+
+                <button type="submit" class="bg-yellow-500 text-white px-4 py-2 rounded hover:bg-yellow-600">
+                    Enviar reporte
+                </button>
+            </div>
         </form>
     </div>
 @endsection

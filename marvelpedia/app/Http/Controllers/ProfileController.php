@@ -9,18 +9,59 @@ use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Redirect;
 use Illuminate\View\View;
 use App\Models\User;
+use Illuminate\Support\Facades\Http;
 
 class ProfileController extends Controller
 {
     /**
      * Display the user's profile.
      */
+
     public function show(Request $request): View
     {
+        $user = $request->user();
+
+        // Reseñas paginadas
+        $reseñas = $user->reviews()
+            ->latest()
+            ->paginate(5, ['*'], 'reseñas_page');
+
+        // Mensajes paginados
+        $mensajes = $user->mensajes()
+            ->with(['foro', 'respuestas']) // 'respuestas' es la relación de respuestas de un mensaje
+            ->latest()
+            ->get()
+            ->groupBy(fn($m) => $m->foro_id); // agrupa por foro
+
+        // Foros donde el usuario ha participado
+        $forosParticipa  = $user->forosParticipa()
+            ->with(['mensajes' => function ($q) use ($user) {
+                $q->where('user_id', $user->id)->latest();
+            }])
+            ->get();
+
+        // Traer info de OMDb para cada reseña
+        foreach ($reseñas as $resena) {
+            if ($resena->entity_id) {
+                $response = Http::get('https://www.omdbapi.com/', [
+                    'apikey' => env('OMDB_API_KEY'),
+                    'i' => $resena->entity_id,
+                ]);
+                $info = $response->json();
+                $resena->titulo_pelicula = $info['Title'] ?? 'Título no disponible';
+            } else {
+                $resena->titulo_pelicula = 'Título no disponible';
+            }
+        }
+
         return view('dashboar', [
-            'user' => $request->user(),
+            'user' => $user,
+            'reseñas' => $reseñas,
+            'mensajes' => $mensajes,
+            'foros' => $forosParticipa,
         ]);
     }
+
 
     /**
      * Display the user's profile form.

@@ -18,7 +18,9 @@ class HomeController extends Controller
             return [
                 'title' => $f->titulo,
                 'text' => Str::limit($f->descripcion ?? '', 100),
-                'image' => $f->imagen_portada ?? asset('build/assets/images/foro_placeholder.jpg'),
+                'image' => $f->imagen
+                    ? asset('/storage/portadas/' . $f->imagen)
+                    : asset('images/fondo-foros.jpg'),
                 'link' => route('foros.show', $f->id),
                 'bg_color' => $f->color_fondo ?? '#000',
                 'title_color' => $f->color_titulo ?? '#fff',
@@ -28,7 +30,7 @@ class HomeController extends Controller
         // Formatea los datos para el carrusel
         $resenas = Review::latest()->take(8)->get()->map(function ($r) {
             $titulo = 'Desconocido';
-            $imagen = asset('build/assets/images/resena_placeholder.jpg');
+            $imagen = asset('images/fondo-resenas.jpeg');
 
             // Cacheamos por entity_id y type para no saturar la API
             $cacheKey = "{$r->type}_{$r->entity_id}";
@@ -48,20 +50,6 @@ class HomeController extends Controller
                                 'plot' => 'full'
                             ]);
                             return $response->json();
-                        case 'comic':
-                            $response = Http::get("https://gateway.marvel.com/v1/public/comics/{$r->entity_id}", [
-                                'ts' => '1758626088',
-                                'apikey' => '4ce916eb12f534d995b7f03d80470b48',
-                                'hash' => 'ae21b0b6b32d7da943ba2a57cb21a70b'
-                            ]);
-                            return $response->json()['data']['results'][0] ?? [];
-                        case 'personaje':
-                            $response = Http::get("https://gateway.marvel.com/v1/public/characters/{$r->entity_id}", [
-                                'ts' => '1758626088',
-                                'apikey' => '4ce916eb12f534d995b7f03d80470b48',
-                                'hash' => 'ae21b0b6b32d7da943ba2a57cb21a70b'
-                            ]);
-                            return $response->json()['data']['results'][0] ?? [];
                     }
                 } catch (\Exception $e) {
                     return [];
@@ -74,13 +62,6 @@ class HomeController extends Controller
                 case 'serie':
                     $titulo = $data['Title'] ?? $titulo;
                     $imagen = ($data['Poster'] ?? '') !== 'N/A' ? $data['Poster'] : $imagen;
-                    break;
-                case 'comic':
-                case 'personaje':
-                    $titulo = $data['title'] ?? $data['name'] ?? $titulo;
-                    $imagen = $data['thumbnail']['path'] ?? ''
-                        ? $data['thumbnail']['path'] . '.' . $data['thumbnail']['extension']
-                        : $imagen;
                     break;
             }
 

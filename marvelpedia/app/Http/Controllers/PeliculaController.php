@@ -16,31 +16,42 @@ class PeliculaController extends Controller
     {
         $page = $request->query('page', 1);
         $query = $request->query('search', 'Marvel'); // valor por defecto
+        $perPage = 20; // queremos 20 resultados por página
 
-        $response = Http::get($this->baseUrl, [
-            'apikey' => $this->apiKey,
-            's' => $query,
-            'type' => 'movie',
-            'page' => $page
-        ]);
+        // OMDb devuelve máximo 10 por página
+        $pagesNeeded = ceil($perPage / 10);
+        $peliculasArray = [];
 
-        $data = $response->json();
-        $peliculasArray = $data['Search'] ?? [];
-        $total = isset($data['totalResults']) ? (int)$data['totalResults'] : count($peliculasArray);
+        // Traer varias páginas de la API si es necesario
+        for ($i = 0; $i < $pagesNeeded; $i++) {
+            $res = Http::get($this->baseUrl, [
+                'apikey' => $this->apiKey,
+                's' => $query,
+                'type' => 'movie',
+                'page' => $page + $i
+            ])->json();
+
+            if (isset($res['Search'])) {
+                $peliculasArray = array_merge($peliculasArray, $res['Search']);
+            }
+        }
+
+        $total = $res['totalResults'] ?? count($peliculasArray);
 
         // Adaptar datos para Blade
         foreach ($peliculasArray as &$p) {
             $p['poster_path'] = $p['Poster'] != 'N/A' ? $p['Poster'] : '';
             $p['anio'] = $p['Year'] ?? 'Desconocido';
             $p['tipo'] = $p['Type'] ?? 'película';
-            $p['sinopsis'] = $p['Plot'] ?? 'Sin información disponible.'; // opcional
-            $p['genero'] = 'Desconocido'; // como placeholder
+            $p['sinopsis'] = $p['Plot'] ?? 'Sin información disponible.';
+            $p['genero'] = 'Desconocido';
         }
 
+        // Crear paginador de Laravel
         $peliculas = new LengthAwarePaginator(
-            $peliculasArray,
+            array_slice($peliculasArray, 0, $perPage),
             $total,
-            12, // items por página
+            $perPage,
             $page,
             ['path' => $request->url(), 'query' => $request->query()]
         );
@@ -111,6 +122,28 @@ class PeliculaController extends Controller
             'tipo' => $data['Type'] ?? 'peliculas',
             'imdbID' => $data['imdbID'] ?? 'N/A',
         ];
+
+        // Traducir la sinopsis usando LibreTranslate
+        try {
+            $translateResponse = Http::withHeaders([
+                'Content-Type' => 'application/json',
+                'User-Agent' => 'Mozilla/5.0'
+            ])->withBody(json_encode([
+                'q' => $pelicula['sinopsis'],
+                'source' => 'en',
+                'target' => 'es',
+                'format' => 'text',
+                'api_key' => ''
+            ]), 'application/json')->post('https://libretranslate.com/translate');
+
+            if ($translateResponse->ok()) {
+                $pelicula['sinopsis_es'] = $translateResponse->json()['translatedText'] ?? $pelicula['sinopsis'];
+            } else {
+                $pelicula['sinopsis_es'] = $pelicula['sinopsis'];
+            }
+        } catch (\Exception $e) {
+            $pelicula['sinopsis_es'] = $pelicula['sinopsis'];
+        }
 
         // Obtener reseñas desde la base de datos
         $reseñas = Review::with('user')

@@ -14,11 +14,17 @@ use App\Http\Controllers\PersonajeController;
 use App\Http\Controllers\ResenaController;
 use App\Http\Controllers\SerieController;
 use App\Http\Controllers\AdminController;
+use App\Http\Controllers\Auth\VerifyEmailController;
 use App\Http\Controllers\HomeController;
 use App\Http\Controllers\MensajeController;
+use App\Http\Controllers\SupportController;
 use App\Http\Middleware\IsAdmin;
+use App\Mail\VerificacionMail;
+use App\Models\User;
 use Illuminate\Foundation\Auth\EmailVerificationRequest;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Mail;
+use Illuminate\Support\Str;
 
 // Index Route
 // Route::get('/', function () {
@@ -61,9 +67,6 @@ Route::prefix('admin')
     ->group(function () {
         Route::get('/dashboard', [AdminController::class, 'dashboard'])->name('dashboard');
         Route::get('/manage-content', [AdminController::class, 'manageContent'])->name('manage-content');
-        Route::get('/reports', [AdminController::class, 'reports'])->name('reports');
-        Route::get('/settings', [App\Http\Controllers\Admin\SettingsController::class, 'index'])->name('settings');
-        Route::post('/settings', [App\Http\Controllers\Admin\SettingsController::class, 'update'])->name('settings.update');
 
         // Reseñas
         Route::get('review/{review}/report/view', [AdminController::class, 'viewReportResena'])->name('resenas.viewreport');
@@ -97,18 +100,13 @@ Route::prefix('admin')
 // Resource Controllers
 Route::get('/descubre', [DescubreController::class, 'index'])->name('descubre');
 
-Route::get('/personajes', [PersonajeController::class, 'index'])->name('personajes');
-Route::get('/persoanje/{id}', [PersonajeController::class, 'show'])->name('personaje.show');
-
-Route::get('/comics', [ComicController::class, 'index'])->name('comics');
-Route::get('/comic/{id}', [ComicController::class, 'show'])->name('comic.show');
-
 Route::get('/peliculas', [PeliculaController::class, 'index'])->name('peliculas.index');
 Route::get('/pelicula/{id}', [PeliculaController::class, 'show'])->name('pelicula.show');
 Route::get('/peliculas/buscar', [PeliculaController::class, 'buscar'])->name('peliculas.buscar');
 
 Route::get('/series', [SerieController::class, 'index'])->name('series');
 Route::get('/serie/{id}', [SerieController::class, 'show'])->name('serie.show');
+Route::get('/series/buscar', [SerieController::class, 'buscar'])->name('series.buscar');
 
 // Route::get('/resenas/{id}', [ResenaController::class, 'show'])->name('resenas.show');
 
@@ -120,7 +118,7 @@ Route::middleware(['auth', 'verified'])->group(function () {
     Route::post('/resenas', [ResenaController::class, 'store'])->name('resenas.store');
 
     Route::get('/resenas/{id}/edit', [ResenaController::class, 'edit'])->name('resenas.edit');
-    Route::patch('/resenas/{id}/update', [ResenaController::class, 'update'])->name('resenas.update');
+    Route::put('/resenas/{id}/update', [ResenaController::class, 'update'])->name('resenas.update');
     Route::delete('/resenas/{id}/eliminar', [ResenaController::class, 'destroy'])->name('resenas.destroy');
 
     // Foros
@@ -131,7 +129,6 @@ Route::middleware(['auth', 'verified'])->group(function () {
     Route::post('/foros', [ForoController::class, 'store'])->name('foros.store');
     Route::get('/foros/{foro}/edit', [ForoController::class, 'edit'])->name('foros.edit');
     Route::put('/foros/{foro}', [ForoController::class, 'update'])->name('foros.update');
-
     Route::delete('/foros/{id}/eliminar', [ForoController::class, 'destroy'])->name('foros.destroy');
 
     // Mensajes
@@ -142,6 +139,7 @@ Route::middleware(['auth', 'verified'])->group(function () {
 });
 
 Route::get('/resenas', [ResenaController::class, 'index'])->name('resenas');
+Route::get('/resenas/{type}/{id}', [ResenaController::class, 'show'])->name('resenas.show');
 
 Route::get('/foros', [ForoController::class, 'index'])->name('foros.index');
 Route::get('/foros/{foro}', [ForoController::class, 'show'])->name('foros.show');
@@ -154,19 +152,27 @@ Route::get('/api/buscar/resenas', [ApiController::class, 'buscarAjaxReseñas'])-
 Route::get('/ayuda', [AyudaController::class, 'index'])->name('ayuda');
 Route::get('/ayuda/buscar', [AyudaController::class, 'index'])->name('ayuda.buscar');
 
-// Email Verification Routes
+//Email
 Route::get('/email/verify', function () {
-    return view('auth.verify-email'); // Aquí puedes poner una vista con un mensaje tipo "Revisa tu correo"
+    return view('auth.verify-email');
 })->middleware('auth')->name('verification.notice');
 
 Route::get('/email/verify/{id}/{hash}', function (EmailVerificationRequest $request) {
-    $request->fulfill(); // Marca el email como verificado en la base de datos
+    $request->fulfill();
+
     return redirect('/dashboard');
 })->middleware(['auth', 'signed'])->name('verification.verify');
 
 Route::post('/email/verification-notification', function (Request $request) {
     $request->user()->sendEmailVerificationNotification();
-    return back()->with('message', 'Correo de verificación enviado ✅');
+
+    return back()->with('message', 'Se ha reenviado el enlace de verificación.');
 })->middleware(['auth', 'throttle:6,1'])->name('verification.send');
+
+Route::get('/email/verify/{token}', [SupportController::class, 'verify'])
+    ->name('email.verify.custom');
+
+// Enviar mensaje de soporte
+Route::post('/support/enviar', [SupportController::class, 'enviar'])->name('support.enviar');
 
 require __DIR__ . '/auth.php';
