@@ -6,7 +6,7 @@
     <x-breadcrumb-drawer :items="[
         ['label' => 'Inicio', 'url' => route('inicio'), 'level' => 0],
         ['label' => 'Reseñas', 'url' => route('resenas'), 'level' => 1],
-        ['label' => $review->titulo_pelicula ?? 'Reseña', 'url' => route('resenas.show', ['type' => $review->type, 'id' => $review->id]), 'level' => 2],
+        ['label' => $review->titulo_pelicula ?? 'Reseña', 'url' => route('resenas.showresena', ['type' => $review->type, 'id' => $review->id]), 'level' => 2],
     ]" />
 
     <div class="max-w-3xl mx-auto py-8">

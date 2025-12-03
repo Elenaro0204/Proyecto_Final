@@ -112,7 +112,7 @@ Route::middleware(['auth', 'verified'])->group(function () {
     Route::get('/resenas/create', [ResenaController::class, 'create'])->name('resenas.create');
     Route::get('/resenas/create/{type?}/{entity_id?}', [ResenaController::class, 'create'])
         ->name('resenas.create.withparams');
-    Route::post('/resenas/{type}/{id}', [ResenaController::class, 'showByEntity'])->name('resenas.show');
+    Route::post('/resenas/{type}/{id}', [ResenaController::class, 'showByEntity'])->name('resenas.showresena');
     Route::post('/resenas', [ResenaController::class, 'store'])->name('resenas.store');
 
     Route::get('/resenas/{id}/edit', [ResenaController::class, 'edit'])->name('resenas.edit');
