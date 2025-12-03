@@ -108,8 +108,6 @@ Route::get('/series', [SerieController::class, 'index'])->name('series');
 Route::get('/serie/{id}', [SerieController::class, 'show'])->name('serie.show');
 Route::get('/series/buscar', [SerieController::class, 'buscar'])->name('series.buscar');
 
-// Route::get('/resenas/{id}', [ResenaController::class, 'show'])->name('resenas.show');
-
 Route::middleware(['auth', 'verified'])->group(function () {
     Route::get('/resenas/create', [ResenaController::class, 'create'])->name('resenas.create');
     Route::get('/resenas/create/{type?}/{entity_id?}', [ResenaController::class, 'create'])
