@@ -1,5 +1,4 @@
 <!-- resources/views/auth/login.blade.php -->
-
 @extends('layouts.guest')
 
 @section('content')

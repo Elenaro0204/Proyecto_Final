@@ -7,23 +7,31 @@
     @php
         $poster = null;
         $titleInfo = null;
+        $omdbData = null;
 
         if (in_array($review->type, ['pelicula', 'serie']) && preg_match('/^tt\d+$/', $review->entity_id)) {
             try {
                 $response = Http::get('https://www.omdbapi.com/', [
-                    'apikey' => env('OMDB_API_KEY'),
+                    'apikey' => '1f00bd0e',
                     'i' => $review->entity_id,
                 ]);
+
                 $data = $response->json();
+
                 if (isset($data['Poster']) && $data['Poster'] != 'N/A') {
                     $poster = $data['Poster'];
                 }
+
                 if (isset($data['Title'])) {
                     $titleInfo = $data['Title'];
                 }
+
+                // 👇 ESTA LÍNEA ES LA QUE FALTABA
+                $omdbData = $data;
             } catch (\Exception $e) {
                 $poster = null;
                 $titleInfo = null;
+                $omdbData = null;
             }
         }
     @endphp

@@ -74,7 +74,9 @@
                         class="px-4 py-2 bg-yellow-400 text-black rounded-lg font-bangers hover:bg-yellow-500 transition-colors">{{ __('Iniciar sesión') }}</a>
                     <a href="{{ route('register') }}"
                         class="px-4 py-2 bg-red-600 text-white rounded-lg font-bangers hover:bg-red-700 transition-colors">{{ __('Registrarse') }}</a>
-                @else
+                @endguest
+
+                @auth
                     <x-dropdown align="right" width="48">
                         <x-slot name="trigger">
                             <button
@@ -136,7 +138,7 @@
                             </div>
                         </x-slot>
                     </x-dropdown>
-                @endguest
+                @endauth
             </div>
 
             <!-- HAMBURGUESA (mobile) -->
@@ -236,7 +238,8 @@
                     class="block w-full text-center mt-2 px-4 py-2 bg-red-600 text-white rounded-lg font-bangers hover:bg-red-700 transition-colors">
                     Registrarse
                 </a>
-            @else
+            @endguest
+            @auth
                 <!-- Usuario -->
                 <div x-data="{ openUsuario: false }" class="border-b pb-2">
                     <button @click="openUsuario = !openUsuario"
@@ -264,7 +267,7 @@
                         x-transition:leave="transition ease-in duration-200"
                         x-transition:leave-start="opacity-100 max-h-40" x-transition:leave-end="opacity-0 max-h-0"
                         class="mt-2 pl-4 overflow-hidden flex flex-col space-y-1">
-                        <x-nav-link :href="route('dashboard')" :active="request()->routeIs('dashboard')"
+                        <x-nav-link :href="route('profile')" :active="request()->routeIs('profile')"
                             class="block px-3 py-2 rounded-md hover:text-yellow-400 transition-colors">
                             Perfil
                         </x-nav-link>
@@ -287,7 +290,7 @@
                         </form>
                     </div>
                 </div>
-            @endguest
+            @endauth
         </div>
     </div>
 </nav>

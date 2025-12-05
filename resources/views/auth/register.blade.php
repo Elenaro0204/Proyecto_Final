@@ -9,14 +9,16 @@
         <!-- Name -->
         <div>
             <x-input-label for="name" :value="__('Nombre')" />
-            <x-text-input id="name" class="block mt-1 w-full" type="text" name="name" :value="old('name')" required autofocus autocomplete="name" />
+            <x-text-input id="name" class="block mt-1 w-full" type="text" name="name" :value="old('name')" required
+                autofocus autocomplete="name" />
             <x-input-error :messages="$errors->get('name')" class="mt-2" />
         </div>
 
         <!-- Email Address -->
         <div class="mt-4">
             <x-input-label for="email" :value="__('Email')" />
-            <x-text-input id="email" class="block mt-1 w-full" type="email" name="email" :value="old('email')" required autocomplete="username" />
+            <x-text-input id="email" class="block mt-1 w-full" type="email" name="email" :value="old('email')" required
+                autocomplete="username" />
             <x-input-error :messages="$errors->get('email')" class="mt-2" />
         </div>
 
@@ -24,10 +26,8 @@
         <div class="mt-4">
             <x-input-label for="password" :value="__('Contraseña')" />
 
-            <x-text-input id="password" class="block mt-1 w-full"
-                            type="password"
-                            name="password"
-                            required autocomplete="new-password" />
+            <x-text-input id="password" class="block mt-1 w-full" type="password" name="password" required
+                autocomplete="new-password" />
 
             <x-input-error :messages="$errors->get('password')" class="mt-2" />
 
@@ -60,15 +60,15 @@
         <div class="mt-4">
             <x-input-label for="password_confirmation" :value="__('Confirmar Contraseña')" />
 
-            <x-text-input id="password_confirmation" class="block mt-1 w-full"
-                            type="password"
-                            name="password_confirmation" required autocomplete="new-password" />
+            <x-text-input id="password_confirmation" class="block mt-1 w-full" type="password" name="password_confirmation"
+                required autocomplete="new-password" />
 
             <x-input-error :messages="$errors->get('password_confirmation')" class="mt-2" />
         </div>
 
         <div class="flex items-center justify-end mt-4">
-            <a class="underline text-sm text-gray-600 hover:text-gray-900 rounded-md focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500" href="{{ route('login') }}">
+            <a class="underline text-sm text-gray-600 hover:text-gray-900 rounded-md focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500"
+                href="{{ route('login') }}">
                 {{ __('¿Ya estás registrado?') }}
             </a>
 
@@ -79,34 +79,35 @@
     </form>
 @endsection
 
+@push('scripts')
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            // Seleccionamos el input de contraseña
+            const passwordInput = document.getElementById('password');
 
-<script>
-    document.addEventListener('DOMContentLoaded', () => {
-        // Seleccionamos el input de contraseña
-        const passwordInput = document.getElementById('password');
+            passwordInput.addEventListener('input', () => {
+                const value = passwordInput.value;
 
-        passwordInput.addEventListener('input', () => {
-            const value = passwordInput.value;
+                const updateIcon = (id, condition) => {
+                    const el = document.getElementById(id);
+                    if (condition) {
+                        el.textContent = '✅';
+                        el.classList.remove('text-red-600');
+                        el.classList.add('text-green-500');
+                    } else {
+                        el.textContent = '❌';
+                        el.classList.remove('text-green-500');
+                        el.classList.add('text-red-600');
+                    }
+                };
 
-            const updateIcon = (id, condition) => {
-                const el = document.getElementById(id);
-                if(condition){
-                    el.textContent = '✅';
-                    el.classList.remove('text-red-600');
-                    el.classList.add('text-green-500');
-                } else {
-                    el.textContent = '❌';
-                    el.classList.remove('text-green-500');
-                    el.classList.add('text-red-600');
-                }
-            };
+                updateIcon('length-icon', value.length >= 8);
+                updateIcon('uppercase-icon', /[A-Z]/.test(value));
+                updateIcon('lowercase-icon', /[a-z]/.test(value));
+                updateIcon('number-icon', /[0-9]/.test(value));
+                updateIcon('symbol-icon', /[^A-Za-z0-9]/.test(value)); // Detecta cualquier símbolo
+            });
 
-            updateIcon('length-icon', value.length >= 8);
-            updateIcon('uppercase-icon', /[A-Z]/.test(value));
-            updateIcon('lowercase-icon', /[a-z]/.test(value));
-            updateIcon('number-icon', /[0-9]/.test(value));
-            updateIcon('symbol-icon', /[^A-Za-z0-9]/.test(value)); // Detecta cualquier símbolo
         });
-
-    });
-</script>
+    </script>
+@endpush

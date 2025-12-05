@@ -248,10 +248,11 @@
     </div>
 @endsection
 
-
-<style>
-    a:hover {
-        filter: brightness(1.2);
-        transform: scale(1.05);
-    }
-</style>
+@section('styles')
+    <style>
+        a:hover {
+            filter: brightness(1.2);
+            transform: scale(1.05);
+        }
+    </style>
+@endsection

@@ -27,7 +27,7 @@ class ApiController extends Controller
         ])->json()['results'] ?? [];
 
         // Pasar todas las variables a la vista Blade
-        return view('descubre.index', compact( 'peliculas', 'series'));
+        return view('descubre.index', compact('peliculas', 'series'));
     }
 
     // 🔹 Mostrar todas las series
@@ -204,5 +204,27 @@ class ApiController extends Controller
         }
 
         return response()->json(['results' => $results]);
+    }
+
+    public function getSeriesData()
+    {
+        $response = Http::get('http://www.omdbapi.com/', [
+            'apikey' => '1f00bd0e',
+            's' => 'Marvel',
+            'type' => 'series',
+        ]);
+
+        return $response->json()['Search'] ?? [];
+    }
+
+    public function getPeliculasData()
+    {
+        $response = Http::get('http://www.omdbapi.com/', [
+            'apikey' => '1f00bd0e',
+            's' => 'Marvel',
+            'type' => 'movie',
+        ]);
+
+        return $response->json()['Search'] ?? [];
     }
 }

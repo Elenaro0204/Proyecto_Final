@@ -10,8 +10,6 @@
                 <form action="{{ route('resenas.store') }}" method="POST" class="space-y-3">
                     @csrf
 
-                    <input type="hidden" name="entity_title" id="entityTitleHidden">
-
                     {{-- Si viene desde una serie, película, cómic o personaje --}}
                     @if (!empty($type) && !empty($entity_id))
                         <input type="hidden" name="type" value="{{ $type }}">
@@ -21,9 +19,9 @@
                         <div class="bg-gray-100 p-3 rounded mb-4 flex items-center gap-3">
 
                             {{-- @if ($info && isset($info['Poster']))
-                        <img src="{{ $info['Poster'] }}" alt="{{ $title }}"
-                            class="w-16 h-24 object-cover rounded shadow">
-                    @endif --}}
+                            <img src="{{ $info['Poster'] }}" alt="{{ $title }}"
+                                class="w-16 h-24 object-cover rounded shadow">
+                        @endif --}}
 
                             <div>
                                 <p class="text-gray-700 mb-1">
@@ -36,6 +34,7 @@
                             </div>
                         </div>
                     @else
+                        <input type="hidden" name="entity_title" id="entityTitleHidden">
                         {{-- Si viene desde la página general --}}
                         <label class="block">
                             Tipo de contenido:
@@ -57,7 +56,7 @@
                         <label class="block">
                             Selecciona entidad:
                             <select name="entity_id" id="entitySelect" class="border rounded p-2 w-full" required disabled>
-                                <option value="">Primero selecciona tipo y busca...</option>
+                                <option name="entity_title" value="">Primero selecciona tipo y busca...</option>
                             </select>
                         </label>
                     @endif
@@ -147,6 +146,13 @@
                             entitySelect.innerHTML = '<option value="">Error al buscar resultados</option>';
                         });
                 }, 400);
+            });
+
+            // Guardar título en el hidden cuando se selecciona entidad
+            entitySelect.addEventListener('change', () => {
+                const option = entitySelect.options[entitySelect.selectedIndex];
+                const title = option.dataset.title || "";
+                document.getElementById('entityTitleHidden').value = title;
             });
         </script>
     @endif

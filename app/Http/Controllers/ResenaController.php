@@ -12,11 +12,13 @@ use Illuminate\Support\Facades\Cache;
 
 class ResenaController extends Controller
 {
-    // Mostrar reseñas de una entidad (película, serie, personaje...)
+    // Mostrar reseñas de una entidad (película, serie...)
     public function index(Request $request)
     {
         // Consulta base
-        $query = Review::query()->with(['user', 'report']);
+        $baseQuery  = Review::query()->with(['user', 'report']);
+
+        $query = clone $baseQuery;
 
         // Filtro por contenido, tipo y título de entidad
         if ($request->filled('search')) {
@@ -36,7 +38,7 @@ class ResenaController extends Controller
 
         // Orden
         switch ($request->orden) {
-            case 'antiguas':
+            case 'antiguos':
                 $query->orderBy('created_at', 'asc');
                 break;
             case 'valoradas':
@@ -55,10 +57,10 @@ class ResenaController extends Controller
         }
 
         // Datos secundarios para secciones de la home
-        $latest = $query->orderBy('created_at', 'desc')->take(6)->get();
-        $topRated = $query->orderBy('rating', 'desc')->take(6)->get();
-        $movies = $query->where('type', 'pelicula')->orderBy('created_at', 'desc')->take(6)->get();
-        $series = $query->where('type', 'serie')->orderBy('created_at', 'desc')->take(6)->get();
+        $latest   = (clone $baseQuery)->orderBy('created_at', 'desc')->take(6)->get();
+        $topRated = (clone $baseQuery)->orderBy('rating', 'desc')->take(6)->get();
+        $movies   = (clone $baseQuery)->where('type', 'pelicula')->orderBy('created_at', 'desc')->take(6)->get();
+        $series   = (clone $baseQuery)->where('type', 'serie')->orderBy('created_at', 'desc')->take(6)->get();
 
         return view('resenas.index', [
             'reviews'        => $reviews,
@@ -79,7 +81,7 @@ class ResenaController extends Controller
         if ($review->type && $review->entity_id && in_array($review->type, ['pelicula', 'serie'])) {
             try {
                 $response = Http::get('https://www.omdbapi.com/', [
-                    'apikey' => env('OMDB_API_KEY'),
+                    'apikey' => '1f00bd0e',
                     'i' => $review->entity_id,
                 ]);
                 $data = $response->json();
@@ -125,7 +127,7 @@ class ResenaController extends Controller
 
         if ($type && $entity_id) {
             $response = Http::get('https://www.omdbapi.com/', [
-                'apikey' => env('OMDB_API_KEY'),
+                'apikey' => '1f00bd0e',
                 'i' => $entity_id,
             ]);
             $info = $response->json();
@@ -134,42 +136,38 @@ class ResenaController extends Controller
         return view('resenas.create', compact('type', 'entity_id', 'title', 'info'));
     }
 
-
     // Guardar reseña
     public function store(Request $request)
     {
         $request->validate([
-            'type' => 'required|in:pelicula,serie',
-            'entity_id' => 'required|string',
+            'type' => 'required',
+            'entity_id' => 'required',
+            'content' => 'required',
             'rating' => 'required|integer|min:1|max:5',
-            'content' => 'required|string|min:10',
         ]);
 
-        $entityTitle = null;
+        $type = $request->type;
+        $entityId = $request->entity_id;
 
-        if (in_array($request->type, ['pelicula', 'serie']) && $request->entity_id) {
-            // Traer título desde OMDb y cachear
-            $data = Cache::remember("omdb_{$request->entity_id}", 86400, function () use ($request) {
-                $response = Http::get('https://www.omdbapi.com/', [
-                    'apikey' => env('OMDB_API_KEY'),
-                    'i' => $request->entity_id,
-                ]);
-                return $response->json();
-            });
+        // Obtener datos desde OMDb al guardar
+        $apiKey = '1f00bd0e';
+        $json = file_get_contents("https://www.omdbapi.com/?i={$request->entity_id}&apikey={$apiKey}");
+        $info = json_decode($json, true);
 
-            $entityTitle = $data['Title'] ?? null;
-        }
+        $title = $info['Title'] ?? 'Título desconocido';
 
+        // Crear reseña
         Review::create([
             'user_id' => Auth::id(),
-            'type' => $request->type,
-            'entity_id' => $request->entity_id,
-            'entity_title' => $entityTitle,
+            'type' => $type,
+            'entity_id' => $entityId,
+            'entity_title' => $title,
+            'content' => $request->content,
             'rating' => $request->rating,
-            'content' => $request->input('content'),
         ]);
 
-        return redirect()->route('resenas')->with('success', 'Reseña guardada correctamente');
+        return redirect()->route('resenas')
+            ->with('success', 'Reseña creada correctamente.');
     }
 
     public function edit(Request $request, $id)
@@ -182,7 +180,7 @@ class ResenaController extends Controller
         // Si quieres mostrar info de la entidad relacionada
         if ($review->type && $review->entity_id) {
             $response = Http::get('https://www.omdbapi.com/', [
-                'apikey' => env('OMDB_API_KEY'),
+                'apikey' => '1f00bd0e',
                 'i' => $review->entity_id,
             ]);
             $info = $response->json();

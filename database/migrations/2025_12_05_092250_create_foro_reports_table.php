@@ -14,15 +14,20 @@ return new class extends Migration
         Schema::create('foro_reports', function (Blueprint $table) {
             $table->id();
 
+            // Relación con la tabla foros
             $table->foreignId('foro_id')
                 ->constrained('foros')
-                ->onDelete('cascade'); // Si se borra el foro, se borran sus reportes
+                ->onDelete('cascade');
 
+            // Usuario que reporta
             $table->foreignId('reported_by')
                 ->constrained('users')
-                ->onDelete('cascade'); // Si se borra el usuario, se borran sus reportes
+                ->onDelete('cascade');
 
+            // ¿Se resolvió el reporte?
             $table->boolean('resolved')->default(false);
+
+            // Fecha límite para revisar el reporte
             $table->timestamp('deadline')->nullable();
 
             $table->timestamps();
@@ -34,8 +39,10 @@ return new class extends Migration
      */
     public function down(): void
     {
-        Schema::table('foro_reports', function (Blueprint $table) {
-            //
-        });
+        Schema::disableForeignKeyConstraints();
+
+        Schema::dropIfExists('foro_reports');
+
+        Schema::enableForeignKeyConstraints();
     }
 };

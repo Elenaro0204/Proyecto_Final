@@ -300,21 +300,108 @@
                             {{-- Fecha --}}
                             <small class="text-gray-400">{{ $r->created_at->diffForHumans() }}</small>
 
-                            {{-- Botones Editar / Eliminar solo para el autor --}}
                             @auth
+                                @php
+                                    $userReport = $r->report?->firstWhere('reported_by', auth()->id());
+                                    $tiempoRestante = $userReport
+                                        ? max(0, now()->diffInSeconds($userReport->deadline))
+                                        : 0;
+                                @endphp
+
+                                {{-- Reporte --}}
+                                @if ($userReport && $tiempoRestante > 0)
+                                    <div x-data="{
+                                        tiempo: {{ $tiempoRestante }},
+                                        get formato() {
+                                            let segundos = Math.floor(this.tiempo);
+                                            const years = Math.floor(segundos / (3600 * 24 * 365));
+                                            segundos -= years * 3600 * 24 * 365;
+                                            const months = Math.floor(segundos / (3600 * 24 * 30));
+                                            segundos -= months * 3600 * 24 * 30;
+                                            const days = Math.floor(segundos / (3600 * 24));
+                                            segundos -= days * 3600 * 24;
+                                            const hours = Math.floor(segundos / 3600);
+                                            segundos -= hours * 3600;
+                                            const minutes = Math.floor(segundos / 60);
+                                            segundos -= minutes * 60;
+                                            return [
+                                                years > 0 ? `${years}a` : null,
+                                                months > 0 ? `${months}m` : null,
+                                                days > 0 ? `${days}d` : null,
+                                                hours > 0 ? `${hours}h` : null,
+                                                minutes > 0 ? `${minutes}m` : null,
+                                                segundos >= 0 ? `${segundos}s` : null
+                                            ].filter(Boolean).join(' ');
+                                        },
+                                        disminuir() { if (this.tiempo > 0) this.tiempo--; }
+                                    }" x-init="setInterval(() => disminuir(), 1000)"
+                                        class="bg-yellow-100 border-l-4 border-yellow-500 text-yellow-800 px-4 py-3 rounded-md shadow-md mt-4 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2">
+
+                                        <div class="font-semibold text-sm sm:text-base">⚠ Este mensaje ha sido reportado.</div>
+                                        <div class="text-sm sm:text-base">
+                                            Tiempo restante para modificarlo: <span x-text="formato" class="font-mono"></span>
+                                        </div>
+                                    </div>
+                                @endif
+                            @endauth
+
+                            {{-- Botones Editar / Eliminar solo para el autor --}}
+                            <div class="mt-3 flex flex-wrap gap-2">
+                                {{-- Si el usuario ES EL AUTOR de la reseña --}}
                                 @if (Auth::id() === $r->user_id)
-                                    <div class="mt-2 flex gap-2">
-                                        <a href="{{ route('resenas.edit', $r->id) }}"
-                                            class="text-indigo-600 hover:underline">Editar</a>
+                                    <a href="{{ route('resenas.edit', $r->id) }}"
+                                        class="px-3 py-1 bg-blue-500 hover:bg-blue-600 text-white rounded-md text-sm transition">
+                                        Editar
+                                    </a>
+
+                                    @if (!Auth::user()->isAdmin())
                                         <form action="{{ route('resenas.destroy', $r->id) }}" method="POST"
                                             onsubmit="return confirm('¿Seguro que quieres eliminar esta reseña?');">
                                             @csrf
                                             @method('DELETE')
-                                            <button type="submit" class="text-red-500 hover:underline">Eliminar</button>
+                                            <button type="submit"
+                                                class="px-3 py-1 bg-red-500 hover:bg-red-600 text-white rounded-md text-sm transition">
+                                                Eliminar
+                                            </button>
                                         </form>
-                                    </div>
+                                    @endif
                                 @endif
-                            @endauth
+
+                                {{-- ADMIN --}}
+                                @if (Auth::check() && Auth::user()->isAdmin())
+                                    {{-- Añadir reporte si el admin NO lo ha reportado antes --}}
+                                    @if (!$r->report?->firstWhere('reported_by', auth()->id()))
+                                        <a href="{{ route('admin.resenas.addreport', $r->id) }}"
+                                            class="px-3 py-1 bg-yellow-500 hover:bg-yellow-600 text-black rounded-md text-sm transition">
+                                            Reportar
+                                        </a>
+                                    @else
+                                        <form
+                                            action="{{ route('admin.resenas.report.cancel', $r->report->firstWhere('reported_by', auth()->id())->id) }}"
+                                            method="POST"
+                                            onsubmit="return confirm('¿Seguro que quieres cancelar tu reporte?');"
+                                            class="inline-block">
+                                            @csrf
+                                            @method('DELETE')
+                                            <button type="submit"
+                                                class="px-3 py-1 bg-gray-400 text-black hover:bg-gray-500 rounded-md text-sm transition">
+                                                Cancelar reporte
+                                            </button>
+                                        </form>
+                                    @endif
+
+                                    {{-- Eliminar como admin --}}
+                                    <form action="{{ route('resenas.destroy', $r->id) }}" method="POST"
+                                        onsubmit="return confirm('¿Seguro que quieres eliminar esta reseña como administrador?');">
+                                        @csrf
+                                        @method('DELETE')
+                                        <button type="submit"
+                                            class="px-3 py-1 bg-red-700 hover:bg-red-800 text-white rounded-md text-sm transition">
+                                            Eliminar
+                                        </button>
+                                    </form>
+                                @endif
+                            </div>
                         </div>
                     @endforeach
             @endif
@@ -323,7 +410,7 @@
 @endsection
 
 
-@section('scripts')
+@push('scripts')
     <script>
         const currentURL = window.location.href;
         const title = document.title;
@@ -365,4 +452,4 @@
         document.getElementById('shareFacebook').href =
             `https://www.facebook.com/sharer/sharer.php?u=${encodeURIComponent(currentURL)}`;
     </script>
-@endsection
+@endpush

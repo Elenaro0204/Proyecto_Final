@@ -122,7 +122,7 @@ class AdminController extends Controller
             $review->entity_title = null;
             if (in_array($review->type, ['pelicula', 'serie'])) {
                 $response = Http::get('https://www.omdbapi.com/', [
-                    'apikey' => env('OMDB_API_KEY'),
+                    'apikey' => '1f00bd0e',
                     'i' => $review->entity_id,
                 ]);
                 $data = $response->json();
@@ -243,10 +243,7 @@ class AdminController extends Controller
         // Tipo
         $tipo = 'reseña';
 
-        $link = route('resenas.show', [
-            'type' => $review->type,
-            'id'   => $review->id
-        ]);
+        $link = url("/{$review->type}/{$review->entity_id}");
 
         // Enviar email al dueño
         Mail::to($owner->email)->send(
@@ -270,7 +267,7 @@ class AdminController extends Controller
             'deadline' => 'nullable|date|after_or_equal:today',
         ]);
 
-        $reporte=ForoReport::create([
+        $reporte = ForoReport::create([
             'foro_id' => $foro->id,
             'reported_by' => Auth::id(),
             'resolved'    => $request->resolved,
@@ -318,7 +315,7 @@ class AdminController extends Controller
             'deadline' => $request->deadline ? Carbon::parse($request->deadline) : Carbon::now()->addHours(24),
         ]);
 
-                // Dueño del contenido
+        // Dueño del contenido
         $owner = $mensaje->user;
 
         // Usuario que reporta

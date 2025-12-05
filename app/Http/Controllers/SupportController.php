@@ -64,6 +64,6 @@ class SupportController extends Controller
         $user->token_verificacion = null;
         $user->save();
 
-        return redirect('/dashboard')->with('verified', true);
+        return redirect('/profile')->with('verified', true);
     }
 }

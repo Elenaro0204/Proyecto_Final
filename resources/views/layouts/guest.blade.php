@@ -43,7 +43,7 @@
         <!-- Contenedor central -->
         <div class="flex flex-col justify-center items-center bg-gray-100 px-4 w-full max-w-md">
             <!-- Logo -->
-            <a class="mb-6 flex items-center" href="{{ route('dashboard') }}">
+            <a class="mb-6 flex items-center" href="{{ route('profile') }}">
                 <x-application-logo class="me-2" style="height: 40px; width: auto;" />
                 <span class="h5 mb-0">Marvelpedia</span>
             </a>
@@ -56,23 +56,24 @@
     </main>
 
     @yield('scripts')
+    @stack('scripts')
+
+    @push('scripts')
+        <script>
+            document.getElementById('navbarContent').addEventListener('shown.bs.collapse', function() {
+                this.style.height = 'auto';
+            });
+        </script>
+    @endpush
+
+    @section('styles')
+        <style>
+            .navbar-collapse {
+                overflow: visible;
+                /* permite que el contenido se vea durante la animación */
+            }
+        </style>
+    @endsection
 </body>
 
 </html>
-
-@section('scripts')
-    <script>
-        document.getElementById('navbarContent').addEventListener('shown.bs.collapse', function() {
-            this.style.height = 'auto';
-        });
-    </script>
-@endsection
-
-@section('styles')
-    <style>
-        .navbar-collapse {
-            overflow: visible;
-            /* permite que el contenido se vea durante la animación */
-        }
-    </style>
-@endsection

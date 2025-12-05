@@ -1,15 +1,15 @@
 <!-- resources/views/components/modal-drawer.blade.php -->
 
-@props(['review'])
+@props(['review', 'model' => 'open'])
 
-<div x-show="open" x-cloak class="fixed inset-0 top-16 flex justify-end z-40">
+<div x-show="{{ $model }}" x-cloak class="fixed inset-0 top-16 flex justify-end z-40">
     <!-- Overlay -->
-    <div @click="closeModal" class="absolute inset-0 bg-black bg-opacity-50 transition-opacity" x-show="open"
+    <div @click="closeModal" class="absolute inset-0 bg-black bg-opacity-10 transition-opacity" x-show="{{ $model }}"
         x-transition.opacity></div>
 
     <!-- Panel -->
     <div class="relative bg-white w-full sm:w-96 h-full sm:h-auto p-4 sm:p-6 shadow-2xl sm:rounded-l-2xl overflow-y-auto transform transition-transform"
-        x-show="open" x-transition:enter="transition duration-300" x-transition:enter-start="translate-x-full"
+        x-show="{{ $model }}" x-transition:enter="transition duration-300" x-transition:enter-start="translate-x-full"
         x-transition:enter-end="translate-x-0" x-transition:leave="transition duration-300"
         x-transition:leave-start="translate-x-0" x-transition:leave-end="translate-x-full">
 

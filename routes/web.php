@@ -5,31 +5,20 @@ use App\Http\Controllers\ProfileController;
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\AuthController;
 use App\Http\Controllers\AyudaController;
-use App\Http\Controllers\BuscarController;
-use App\Http\Controllers\ComicController;
 use App\Http\Controllers\DescubreController;
 use App\Http\Controllers\ForoController;
 use App\Http\Controllers\PeliculaController;
-use App\Http\Controllers\PersonajeController;
 use App\Http\Controllers\ResenaController;
 use App\Http\Controllers\SerieController;
 use App\Http\Controllers\AdminController;
-use App\Http\Controllers\Auth\VerifyEmailController;
 use App\Http\Controllers\HomeController;
 use App\Http\Controllers\MensajeController;
 use App\Http\Controllers\SupportController;
 use App\Http\Middleware\IsAdmin;
-use App\Mail\VerificacionMail;
-use App\Models\User;
 use Illuminate\Foundation\Auth\EmailVerificationRequest;
 use Illuminate\Http\Request;
-use Illuminate\Support\Facades\Mail;
-use Illuminate\Support\Str;
 
 // Index Route
-// Route::get('/', function () {
-//     return view('welcome');
-// })->name('inicio');
 Route::get('/', [HomeController::class, 'index'])->name('inicio');
 
 // Login
@@ -39,18 +28,12 @@ Route::get('/login', [AuthController::class, 'showLoginForm'])
 Route::post('/login', [AuthController::class, 'login']);
 
 // Register
-Route::get('/registre', [AuthController::class, 'showRegisterForm'])
+Route::get('/register', [AuthController::class, 'showRegisterForm'])
     ->middleware('guest')
-    ->name('registre');
+    ->name('register');
 
 // Logout
 Route::post('/logout', [AuthController::class, 'logout'])->name('logout');
-
-// Dashboard
-Route::middleware(['auth', 'verified'])->group(function () {
-    Route::get('/dashboard', [ProfileController::class, 'show'])->name('dashboard');
-});
-
 
 // Profile Management
 Route::middleware('auth', 'verified')->group(function () {
@@ -151,14 +134,10 @@ Route::get('/ayuda', [AyudaController::class, 'index'])->name('ayuda');
 Route::get('/ayuda/buscar', [AyudaController::class, 'index'])->name('ayuda.buscar');
 
 //Email
-Route::get('/email/verify', function () {
-    return view('auth.verify-email');
-})->middleware('auth')->name('verification.notice');
-
 Route::get('/email/verify/{id}/{hash}', function (EmailVerificationRequest $request) {
     $request->fulfill();
 
-    return redirect('/dashboard');
+    return redirect('/profile');
 })->middleware(['auth', 'signed'])->name('verification.verify');
 
 Route::post('/email/verification-notification', function (Request $request) {

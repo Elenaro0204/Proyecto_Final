@@ -6,7 +6,7 @@
 
             <!-- 1. Logo + Contacto -->
             <div class="text-center md:text-left">
-                <a href="{{ route('dashboard') }}" class="flex items-center justify-center md:justify-start mb-4">
+                <a href="{{ route('profile') }}" class="flex items-center justify-center md:justify-start mb-4">
                     <x-application-logo class="h-8 w-auto mr-2 fill-current text-red-500" />
                     <span class="text-2xl font-bangers text-yellow-400">Marvelpedia</span>
                 </a>
@@ -55,7 +55,7 @@
 
                     @auth
                         {{-- Opcional: enlaces para usuarios logueados --}}
-                        <li><a href="{{ route('dashboard') }}" class="hover:text-red-500 transition-colors">Mi Perfil</a>
+                        <li><a href="{{ route('profile') }}" class="hover:text-red-500 transition-colors">Mi Perfil</a>
                         </li>
 
                         @if (Auth::user()->role === 'admin')

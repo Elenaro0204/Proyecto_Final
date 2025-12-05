@@ -51,9 +51,7 @@
                 </h3>
                 @if ($reviewsSection->count() > 0)
                     <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
-                        @foreach ($reviewsSection as $review)
-                            <x-review-card :review="$review" />
-                        @endforeach
+                        @include('resenas.partials.cards', ['reviews' => $reviewsSection])
                     </div>
                 @else
                     <p class="text-gray-500 text-center italic">No hay reseñas disponibles en esta sección.</p>
@@ -101,11 +99,13 @@
         </section>
 
         {{-- Modal Drawer --}}
-        <x-modal-drawer :review="$review" />
+        @forelse ($reviews as $review)
+            <x-modal-drawer :review="$review" />
+        @endforeach
     </div>
 @endsection
 
-@section('scripts')
+@push('scripts')
     <script>
         // Lógica Alpine.js para el modal de reseñas
         function reviewModal() {
@@ -152,4 +152,4 @@
             });
         });
     </script>
-@endsection
+@endpush

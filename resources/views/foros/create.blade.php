@@ -17,6 +17,16 @@
                         @method('PUT')
                     @endif
 
+                    @if ($errors->any())
+                        <div class="bg-red-200 text-red-800 p-4 rounded">
+                            <ul>
+                                @foreach ($errors->all() as $error)
+                                    <li>- {{ $error }}</li>
+                                @endforeach
+                            </ul>
+                        </div>
+                    @endif
+
                     <!-- Título -->
                     <div>
                         <label class="block text-gray-700 font-semibold mb-2">Título</label>

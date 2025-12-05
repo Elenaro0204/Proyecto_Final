@@ -94,7 +94,7 @@
     </div>
 @endsection
 
-@section('scripts')
+@push('scripts')
     <script>
         document.addEventListener('DOMContentLoaded', () => {
             const input = document.getElementById('globalSearch');
@@ -156,4 +156,4 @@
             });
         });
     </script>
-@endsection
+@endpush

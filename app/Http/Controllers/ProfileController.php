@@ -44,7 +44,7 @@ class ProfileController extends Controller
         foreach ($reseñas as $resena) {
             if ($resena->entity_id) {
                 $response = Http::get('https://www.omdbapi.com/', [
-                    'apikey' => env('OMDB_API_KEY'),
+                    'apikey' => '1f00bd0e',
                     'i' => $resena->entity_id,
                 ]);
                 $info = $response->json();
@@ -54,7 +54,7 @@ class ProfileController extends Controller
             }
         }
 
-        return view('dashboar', [
+        return view('dashboard', [
             'user' => $user,
             'reseñas' => $reseñas,
             'mensajes' => $mensajes,
@@ -124,7 +124,7 @@ class ProfileController extends Controller
         // Guardar en la base de datos
         $user->save();
 
-        return redirect()->route('dashboard')->with('status', 'profile-updated');
+        return redirect()->route('profile')->with('status', 'profile-updated');
     }
 
     /**

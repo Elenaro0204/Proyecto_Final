@@ -6,19 +6,35 @@ use Illuminate\Support\Facades\Schema;
 
 return new class extends Migration
 {
-    /**
-     * Run the migrations.
-     */
     public function up(): void
     {
         Schema::create('users', function (Blueprint $table) {
-            $table->id();
+            $table->id(); // bigint unsigned auto_increment
             $table->string('name');
             $table->string('email')->unique();
             $table->timestamp('email_verified_at')->nullable();
             $table->string('password');
-            $table->rememberToken();
-            $table->timestamps();
+
+            $table->string('avatar_url')->nullable();
+            $table->string('nickname')->nullable();
+            $table->string('favorito_personaje')->nullable();
+            $table->string('favorito_comic')->nullable();
+            $table->string('pais')->nullable();
+            $table->date('fecha_nacimiento')->nullable();
+            $table->string('banner_url')->nullable();
+
+            $table->string('theme')->default('default');
+            $table->integer('nivel')->default(1);
+            $table->integer('puntos')->default(0);
+
+            $table->rememberToken(); // varchar(100) nullable
+
+            $table->string('role')->default('user'); // NUEVO: admin/user
+            $table->string('bio')->nullable();
+            $table->string('twitter')->nullable();
+            $table->string('instagram')->nullable();
+
+            $table->timestamps(); // created_at / updated_at
         });
 
         Schema::create('password_reset_tokens', function (Blueprint $table) {
@@ -37,13 +53,13 @@ return new class extends Migration
         });
     }
 
-    /**
-     * Reverse the migrations.
-     */
     public function down(): void
     {
+        Schema::disableForeignKeyConstraints();
         Schema::dropIfExists('users');
         Schema::dropIfExists('password_reset_tokens');
         Schema::dropIfExists('sessions');
+
+        Schema::enableForeignKeyConstraints();
     }
 };
