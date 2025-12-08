@@ -8,6 +8,7 @@
     <meta name="csrf-token" content="{{ csrf_token() }}">
 
     <title>{{ config('app.name', 'Marvelpedia') }}</title>
+    <link rel="icon" href="{{ asset('/logos/Icono.png') }}" type="image/png">
 
     <!-- Fonts -->
     <link rel="preconnect" href="https://fonts.bunny.net">
@@ -37,15 +38,15 @@
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
 </head>
 
-<body class="bg-gray-100 font-sans antialiased">
+<body class="font-sans antialiased">
 
-    <main class="min-h-screen flex justify-center items-center bg-gray-100 pt-5">
+    <main class="bg-gradient-to-b from-blue-700 to-red-700 min-h-screen flex justify-center items-center pt-5">
         <!-- Contenedor central -->
-        <div class="flex flex-col justify-center items-center bg-gray-100 px-4 w-full max-w-md">
+        <div class="flex flex-col justify-center items-center px-4 w-full max-w-md">
             <!-- Logo -->
             <a class="mb-6 flex items-center" href="{{ route('profile') }}">
-                <x-application-logo class="me-2" style="height: 40px; width: auto;" />
-                <span class="h5 mb-0">Marvelpedia</span>
+                <img src="{{ asset('logos/Logo.png') }}" alt="Logo" class="me-2"
+                    style="height: 100px; width: auto;">
             </a>
 
             <!-- Contenedor del formulario -->

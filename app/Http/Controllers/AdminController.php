@@ -251,7 +251,7 @@ class AdminController extends Controller
         );
 
         // Copia al admin
-        Mail::to("elenaro0240@gmail.com")->send(
+        Mail::to("soportemarvelpedia@gmail.com")->send(
             new ContenidoReportadoMail($owner, $review, $reporter, $reporte, $link, $tipo)
         );
 
@@ -293,7 +293,7 @@ class AdminController extends Controller
         );
 
         // Copia al admin
-        Mail::to("elenaro0240@gmail.com")->send(
+        Mail::to("soportemarvelpedia@gmail.com")->send(
             new ContenidoReportadoMail($owner, $foro, $reporter, $reporte, $link, $tipo)
         );
 
@@ -334,12 +334,12 @@ class AdminController extends Controller
         );
 
         // Copia al admin
-        Mail::to("elenaro0240@gmail.com")->send(
+        Mail::to("soportemarvelpedia@gmail.com")->send(
             new ContenidoReportadoMail($owner, $mensaje, $reporter, $reporte, $link, $tipo)
         );
 
         // Redirige de vuelta al listado del foro con un hash para abrir el modal
-        return redirect($request->input('redirect_to', url()->previous()))
+        return redirect($reporte->input('redirect_to', url()->previous()))
             ->with('success', 'Reporte enviado correctamente.');
     }
 
@@ -435,15 +435,18 @@ class AdminController extends Controller
         $perPage = $request->query('perPage', 5);
 
         $mensajes = Mensaje::with(['user', 'reporter']) // reporter es quien hizo el reporte
+            ->withCount('respuestas')
             ->where('foro_id', $foroId)
             ->paginate($perPage);
 
         $mensajesArray = $mensajes->map(function ($msg) {
             $report = $msg->reports->isNotEmpty(); // puede ser null
 
+            $ultimoReporte = $msg->reports->sortByDesc('created_at')->first();
+
             $deadline = null;
-            if ($report && $msg->deadline) {
-                $deadline = Carbon::parse($msg->deadline)->toIso8601String();
+            if ($ultimoReporte && $ultimoReporte->deadline) {
+                $deadline = Carbon::parse($ultimoReporte->deadline)->toIso8601String();
             }
 
             return [
@@ -453,6 +456,7 @@ class AdminController extends Controller
                 'fecha' => $msg->created_at->format('d/m/Y H:i'),
                 'reportado' => $report ? true : false,
                 'deadline' => $deadline,
+                'respuestas_count' => $msg->respuestas_count,
             ];
         });
 

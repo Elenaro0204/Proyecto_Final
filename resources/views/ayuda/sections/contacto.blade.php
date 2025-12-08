@@ -7,8 +7,9 @@
         <p>Si necesitas ayuda, puedes contactarnos por los siguientes medios o enviarnos un mensaje
             directamente desde esta página:</p>
         <ul>
-            <li><strong>Email:</strong> <a href="mailto:support@marvelpedia.com">support@marvelpedia.com</a></li>
-            <li><strong>Teléfono:</strong> +34 123 456 789</li>
+            <li><strong>Email:</strong> <a href="mailto:soportemarvelpedia@gmail.com">soportemarvelpedia@gmail.com</a>
+            </li>
+            <li><strong>Teléfono:</strong> +34 656 44 85 41</li>
             <li><strong>Horario de atención:</strong> Lunes a Viernes, 09:00 - 18:00</li>
             <li><strong>Documentación y ayuda rápida:</strong> <a href="{{ route('ayuda') }}">Consulta
                     nuestra guía de ayuda</a></li>
@@ -34,6 +35,17 @@
                 <div class="modal-body">
                     <form action="{{ route('support.enviar') }}" method="POST" id="soporteForm">
                         @csrf
+
+                        @if ($errors->any())
+                            <div class="bg-red-200 text-red-800 p-4 rounded">
+                                <ul>
+                                    @foreach ($errors->all() as $error)
+                                        <li>- {{ $error }}</li>
+                                    @endforeach
+                                </ul>
+                            </div>
+                        @endif
+
                         <div class="mb-3">
                             <label for="nombre" class="form-label">Tu nombre</label>
                             <input type="text" class="form-control" id="nombre" name="nombre" required>

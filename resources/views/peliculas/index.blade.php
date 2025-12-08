@@ -26,15 +26,18 @@
         <!-- Grid de películas -->
         <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-8 mt-6">
             @foreach ($peliculas as $pelicula)
-                <a href="{{ route('pelicula.show', $pelicula['imdbID']) }}" class="group">
+                <a href="{{ route('pelicula.show', $pelicula['id']) }}" class="group">
                     <div
                         class="relative rounded-xl overflow-hidden shadow-lg transform hover:scale-105 hover:shadow-2xl transition duration-500 ease-in-out bg-gradient-to-b from-indigo-900 to-indigo-800">
                         <img class="w-full h-64 object-cover transition-transform duration-500 group-hover:scale-110"
                             src="{{ $pelicula['poster_path'] ? $pelicula['poster_path'] : asset('images/fondo-peliculas.jpeg') }}"
-                            alt="{{ $pelicula['Title'] }}">
+                            alt="{{ $pelicula['title'] }}">
                         <div
                             class="absolute inset-0 bg-black/50 flex flex-col justify-center items-center text-center px-4 z-10">
-                            <h2 class="text-white font-bold text-lg md:text-xl truncate">{{ $pelicula['Title'] }}</h2>
+                            <h2 class="text-white font-bold text-lg md:text-xl break-words whitespace-normal">
+                                {{ $pelicula['title'] }}
+                            </h2>
+
                             <p class="text-gray-200 text-sm md:text-base mt-1 line-clamp-2">{{ $pelicula['anio'] }}</p>
                             <span
                                 class="mt-3 px-4 py-2 bg-yellow-400 text-indigo-900 font-semibold rounded-md shadow hover:bg-yellow-500 transition-colors cursor-pointer">
@@ -72,13 +75,14 @@
 
                 peliculas.forEach(p => {
                     const div = document.createElement('a');
-                    div.href = `/pelicula/${p.imdbID}`;
+                    div.href = `/pelicula/${p.id}`;
                     div.className = 'group';
                     div.innerHTML = `
                 <div class="relative rounded-xl overflow-hidden shadow-lg transform hover:scale-105 hover:shadow-2xl transition duration-500 ease-in-out bg-gradient-to-b from-indigo-900 to-indigo-800">
-                    <img class="w-full h-64 object-cover transition-transform duration-500 group-hover:scale-110" src="${p.poster_path || '/images/fondo-peliculas.jpeg'}" alt="${p.title}">
+                    <img class="w-full h-64 object-cover transition-transform duration-500 group-hover:scale-110"
+                        src="${p.poster_path || '/images/fondo-peliculas.jpeg'}" alt="${p.title}">
                     <div class="absolute inset-0 bg-black/50 flex flex-col justify-center items-center text-center px-4 z-10">
-                        <h2 class="text-white font-bold text-lg md:text-xl truncate">${p.title}</h2>
+                        <h2 class="text-white font-bold text-lg md:text-xl break-words whitespace-normal">${p.title}</h2>
                         <p class="text-gray-200 text-sm md:text-base mt-1 line-clamp-2">${p.anio || 'Desconocido'}</p>
                         <span class="mt-3 px-4 py-2 bg-yellow-400 text-indigo-900 font-semibold rounded-md shadow hover:bg-yellow-500 transition-colors cursor-pointer">Ver más</span>
                     </div>

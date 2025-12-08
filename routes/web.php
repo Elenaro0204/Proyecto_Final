@@ -79,9 +79,8 @@ Route::prefix('admin')
         Route::delete('/users/{id}', [AdminController::class, 'deleteUser'])->name('delete-user'); // Eliminar usuario
     });
 
-
 // Resource Controllers
-Route::get('/descubre', [DescubreController::class, 'index'])->name('descubre');
+Route::get('/descubre', [ApiController::class, 'index'])->name('descubre');
 
 Route::get('/peliculas', [PeliculaController::class, 'index'])->name('peliculas.index');
 Route::get('/pelicula/{id}', [PeliculaController::class, 'show'])->name('pelicula.show');
@@ -117,6 +116,7 @@ Route::middleware(['auth', 'verified'])->group(function () {
     Route::get('/mensajes/{mensaje}/edit', [MensajeController::class, 'edit'])->name('mensajes.edit');
     Route::put('/mensajes/{mensaje}', [MensajeController::class, 'update'])->name('mensajes.update');
     Route::delete('/mensajes/{mensaje}', [MensajeController::class, 'destroy'])->name('mensajes.destroy');
+    Route::delete('/mensajes/{mensaje}/eliminar', [MensajeController::class, 'eliminar'])->name('mensajes.eliminar');
 });
 
 Route::get('/resenas', [ResenaController::class, 'index'])->name('resenas');

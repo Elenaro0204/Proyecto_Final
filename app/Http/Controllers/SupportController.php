@@ -20,7 +20,7 @@ class SupportController extends Controller
             'mensaje' => 'required|string',
         ]);
 
-        Mail::to('elenaro0240@gmail.com')->send(
+        Mail::to('soportemarvelpedia@gmail.com')->send(
             new SoporteMail($request->nombre, $request->email, $request->mensaje)
         );
 

@@ -83,7 +83,7 @@
 
                     // Renderizar series
                     if (data.series && data.series.length) {
-                        renderCards(seriesGrid, data.series);
+                        renderCards(seriesGrid, data.series || [], 'serie');
                         seriesSection.classList.remove('hidden');
                     } else {
                         seriesSection.classList.add('hidden');
@@ -91,7 +91,7 @@
 
                     // Renderizar películas
                     if (data.peliculas && data.peliculas.length) {
-                        renderCards(peliculasGrid, data.peliculas);
+                        renderCards(peliculasGrid, data.peliculas || [], 'pelicula');
                         peliculasSection.classList.remove('hidden');
                     } else {
                         peliculasSection.classList.add('hidden');

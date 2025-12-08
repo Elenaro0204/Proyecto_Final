@@ -6,7 +6,7 @@
     <x-breadcrumb-drawer :items="[
         ['label' => 'Inicio', 'url' => route('inicio'), 'level' => 0],
         ['label' => 'Foros', 'url' => route('foros.index'), 'level' => 1],
-        ['label' => 'Multiverso Marvel', 'url' => route('foros.show', $foro->id), 'level' => 2],
+        ['label' => $foro->titulo, 'url' => route('foros.show', $foro->id), 'level' => 2],
     ]" />
 
     <div class="container mx-auto py-8 px-4" x-data="{ open: false }">
@@ -86,17 +86,48 @@
             @endif
 
             <div class="mt-6 flex flex-col sm:flex-row gap-3">
+                @auth
+                    {{-- Usuario propietario --}}
+                    @if (auth()->check() && Auth::id() === $foro->user_id)
+                        <a href="{{ route('foros.edit', $foro->id) }}"
+                            class="inline-block px-5 py-2 bg-yellow-400 text-black rounded-full hover:bg-yellow-500 transition shadow-md text-center">
+                            Editar foro
+                        </a>
 
-                {{-- Usuario propietario --}}
-                @if (Auth::id() === $foro->user_id)
-                    <a href="{{ route('foros.edit', $foro->id) }}"
-                        class="inline-block px-5 py-2 bg-yellow-400 text-black rounded-full hover:bg-yellow-500 transition shadow-md text-center">
-                        Editar foro
-                    </a>
+                        @if (auth()->check() && !Auth::user()->isAdmin())
+                            <form action="{{ route('foros.destroy', $foro->id) }}" method="POST"
+                                onsubmit="return confirm('¿Seguro que quieres eliminar este foro?');">
+                                @csrf
+                                @method('DELETE')
+                                <button type="submit"
+                                    class="inline-block px-5 py-2 bg-red-500 text-white rounded-full hover:bg-red-600 transition shadow-md text-center">
+                                    Eliminar
+                                </button>
+                            </form>
+                        @endif
+                    @endif
 
-                    @if (!Auth::user()->isAdmin())
-                        <form action="{{ route('foros.destroy', $foros->id) }}" method="POST"
-                            onsubmit="return confirm('¿Seguro que quieres eliminar este foro?');">
+                    {{-- Admin --}}
+                    @if (auth()->check() && Auth::user()->isAdmin())
+                        @if (!$foro->report?->firstWhere('reported_by', auth()->id()))
+                            <a href="{{ route('admin.foros.addreport', $foro->id) }}"
+                                class="inline-block px-5 py-2 bg-yellow-500 text-black rounded-full hover:bg-yellow-600 transition shadow-md text-center">
+                                Reportar
+                            </a>
+                        @else
+                            <form action="{{ route('admin.foro.report.cancel', $userReport->id) }}" method="POST"
+                                onsubmit="return confirm('¿Seguro que quieres cancelar tu reporte?');" class="inline-block">
+                                @csrf
+                                @method('DELETE')
+                                <button type="submit"
+                                    class="px-5 py-2 bg-gray-400 text-black rounded-full hover:bg-gray-500 transition shadow-md text-center">
+                                    Cancelar reporte
+                                </button>
+                            </form>
+                        @endif
+
+                        <form action="{{ route('foros.destroy', $foro->id) }}" method="POST"
+                            onsubmit="return confirm('¿Seguro que quieres eliminar este foro?');" class="flex-1">
                             @csrf
                             @method('DELETE')
                             <button type="submit"
@@ -105,37 +136,7 @@
                             </button>
                         </form>
                     @endif
-                @endif
-
-                {{-- Admin --}}
-                @if (Auth::user()->isAdmin())
-                    @if (!$foro->report?->firstWhere('reported_by', auth()->id()))
-                        <a href="{{ route('admin.foros.addreport', $foro->id) }}"
-                            class="inline-block px-5 py-2 bg-yellow-500 text-black rounded-full hover:bg-yellow-600 transition shadow-md text-center">
-                            Reportar
-                        </a>
-                    @else
-                        <form action="{{ route('admin.foro.report.cancel', $userReport->id) }}" method="POST"
-                            onsubmit="return confirm('¿Seguro que quieres cancelar tu reporte?');" class="inline-block">
-                            @csrf
-                            @method('DELETE')
-                            <button type="submit"
-                                class="px-5 py-2 bg-gray-400 text-black rounded-full hover:bg-gray-500 transition shadow-md text-center">
-                                Cancelar reporte
-                            </button>
-                        </form>
-                    @endif
-
-                    <form action="{{ route('foros.destroy', $foro->id) }}" method="POST"
-                        onsubmit="return confirm('¿Seguro que quieres eliminar este foro?');" class="flex-1">
-                        @csrf
-                        @method('DELETE')
-                        <button type="submit"
-                            class="inline-block px-5 py-2 bg-red-500 text-white rounded-full hover:bg-red-600 transition shadow-md text-center">
-                            Eliminar
-                        </button>
-                    </form>
-                @endif
+                @endauth
             </div>
         </div>
 
@@ -174,6 +175,17 @@
                 <h2 class="text-xl font-semibold mb-4 border-b pb-2">Nuevo mensaje</h2>
                 <form action="{{ route('mensajes.store') }}" method="POST">
                     @csrf
+
+                    @if ($errors->any())
+                        <div class="bg-red-200 text-red-800 p-4 rounded">
+                            <ul>
+                                @foreach ($errors->all() as $error)
+                                    <li>- {{ $error }}</li>
+                                @endforeach
+                            </ul>
+                        </div>
+                    @endif
+
                     <input type="hidden" name="foro_id" value="{{ $foro->id }}">
                     <textarea name="contenido" rows="6"
                         class="w-full border border-gray-300 p-3 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500 mb-4"

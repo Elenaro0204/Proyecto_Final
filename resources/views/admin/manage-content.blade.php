@@ -5,7 +5,7 @@
 @section('content')
     <x-breadcrumb-drawer :items="[
         ['label' => 'Inicio', 'url' => route('inicio'), 'level' => 0],
-        ['label' => 'Contenido', 'url' => route('admin.manage-content'), 'level' => 1],
+        ['label' => 'Gestion de Contenido', 'url' => route('admin.manage-content'), 'level' => 1],
     ]" />
 
     <div class="flex flex-col justify-center container py-6 gap-6">
@@ -77,7 +77,7 @@
         </div>
     @endsection
 
-    @section('scripts')
+    @push('scripts')
         <script>
             // Función para actualizar los contadores regresivos
             function updateCountdown(el) {
@@ -91,20 +91,19 @@
 
                 let diffMs = endDate - now;
 
+                // Elimina el hover
+                const row = el.closest(".review-row");
+                if (row) {
+                    row.classList.remove("hover:bg-gray-50");
+                }
+
                 // 🚨 SI SE HA CUMPLIDO EL PLAZO → MENSAJE DE ELIMINACIÓN
                 if (diffMs <= 0) {
                     el.innerHTML = `
                         <span class="bg-red-200 text-red-800 px-2 py-1 rounded block text-center">
-                            Se ha cumplido el tiempo
+                            Agotado
                         </span>
                     `;
-
-                    // ❗ MARCAR LA FILA EN ROJO ❗
-                    const row = el.closest(".review-row");
-                    if (row) {
-                        row.classList.add("bg-red-200", "border-red-500");
-                        row.classList.remove("hover:bg-gray-50");
-                    }
 
                     return;
                 }
@@ -214,14 +213,15 @@
                             document.querySelector('#foros-table-container').innerHTML = html;
                         });
                 });
-
-                // También puedes manejar paginación AJAX de la misma forma
             });
 
             // Funciones para abrir y cerrar el modal de mensajes
             function openModal(foroId, page = 1, perPage = 5) {
                 const container = document.getElementById('mensajes-container');
                 container.innerHTML = "Cargando...";
+                window.currentForoId = foroId;
+                window.currentPage = page;
+                window.currentPerPage = perPage;
 
                 fetch(`/admin/foros/${foroId}/mensajes?page=${page}&perPage=${perPage}`)
                     .then(res => res.json())
@@ -234,16 +234,49 @@
                         }
 
                         data.mensajes.forEach(msg => {
+                            let fechaDeadline = msg.deadline ? msg.deadline.toString().replace(' ', 'T') : null;
+                            const ahora = new Date();
+
+                            let estaReportado = msg.reportado;
+                            let deadlineDate = fechaDeadline ? new Date(fechaDeadline) : null;
+                            let cuentaActiva = estaReportado && deadlineDate && ahora < deadlineDate;
+                            let cuentaFinalizada = estaReportado && deadlineDate && ahora >= deadlineDate;
+
+                            let clasesColor = "bg-gray-50 hover:bg-gray-100"; // Normal
+
+                            if (cuentaActiva) {
+                                clasesColor = "bg-yellow-200 border-l-4 border-yellow-500";
+                            } else if (estaReportado) {
+                                clasesColor = "bg-red-200 border-l-4 border-red-500";
+                            }
+
                             const msgDiv = document.createElement('div');
-                            msgDiv.className =
-                                `border p-4 rounded-lg shadow-sm transition mb-3 ${msg.reportado ? 'bg-red-50 hover:bg-red-100' : 'bg-gray-50 hover:bg-gray-100'}`;
+                            msgDiv.className = `border p-4 rounded-lg shadow-sm transition mb-3 ${clasesColor}`;
 
                             // Contador si está reportado
-                            const countdownHtml = (msg.reportado && msg.deadline) ? `
-                    <span class="countdown block h-full px-2 py-1 rounded shadow bg-red-100 text-red-600 font-bold"
-                        data-end="${msg.deadline}">
+                            const countdownHtml = (msg.reportado) ? `
+                    <span class="countdown block h-full items-center justify-center text-red-700 font-bold"
+                        data-end="${fechaDeadline}">
                         Cargando...
                     </span>` : '';
+
+                            let advertencia = "";
+
+                            if (msg.respuestas_count > 0) {
+                                advertencia = `
+                                    <div class="bg-yellow-300 text-yellow-900 p-2 rounded mb-2">
+                                        ⚠️ Este mensaje tiene ${msg.respuestas_count} respuesta(s).
+                                        Si lo eliminas, también se eliminarán.
+                                    </div>
+                                `;
+                            }
+
+                            // Boton de Eliminar
+                            const botonEliminar = `
+                    <button type='button' onclick="eliminarMensaje(${msg.id}, ${msg.respuestas_count})"
+                        class="bg-red-600 text-white px-2 py-1 rounded hover:bg-red-700 text-sm">
+                        Eliminar
+                    </button>`;
 
                             // Botones según estado
                             const botonesReport = msg.reportado ? `
@@ -257,14 +290,18 @@
                     </a>`;
 
                             msgDiv.innerHTML = `
+                            ${advertencia}
                     <div class="flex justify-between items-center mb-2">
                         <span class="font-semibold text-blue-600">${msg.usuario}</span>
                         <span class="text-gray-500 text-sm">${msg.fecha}</span>
                     </div>
-                    <p class="text-gray-700 mb-2">${msg.contenido}</p>
+                    <div class="flex justify-between items-center mb-2">
+                        <p class="text-gray-700 mb-2">${msg.contenido}</p>
+                        ${countdownHtml}
+                    </div>
                     <div class="flex flex-col sm:flex-row items-start sm:items-center gap-2">
                         ${botonesReport}
-                        ${countdownHtml}
+                        ${botonEliminar}
                     </div>
                 `;
 
@@ -300,8 +337,33 @@
             function closeModal() {
                 document.getElementById('modal-mensajes').classList.add('hidden');
             }
+
+            function eliminarMensaje(id, respuestas_count = 0) {
+                let mensaje = "¿Seguro que quieres eliminar este mensaje?";
+
+                if (respuestas_count > 0) {
+                    mensaje =
+                        `⚠️ Este mensaje tiene ${respuestas_count} respuesta(s). Si lo eliminas, también se eliminarán sus respuestas.`;
+                }
+
+                if (!confirm(mensaje)) return;
+
+                fetch(`/mensajes/${id}/eliminar`, {
+                        method: "DELETE",
+                        headers: {
+                            "X-CSRF-TOKEN": document.querySelector('meta[name="csrf-token"]').content,
+                            "Accept": "application/json"
+                        }
+                    })
+                    .then(res => {
+                        if (!res.ok) throw new Error();
+                        alert("Mensaje eliminado correctamente");
+                        location.reload();
+                    })
+                    .catch(() => alert("Error al eliminar el mensaje"));
+            }
         </script>
-    @endsection
+    @endpush
 
     @section('styles')
         <style>

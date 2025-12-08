@@ -19,7 +19,6 @@ class AuthController extends Controller
         return view('login', ['action' => 'register']);
     }
 
-
     // Procesar login
     public function login(Request $request)
     {

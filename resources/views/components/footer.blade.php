@@ -1,14 +1,14 @@
 <!-- resources/views/components/footer.blade.php -->
 
-<footer class="bg-gray-950 text-gray-200 mt-auto py-8">
+<footer class="bg-gradient-to-b from-blue-700 to-red-700 text-gray-200 mt-auto py-8">
     <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div class="grid grid-cols-1 md:grid-cols-3 gap-8">
 
             <!-- 1. Logo + Contacto -->
             <div class="text-center md:text-left">
-                <a href="{{ route('profile') }}" class="flex items-center justify-center md:justify-start mb-4">
-                    <x-application-logo class="h-8 w-auto mr-2 fill-current text-red-500" />
-                    <span class="text-2xl font-bangers text-yellow-400">Marvelpedia</span>
+                <a href="{{ route('profile') }}"
+                    class="flex items-center justify-center md:justify-start mb-4">
+                    <img src="{{ asset('logos/Logo.png') }}" alt="Logo" class="h-8 md:h-24 lg:h-28 w-auto mr-2 fill-current">
                 </a>
 
                 <h6 class="text-red-500 text-sm uppercase font-semibold mb-2">¡Hablemos!</h6>
@@ -20,6 +20,17 @@
                 </p>
                 <form action="{{ route('support.enviar') }}" method="POST" id="supportForm" class="space-y-2">
                     @csrf
+
+                    @if ($errors->any())
+                        <div class="bg-red-200 text-red-800 p-4 rounded">
+                            <ul>
+                                @foreach ($errors->all() as $error)
+                                    <li>- {{ $error }}</li>
+                                @endforeach
+                            </ul>
+                        </div>
+                    @endif
+
                     <input type="text"
                         class="w-full px-3 py-2 rounded-md text-gray-900 focus:outline-none focus:ring-2 focus:ring-red-500"
                         id="nombre" name="nombre" placeholder="Tu nombre" required>

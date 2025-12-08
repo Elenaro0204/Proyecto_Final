@@ -3,50 +3,71 @@
 <table class="min-w-full border border-gray-200 rounded-lg table-fixed">
     <thead class="bg-gray-100">
         <tr>
-            <th class="px-4 py-2 border min-w-[120px]">Usuario</th>
-            <th class="px-4 py-2 border min-w-[100px]">Tipo</th>
-            <th class="px-4 py-2 border min-w-[180px]">Entidad</th>
-            <th class="px-4 py-2 border min-w-[80px]">Puntuación</th>
-            <th class="px-4 py-2 border min-w-[240px]">Contenido</th>
-            <th class="px-4 py-2 border min-w-[160px]">Fecha de Creación</th>
-            <th class="px-4 py-2 border min-w-[160px]">Fecha de Actualización</th>
-            <th class="px-4 py-2 border min-w-[100px]">Estado</th>
-            <th class="px-4 py-2 border min-w-[130px]">Reportada por</th>
-            <th class="px-4 py-2 border min-w-[140px]">Cuenta atrás</th>
-            <th class="px-4 py-2 border min-w-[120px]">Acciones</th>
+            <th class="px-4 py-2 border min-w-[120px] text-center">Usuario</th>
+            <th class="px-4 py-2 border min-w-[100px] text-center">Tipo</th>
+            <th class="px-4 py-2 border min-w-[180px] text-center">Entidad</th>
+            <th class="px-4 py-2 border min-w-[80px] text-center">Puntuación</th>
+            <th class="px-4 py-2 border min-w-[240px] text-center">Contenido</th>
+            <th class="px-4 py-2 border min-w-[160px] text-center">Fecha de Creación</th>
+            <th class="px-4 py-2 border min-w-[160px] text-center">Fecha de Actualización</th>
+            <th class="px-4 py-2 border min-w-[130px] text-center">Reportada por</th>
+            <th class="px-4 py-2 border min-w-[140px] text-center">Cuenta atrás</th>
+            <th class="px-4 py-2 border min-w-[120px] text-center">Acciones</th>
         </tr>
     </thead>
     <tbody>
         @forelse ($reviews as $review)
-            <tr class="review-row expired-check hover:bg-gray-50">
-                <td class="px-4 py-2 border">{{ $review->user->name ?? 'Usuario eliminado' }}</td>
-                <td class="px-4 py-2 border capitalize">{{ $review->type }}</td>
-                <td class="px-4 py-2 border">{{ $review->entity_title ?? $review->entity_id }}</td>
-                <td class="px-4 py-2 border">{{ str_repeat('⭐', $review->rating) }}</td>
-                <td class="px-4 py-2 border">{{ Str::limit($review->content, 60) }}</td>
-                <td class="px-4 py-2 border">
+            @php
+                $userReport = $review->report()->where('reported_by', Auth::id())->first();
+                $isActiveCountdown = $userReport && now()->lt($userReport->deadline);
+            @endphp
+            <tr
+                class="review-row hover:bg-gray-50 @if ($isActiveCountdown) bg-yellow-200 border-l-4 border-yellow-500 @endif @if ($userReport) bg-red-200 border-l-4 border-red-500 @endif">
+                <td class="px-4 py-2 border text-center">{{ $review->user->name ?? 'Usuario eliminado' }}</td>
+                <td class="px-4 py-2 border capitalize text-center">{{ $review->type }}</td>
+                <td class="px-4 py-2 border text-center">{{ $review->entity_title ?? $review->entity_id }}</td>
+                <td class="px-4 py-2 border text-center">{{ str_repeat('⭐', $review->rating) }}</td>
+                <td class="px-4 py-2 border text-center relative group">
+
+                    <div class="truncate max-w-[150px]">
+                        {{ $review->content }}
+                    </div>
+
+                    @php
+                        $isLastRow = $loop->last;
+                    @endphp
+
+                    @if ($isLastRow)
+                        {{-- Tooltip hacia arriba --}}
+                        <div
+                            class="absolute hidden group-hover:block bg-gray-100 text-sm p-3 rounded shadow-lg z-50 w-max max-w-[300px] left-1/2 -translate-x-1/2 bottom-full mb-1 whitespace-normal pointer-events-none">
+                            {{ $review->content }}
+                        </div>
+                    @else
+                        {{-- Tooltip hacia abajo --}}
+                        <div
+                            class="absolute hidden group-hover:block bg-gray-100 text-sm p-3 rounded shadow-lg z-50 w-max max-w-[300px]
+                    left-1/2 -translate-x-1/2 top-full mt-1 whitespace-normal pointer-events-none">
+                            {{ $review->content }}
+                        </div>
+                    @endif
+                </td>
+                <td class="px-4 py-2 border text-center">
                     {{ $review->created_at->format('d/m/Y H:i') }}
                     <div class="text-gray-500 text-sm">{{ $review->created_at->diffForHumans() }}</div>
                 </td>
-                <td class="px-4 py-2 border">
+                <td class="px-4 py-2 border text-center">
                     {{ $review->updated_at->format('d/m/Y H:i') }}
                     <div class="text-gray-500 text-sm">{{ $review->updated_at->diffForHumans() }}</div>
                 </td>
-
-                @php
-                    $userReport = $review->report()->where('reported_by', Auth::id())->first();
-                @endphp
-
-                <td class="px-4 py-2 border">{{ $userReport ? 'Reportada' : 'Sin Reportar' }}</td>
-                <td class="px-4 py-2 border">{{ $userReport ? $userReport->reporter->name : '-' }}</td>
-                <td class="px-4 py-2 border min-h-[80px]">
+                <td class="px-4 py-2 border text-center">{{ $userReport ? $userReport->reporter->name : ' ' }}</td>
+                <td class="px-4 py-2 border min-h-[80px] text-center">
                     @if ($userReport)
                         <span class="countdown block h-full items-center justify-center text-red-700 font-bold"
                             data-end="{{ $userReport->deadline->toIso8601String() }}">
                             Cargando...
                         </span>
                     @else
-                        -
                     @endif
                 </td>
 

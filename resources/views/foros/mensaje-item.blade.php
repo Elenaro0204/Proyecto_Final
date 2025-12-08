@@ -117,6 +117,17 @@
         <form :action="'{{ route('mensajes.update', $mensaje->id) }}'" method="POST" class="mt-2 flex flex-col gap-2">
             @csrf
             @method('PUT')
+
+            @if ($errors->any())
+                <div class="bg-red-200 text-red-800 p-4 rounded">
+                    <ul>
+                        @foreach ($errors->all() as $error)
+                            <li>- {{ $error }}</li>
+                        @endforeach
+                    </ul>
+                </div>
+            @endif
+
             <textarea name="contenido" x-model="contenido" rows="3" class="w-full border p-2 rounded-md text-gray-800"></textarea>
             <div class="flex flex-wrap gap-2">
                 <button type="submit"
@@ -139,6 +150,17 @@
     <div id="replyForm-{{ $mensaje->id }}" class="mt-2 hidden">
         <form action="{{ route('mensajes.store') }}" method="POST" class="flex flex-col gap-2">
             @csrf
+
+            @if ($errors->any())
+                <div class="bg-red-200 text-red-800 p-4 rounded">
+                    <ul>
+                        @foreach ($errors->all() as $error)
+                            <li>- {{ $error }}</li>
+                        @endforeach
+                    </ul>
+                </div>
+            @endif
+
             <input type="hidden" name="foro_id" value="{{ $foro->id }}">
             <input type="hidden" name="parent_id" value="{{ $mensaje->id }}">
             <textarea name="contenido" rows="2" class="w-full border p-2 rounded-md" placeholder="Escribe tu respuesta..."></textarea>

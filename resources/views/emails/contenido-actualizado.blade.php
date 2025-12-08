@@ -5,67 +5,61 @@
     <meta charset="UTF-8">
     <style>
         body {
-            font-family: 'Arial', sans-serif;
-            background-color: #f4f6f9;
-            padding: 0;
+            font-family: "Arial", sans-serif;
+            background: #f3f5f7;
             margin: 0;
+            padding: 0;
         }
 
         .email-container {
-            max-width: 600px;
-            background: white;
+            max-width: 620px;
             margin: 30px auto;
-            padding: 25px 35px;
+            background: #ffffff;
             border-radius: 12px;
-            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.08);
+            padding: 30px 35px;
+            box-shadow: 0 5px 25px rgba(0, 0, 0, 0.06);
             color: #333;
         }
 
         h2 {
-            color: #d32f2f;
             text-align: center;
+            color: #c62828;
+            font-size: 26px;
             margin-bottom: 25px;
         }
 
         p {
             line-height: 1.6;
-            font-size: 15px;
             color: #444;
+            font-size: 15px;
+            margin: 12px 0;
         }
 
         .section-title {
+            margin-top: 25px;
             font-weight: bold;
             color: #222;
-            margin-top: 20px;
+            font-size: 16px;
         }
 
         .highlight-box {
-            background: #fce4ec;
+            background: #fde5ec;
             border-left: 4px solid #d81b60;
-            padding: 12px 15px;
-            margin: 15px 0;
+            padding: 15px;
             border-radius: 6px;
-        }
-
-        .deadline {
-            background: #e3f2fd;
-            border-left: 4px solid #1976d2;
-            padding: 12px 15px;
             margin: 15px 0;
-            border-radius: 6px;
-            font-weight: bold;
         }
 
         .button {
             display: inline-block;
-            margin: 25px 0;
+            margin-top: 25px;
             padding: 12px 22px;
             background: #1976d2;
-            color: white !important;
+            color: #fff !important;
             font-weight: bold;
             text-decoration: none;
             border-radius: 8px;
-            transition: background 0.3s ease;
+            transition: 0.3s;
         }
 
         .button:hover {
@@ -73,10 +67,36 @@
         }
 
         .footer {
-            margin-top: 30px;
             text-align: center;
             font-size: 13px;
             color: #777;
+            margin-top: 35px;
+        }
+
+        /* Firma */
+        .signature-table {
+            width: 100%;
+            max-width: 430px;
+            margin: 30px auto 0;
+            border-top: 1px solid #ddd;
+            padding-top: 15px;
+            font-family: Arial, sans-serif;
+        }
+
+        .signature-table img {
+            width: 70px;
+            border-radius: 8px;
+        }
+
+        .contact-info {
+            color: #333;
+            font-size: 14px;
+            line-height: 1.5;
+        }
+
+        .contact-info a {
+            color: #1976d2;
+            text-decoration: none;
         }
     </style>
 </head>
@@ -84,38 +104,49 @@
 <body>
     <div class="email-container">
 
-        <h2>🔔 Contenido Reportado</h2>
+        <h2>🔔 Contenido Actualizado</h2>
 
-        <p>Hola <strong>{{ $owner->name }}</strong>,</p>
-
-        <div class="highlight-box">
-            <p><strong>Uno de tus contenidos ha sido reportado.</strong></p>
-        </div>
+        <p>Hola <strong>{{ $user->name }}</strong>,</p>
 
         <p class="section-title">📌 Contenido afectado:</p>
-        <p>{{ $contenido->entity_title ?? ($contenido->contenido ?? ($contenido->titulo ?? 'Sin título')) }}</p>
 
-        <p class="section-title">👤 Reportado por:</p>
-        <p>{{ $reporter->name }}</p>
+        {{-- MENSAJE --}}
+        @if ($tipo === 'mensaje')
+            <p><strong>Mensaje:</strong></p>
+            <div class="highlight-box">
+                {{ $contenido->contenido }}
+            </div>
 
-        <p class="section-title">⏳ Fecha límite para resolver:</p>
-        <div class="deadline">
-            {{ $reporte->deadline->format('d/m/Y H:i') }}
-        </div>
+            <p><a class="button" href="{{ $url ?? url('/foros') }}">👉 Ver mensaje actualizado</a></p>
 
-        <center>
-            <a href="{{ $link }}" class="button">🔍 Ver reporte</a>
-        </center>
+            {{-- FORO --}}
+        @elseif ($tipo === 'foro')
+            <p><strong>Foro:</strong> {{ $contenido->titulo }}</p>
 
-        <hr>
+            <p class="section-title">Tu publicación:</p>
+            <div class="highlight-box">
+                {{ $contenido->mensaje }}
+            </div>
 
-        <p>
-            Por favor, revisa la plataforma para tomar las acciones necesarias.<br>
-            Mantener tu contenido revisado ayuda a que la comunidad continúe siendo un espacio seguro.
-        </p>
+            <p><a class="button" href="{{ $url ?? url('/foros') }}">👉 Ir al foro</a></p>
+
+            {{-- RESEÑA --}}
+        @elseif ($tipo === 'resena')
+            <p><strong>Reseña de:</strong> {{ $contenido->entity_title }}</p>
+
+            <p><strong>Valoración:</strong> {{ $contenido->rating }}/5 ⭐</p>
+
+            <div class="highlight-box">
+                {{ $contenido->content }}
+            </div>
+
+            <p><a class="button" href="{{ $url ?? url('/resenas') }}">👉 Ver reseña</a></p>
+        @else
+            <p>Contenido modificado sin tipo especificado.</p>
+        @endif
 
         <footer class="footer">
-            <p>© {{ date('Y') }} Marvelpedia — Sistema de revisión de contenido</p>
+            © {{ date('Y') }} Marvelpedia — Notificación automática. Por favor, no respondas a este correo.
             <!-- Firma -->
             <table
                 style="width:100%; border-top:1px solid #ddd; margin-top:25px; padding-top:15px; font-family:Arial, sans-serif;">
@@ -144,8 +175,8 @@
                 </tr>
             </table>
         </footer>
-
     </div>
+
 </body>
 
 </html>

@@ -33,9 +33,28 @@
 
         .footer {
             margin-top: 30px;
-            font-size: 12px;
-            color: #888;
             text-align: center;
+            font-size: 13px;
+            color: #777;
+        }
+
+        .signature {
+            margin-top: 25px;
+            padding-top: 15px;
+            border-top: 1px solid #ddd;
+            font-size: 13px;
+            color: #555;
+            text-align: left;
+            line-height: 1.5;
+        }
+
+        .signature strong {
+            color: #222;
+        }
+
+        .signature .role {
+            color: #d32f2f;
+            font-weight: bold;
         }
     </style>
 </head>
@@ -44,20 +63,51 @@
 
     <div class="container">
 
-        <h2>Hola {{ $user->name }}</h2>
+        <h2>Hola <strong>{{ $user->name }}</strong>, </h2>
 
         <p>Hemos recibido una solicitud para restablecer tu contraseña en <strong>Marvelpedia</strong>.</p>
 
         <p>Para continuar, haz clic en el siguiente botón:</p>
 
-        <a class="btn" href="{{ $url }}">Restablecer contraseña</a>
+        <center>
+            <a class="btn" href="{{ $url }}">Restablecer contraseña</a>
+        </center>
 
         <p>Si tú no solicitaste este cambio, puedes ignorar este mensaje.</p>
 
-        <p class="footer">Marvelpedia © {{ date('Y') }}</p>
+        <footer class="footer">
+            <p>
+                © {{ date('Y') }} Marvelpedia - Todos los derechos reservados
+            </p>
+            <!-- Firma -->
+            <table
+                style="width:100%; border-top:1px solid #ddd; margin-top:25px; padding-top:15px; font-family:Arial, sans-serif;">
+                <tr>
+                    <td style="vertical-align:top; width:70px; padding-right:15px;">
+                        <!-- Logo (cámbialo por tu URL real) -->
+                        <img src="https://marvelpedia.ruix.iesruizgijon.es/logo.png" alt="Marvelpedia"
+                            style="width:70px; height:auto; border-radius:6px;">
+                    </td>
 
+                    <td style="vertical-align:top; color:#333; font-size:14px; line-height:1.5;">
+                        <strong style="font-size:16px; color:#d32f2f;">Soporte Marvelpedia</strong><br>
+                        <span style="color:#555;">Equipo de revisión y moderación</span><br>
+
+                        ✉️ <a href="mailto:soportemarvelpedia@gmail.com" style="color:#1976d2; text-decoration:none;">
+                            soportemarvelpedia@gmail.com
+                        </a><br>
+
+                        🌐 <a href="https://marvelpedia.ruix.iesruizgijon.es"
+                            style="color:#1976d2; text-decoration:none;">
+                            marvelpedia.ruix.iesruizgijon.es
+                        </a><br>
+
+                        🕒 <span style="color:#555;">Respuesta estimada: 24–48h</span>
+                    </td>
+                </tr>
+            </table>
+        </footer>
     </div>
-
 </body>
 
 </html>

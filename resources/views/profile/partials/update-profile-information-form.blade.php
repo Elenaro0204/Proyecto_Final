@@ -17,6 +17,16 @@
         @csrf
         @method('patch')
 
+        @if ($errors->any())
+            <div class="bg-red-200 text-red-800 p-4 rounded">
+                <ul>
+                    @foreach ($errors->all() as $error)
+                        <li>- {{ $error }}</li>
+                    @endforeach
+                </ul>
+            </div>
+        @endif
+
         <!-- Avatar -->
         <div class="mb-6">
             <x-input-label for="avatar_url" :value="__('Avatar')" />

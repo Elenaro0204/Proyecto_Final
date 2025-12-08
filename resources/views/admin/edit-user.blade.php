@@ -11,6 +11,16 @@
                 @csrf
                 @method('PUT')
 
+                @if ($errors->any())
+                    <div class="bg-red-200 text-red-800 p-4 rounded">
+                        <ul>
+                            @foreach ($errors->all() as $error)
+                                <li>- {{ $error }}</li>
+                            @endforeach
+                        </ul>
+                    </div>
+                @endif
+
                 <div class="mb-4">
                     <label for="avatar_url" class="block text-gray-700 font-medium mb-1">Foto de perfil</label>
                     @if ($user->avatar_url)

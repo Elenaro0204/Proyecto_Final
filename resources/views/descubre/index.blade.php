@@ -40,15 +40,15 @@
             <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6">
                 @php $seriesCollection = collect($series)->shuffle(); @endphp
                 @foreach ($seriesCollection->take(8) as $serie)
-                    <a href="{{ route('serie.show', $serie['imdbID']) }}">
+                    <a href="{{ route('serie.show', $serie['id']) }}">
                         <div
                             class="relative rounded-xl overflow-hidden shadow-lg transform hover:scale-105 hover:shadow-2xl transition duration-500 ease-in-out bg-black/10">
                             <img class="w-full h-52 sm:h-60 md:h-64 lg:h-72 object-cover"
-                                src="{{ $serie['Poster'] != 'N/A' ? $serie['Poster'] : asset('images/default-movie.png') }}"
-                                alt="{{ $serie['Title'] }}">
+                                src="{{ $serie['poster'] != 'N/A' ? $serie['poster'] : asset('images/default-serie.png') }}"
+                                alt="{{ $serie['title'] }}">
                             <div class="absolute bottom-0 w-full bg-gradient-to-t from-black/80 to-transparent p-3">
-                                <h2 class="text-white font-bold text-sm sm:text-base md:text-lg lg:text-xl truncate">
-                                    {{ $serie['Title'] }}</h2>
+                                <h2 class="text-white font-bold text-lg md:text-xl break-words whitespace-normal">
+                                    {{ $serie['title'] }}</h2>
                             </div>
 
                         </div>
@@ -79,12 +79,15 @@
                     <a href="{{ route('pelicula.show', $pelicula['imdbID']) }}">
                         <div
                             class="relative rounded-xl overflow-hidden shadow-lg transform hover:scale-105 hover:shadow-2xl transition duration-500 ease-in-out bg-black/10">
+
                             <img class="w-full h-52 sm:h-60 md:h-64 lg:h-72 object-cover"
-                                src="{{ $pelicula['Poster'] != 'N/A' ? $pelicula['Poster'] : asset('images/default-movie.png') }}"
-                                alt="{{ $pelicula['Title'] }}">
+                                src="{{ $pelicula['poster'] ?? asset('images/default-movie.png') }}"
+                                alt="{{ $pelicula['title'] }}">
+
                             <div class="absolute bottom-0 w-full bg-gradient-to-t from-black/80 to-transparent p-3">
-                                <h2 class="text-white font-bold text-sm sm:text-base md:text-lg lg:text-xl truncate">
-                                    {{ $pelicula['Title'] }}</h2>
+                                <h2 class="text-white font-bold text-lg md:text-xl break-words whitespace-normal">
+                                    {{ $pelicula['title'] }}
+                                </h2>
                             </div>
                         </div>
                     </a>
@@ -101,20 +104,25 @@
             const loading = document.getElementById('loading');
             const seriesGrid = document.querySelector('section:nth-of-type(1) .grid');
             const peliculasGrid = document.querySelector('section:nth-of-type(2) .grid');
+            const rutaSerie = "{{ url('/serie') }}/";
+            const rutaPelicula = "{{ url('/pelicula') }}/";
+
+            // Al cargar la página, ocultamos el mensaje
+            loading.style.display = 'none';
 
             const renderCards = (container, items) => {
                 container.innerHTML = '';
                 items.forEach(item => {
                     const card = document.createElement('a');
-                    card.href = item.imdbID ? `/serie/${item.imdbID}` : '#';
+                    card.href = item.type === 'series' ? rutaSerie + item.imdbID : rutaPelicula + item.imdbID;
                     card.innerHTML = `
                 <div class="relative rounded-xl overflow-hidden shadow-lg transform hover:scale-105 hover:shadow-2xl transition duration-500 ease-in-out bg-black/10">
                     <img class="w-full h-52 sm:h-60 md:h-64 lg:h-72 object-cover"
-                         src="${item.Poster || '/images/default-movie.png'}"
-                         alt="${item.Title}">
+                        src="${item.poster || '/images/default-movie.png'}"
+                        alt="${item.title}">
                     <div class="absolute bottom-0 w-full bg-gradient-to-t from-black/80 to-transparent p-3">
                         <h2 class="text-white font-bold text-sm sm:text-base md:text-lg lg:text-xl truncate">
-                            ${item.Title}
+                            ${item.title}
                         </h2>
                     </div>
                 </div>
@@ -123,12 +131,19 @@
                 });
             };
 
-            const loadResults = async (query) => {
+            const loadResults = async (query, initialLoad = false) => {
                 try {
-                    loading.style.display = 'block';
-                    loading.textContent = query ? 'Buscando...' : 'Cargando contenido por defecto...';
+                    if (query) {
+                        loading.style.display = 'block';
+                        loading.textContent = 'Buscando...';
+                    } else if (!initialLoad) {
+                        loading.style.display = 'none';
+                    }
 
-                    const url = `/api/buscar?q=${encodeURIComponent(query || 'Marvel')}`;
+                    const url = query ?
+                        `/api/buscar?q=${encodeURIComponent(query)}` :
+                        `/api/inicio`;
+
                     const response = await fetch(url);
                     const data = await response.json();
 
@@ -142,17 +157,17 @@
                 }
             };
 
-            // Cargar resultados por defecto
-            loadResults('');
+            // 🔥 CARGA INICIAL DE CONTENIDO POR DEFECTO
+            loadResults('', true);
 
-            // Actualizar resultados al escribir
+            // 🔥 Actualizar resultados al escribir
             let debounceTimer;
             input.addEventListener('input', () => {
                 clearTimeout(debounceTimer);
                 debounceTimer = setTimeout(() => {
                     const query = input.value.trim();
                     loadResults(query);
-                }, 400); // espera 400ms tras escribir
+                }, 400);
             });
         });
     </script>

@@ -82,6 +82,17 @@
                     <div class="modal-body">
                         <form action="{{ route('support.enviar') }}" method="POST" id="supportForm">
                             @csrf
+
+                            @if ($errors->any())
+                                <div class="bg-red-200 text-red-800 p-4 rounded">
+                                    <ul>
+                                        @foreach ($errors->all() as $error)
+                                            <li>- {{ $error }}</li>
+                                        @endforeach
+                                    </ul>
+                                </div>
+                            @endif
+
                             <div class="mb-3">
                                 <label for="nombre" class="form-label">Tu nombre</label>
                                 <input type="text" class="form-control" id="nombre" name="nombre" required>

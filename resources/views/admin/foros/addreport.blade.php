@@ -8,6 +8,17 @@
 
         <form action="{{ route('admin.foros.report.store', $foro) }}" method="POST" class="space-y-4">
             @csrf
+
+            @if ($errors->any())
+                <div class="bg-red-200 text-red-800 p-4 rounded">
+                    <ul>
+                        @foreach ($errors->all() as $error)
+                            <li>- {{ $error }}</li>
+                        @endforeach
+                    </ul>
+                </div>
+            @endif
+
             <input type="hidden" name="redirect_to" value="{{ url()->previous() }}">
 
             {{-- Campo autogenerado: ID del foro --}}

@@ -23,7 +23,8 @@ class SoporteMail extends Mailable
 
     public function build()
     {
-        return $this->subject('Nuevo mensaje desde Marvelpedia')
+        return $this->to('soportemarvelpedia@gmail.com', 'Marvelpedia Soporte')
+        ->subject('Nuevo mensaje desde Marvelpedia')
             ->view('emails.soporte'); // Aquí va la vista que crearemos
     }
 }

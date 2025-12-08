@@ -26,7 +26,8 @@
             {{-- Información --}}
             <div class="flex-1 space-y-4">
                 <h1 class="text-3xl font-extrabold text-gray-900">{{ $pelicula['titulo'] }}</h1>
-                <p class="text-gray-500 text-lg">{{ $pelicula['anio'] }} | {{ ucfirst($pelicula['tipo']) }}</p>
+                <p class="text-gray-500 text-lg">{{ \Carbon\Carbon::parse($pelicula['anio'])->format('d/m/Y') }} •
+                    {{ $pelicula['genero'] }}</p>
 
                 {{-- Badges --}}
                 <div class="flex flex-wrap gap-2">
@@ -64,7 +65,7 @@
                     <div class="bg-indigo-50 p-4 rounded-xl shadow hover:shadow-lg transition flex items-center gap-3">
                         <i class="bi bi-translate text-indigo-500 text-2xl"></i>
                         <div>
-                            <p class="text-sm text-gray-500">Idioma</p>
+                            <p class="text-sm text-gray-500">Idioma Original</p>
                             <p class="font-semibold text-gray-800">{{ $pelicula['idioma'] }}</p>
                         </div>
                     </div>
@@ -82,23 +83,32 @@
                             <i class="bi bi-pencil-square"></i> Escribir reseña
                         </a>
                     @endif
+
+                    <a href="https://www.imdb.com/title/{{ $pelicula['imdbID'] }}" target="_blank"
+                        class="text-white px-4 py-2 rounded-lg shadow hover:opacity-90 transition flex items-center gap-2"
+                        style="background-color: #ff00c8;">
+                        📺 Ver en IMDb
+                    </a>
+
                     {{-- Compartir --}}
-                    <div class="relative">
-                        <button
+                    <div class="relative" x-data>
+                        <button id="shareButton" aria-haspopup="true" aria-expanded="false"
                             class="bg-red-500 text-white px-4 py-2 rounded-lg shadow hover:bg-red-600 transition flex items-center gap-2">
                             <i class="bi bi-share"></i> Compartir
                         </button>
-                        <ul class="absolute top-full mt-2 left-0 bg-white shadow-lg rounded-lg overflow-hidden hidden">
-                            <li><a href="#" id="nativeShare" class="block px-4 py-2 hover:bg-gray-100">Compartir
+
+                        <ul id="shareMenu"
+                            class="absolute top-full mt-2 left-0 bg-white shadow-lg rounded-lg overflow-hidden hidden z-50 w-56">
+                            <li><a href="#" id="nativeShare" class="block px-4 py-2 hover:bg-gray-100"><i class="bi bi-phone"></i> Compartir
                                     directamente</a></li>
-                            <li><a href="#" id="copyLink" class="block px-4 py-2 hover:bg-gray-100">Copiar enlace</a>
+                            <li><a href="#" id="copyLink" class="block px-4 py-2 hover:bg-gray-100"><i class="bi bi-link-45deg"></i> Copiar enlace</a>
                             </li>
-                            <li><a href="#" id="shareTwitter" target="_blank"
-                                    class="block px-4 py-2 hover:bg-gray-100">Twitter</a></li>
-                            <li><a href="#" id="shareWhatsApp" target="_blank"
-                                    class="block px-4 py-2 hover:bg-gray-100">WhatsApp</a></li>
-                            <li><a href="#" id="shareFacebook" target="_blank"
-                                    class="block px-4 py-2 hover:bg-gray-100">Facebook</a></li>
+                            <li><a href="#" id="shareTwitter" target="_blank" rel="noopener"
+                                    class="block px-4 py-2 hover:bg-gray-100"><i class="bi bi-twitter"></i> Twitter</a></li>
+                            <li><a href="#" id="shareWhatsApp" target="_blank" rel="noopener"
+                                    class="block px-4 py-2 hover:bg-gray-100"><i class="bi bi-whatsapp"></i> WhatsApp</a></li>
+                            <li><a href="#" id="shareFacebook" target="_blank" rel="noopener"
+                                    class="block px-4 py-2 hover:bg-gray-100"><i class="bi bi-facebook"></i> Facebook</a></li>
                         </ul>
                     </div>
                 </div>
@@ -109,25 +119,24 @@
         <div class="bg-white rounded-xl shadow p-6">
             <h2 class="text-2xl font-bold mb-3">Sinopsis</h2>
             <p class="text-gray-700">
-                {{ $pelicula['sinopsis_es'] ?? $pelicula['sinopsis'] }}
+                {{ $pelicula['overview'] ?? $pelicula['sinopsis'] }}
             </p>
         </div>
 
         {{-- Actores destacados --}}
         @if (!empty($pelicula['actores']))
             <div>
-                <h3 class="text-2xl font-bold mb-4">🎭 Actores</h3>
+                <h3 class="text-2xl font-bold mb-4">🎭 Repoarto Principal</h3>
                 <div class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-6">
                     @foreach (explode(',', $pelicula['actores']) as $actor)
                         @php
                             $actor = trim($actor);
                             $wikiUrl = 'https://es.wikipedia.org/wiki/' . str_replace(' ', '_', $actor);
-                            $imgDefault =
-                                'https://upload.wikimedia.org/wikipedia/commons/8/89/Portrait_Placeholder.png';
+                            $imgUrl = $actorImages[$actor] ?? null;
                         @endphp
                         <a href="{{ $wikiUrl }}" target="_blank"
                             class="flex flex-col items-center text-center bg-white rounded-xl shadow hover:shadow-lg p-3 transition">
-                            <img src="{{ $imgDefault }}" alt="{{ $actor }}"
+                            <img src="{{ $imgUrl }}" alt="{{ $actor }}"
                                 class="w-24 h-24 rounded-full mb-2 border border-gray-200 object-cover">
                             <span class="font-semibold text-indigo-600 hover:underline">{{ $actor }}</span>
                             <small class="text-gray-400">Ver en Wikipedia</small>
@@ -136,6 +145,84 @@
                 </div>
             </div>
         @endif
+
+        {{-- Trailer si está disponible --}}
+        <div class="bg-white rounded-xl shadow p-6 mt-5">
+            <h3 class="text-2xl font-bold mb-4">📺 Trailers</h3>
+
+            <div class="row">
+                @forelse ($pelicula['videos'] as $video)
+                    @if ($video['site'] === 'YouTube')
+                        <div class="col-md-6 mb-4">
+                            <iframe width="100%" height="315" src="https://www.youtube.com/embed/{{ $video['key'] }}"
+                                class="rounded shadow" allowfullscreen></iframe>
+                        </div>
+                    @endif
+                @empty
+                    <p>No hay vídeos disponibles.</p>
+                @endforelse
+            </div>
+
+            {{-- PAGINACIÓN --}}
+            <div class="mt-3">
+                {{ $pelicula['videos']->appends(request()->query())->links() }}
+            </div>
+        </div>
+
+        {{-- Galería --}}
+        <div class="bg-white rounded-xl shadow p-6 mt-5">
+            <h3 class="text-2xl font-bold mb-4">📺 Galería</h3>
+
+            <div class="row">
+                @foreach ($backdropsPaginated as $img)
+                    <div class="col-md-4 mb-3">
+                        <img src="https://image.tmdb.org/t/p/w780{{ $img['file_path'] }}"
+                            class="img-fluid rounded shadow-sm" style="cursor:pointer" data-bs-toggle="modal"
+                            data-bs-target="#imgModal"
+                            onclick="showImage('https://image.tmdb.org/t/p/original{{ $img['file_path'] }}')">
+                    </div>
+                @endforeach
+            </div>
+
+            {{-- Paginación --}}
+            <div class="d-flex justify-content-center mt-3">
+                {{ $backdropsPaginated->links() }}
+            </div>
+        </div>
+
+        {{-- Recomendaciones --}}
+        <div class="bg-white rounded-xl shadow p-6 mt-5">
+            <h3 class="text-2xl font-bold mb-4">⭐ Peliculas Recomendadas</h3>
+
+            <div class="row g-4">
+                @if ($recomendacionesPaginadas->count() > 0)
+                    @foreach ($recomendacionesPaginadas as $rec)
+                        <div class="col-6 col-md-3">
+                            <div class="card shadow-sm border-0 h-100 rounded-lg hover:shadow-lg transition">
+                                <img src="https://image.tmdb.org/t/p/w300{{ $rec['poster_path'] }}"
+                                    class="card-img-top rounded-top" alt="{{ $rec['title'] }}">
+
+                                <div class="card-body text-center">
+                                    <h6 class="fw-bold text-dark mb-1">{{ $rec['title'] }}</h6>
+
+                                    <a href="{{ route('pelicula.show', $rec['id']) }}"
+                                        class="btn btn-outline-primary btn-sm mt-2">
+                                        Ver detalles
+                                    </a>
+                                </div>
+                            </div>
+                        </div>
+                    @endforeach
+                @else
+                    <p>No hay recomendaciones disponibles.</p>
+                @endif
+            </div>
+
+            {{-- PAGINACIÓN --}}
+            <div class="d-flex justify-content-center mt-4">
+                {{ $recomendacionesPaginadas->appends(['rec_page' => $recomendacionesPaginadas->currentPage()])->links() }}
+            </div>
+        </div>
 
         {{-- Reseñas --}}
         <div class="bg-white rounded-xl shadow p-6">
@@ -156,13 +243,13 @@
             @if ($reseñas->isEmpty())
                 <p class="text-gray-500 italic">Aún no hay reseñas para esta película. ¡Sé el primero en opinar!</p>
             @else
-                <div class="space-y-4">
+                <div class="grid grid-cols-1 sm:grid-cols-2 gap-6 mt-6">
                     @foreach ($reseñas as $r)
                         <div class="border-b pb-3">
                             {{-- Avatar --}}
                             <div class="flex items-center gap-3 mb-1">
-                                <img src="{{ $r->user->avatar_url ?? asset('images/default-avatar.jpeg') }}" alt="Avatar"
-                                    class="w-12 h-12 rounded-full border-2 border-yellow-400 object-cover">
+                                <img src="{{ $r->user->avatar_url ?? asset('images/default-avatar.jpeg') }}"
+                                    alt="Avatar" class="w-12 h-12 rounded-full border-2 border-yellow-400 object-cover">
                                 <strong>{{ $r->user->name ?? 'Anónimo' }}</strong>
                             </div>
 
@@ -287,48 +374,125 @@
             @endif
         </div>
     </div>
+
+    <!-- Modal para ver imagen en grande -->
+    <div class="modal fade" id="imgModal" tabindex="-1" aria-hidden="true">
+        <div class="modal-dialog modal-dialog-centered modal-xl">
+            <div class="modal-content bg-dark">
+                <div class="modal-body p-0">
+                    <img id="modalImage" class="img-fluid w-100 rounded">
+                </div>
+            </div>
+        </div>
+    </div>
 @endsection
 
-@section('scripts')
+@push('scripts')
     <script>
-        const currentURL = window.location.href;
-        const title = document.title;
+        function showImage(url) {
+            document.getElementById('modalImage').src = url;
+        }
 
-        // Compartir nativo
-        document.getElementById('nativeShare').addEventListener('click', async (e) => {
-            e.preventDefault();
-            if (navigator.share) {
-                try {
-                    await navigator.share({
-                        title: title,
-                        url: currentURL
-                    });
-                } catch (err) {
-                    console.error('Error al compartir:', err);
-                }
-            } else {
-                alert('Tu navegador no soporta compartir directamente, usa las otras opciones.');
+        document.addEventListener('DOMContentLoaded', function() {
+            const shareButton = document.getElementById('shareButton');
+            const shareMenu = document.getElementById('shareMenu');
+            const nativeShare = document.getElementById('nativeShare');
+            const copyLink = document.getElementById('copyLink');
+            const shareTwitter = document.getElementById('shareTwitter');
+            const shareWhatsApp = document.getElementById('shareWhatsApp');
+            const shareFacebook = document.getElementById('shareFacebook');
+
+            if (!shareButton || !shareMenu) return;
+
+            const currentURL = window.location.href;
+            const title = document.title || document.querySelector('h1')?.innerText || '';
+
+            // Toggle menú
+            function toggleMenu(open) {
+                const isOpen = shareMenu.classList.contains('hidden') === false;
+                const wantOpen = typeof open === 'boolean' ? open : !isOpen;
+                shareMenu.classList.toggle('hidden', !wantOpen);
+                shareButton.setAttribute('aria-expanded', wantOpen ? 'true' : 'false');
             }
+
+            shareButton.addEventListener('click', (e) => {
+                e.stopPropagation();
+                toggleMenu();
+            });
+
+            // Cerrar al hacer clic fuera
+            document.addEventListener('click', (e) => {
+                if (!shareMenu.classList.contains('hidden') && !shareMenu.contains(e.target) && e.target !==
+                    shareButton) {
+                    toggleMenu(false);
+                }
+            });
+
+            // Rellenar enlaces de compartir
+            if (shareTwitter) {
+                shareTwitter.href =
+                    `https://twitter.com/intent/tweet?url=${encodeURIComponent(currentURL)}&text=${encodeURIComponent(title)}`;
+            }
+            if (shareWhatsApp) {
+                shareWhatsApp.href =
+                    `https://api.whatsapp.com/send?text=${encodeURIComponent(title + ' ' + currentURL)}`;
+            }
+            if (shareFacebook) {
+                shareFacebook.href =
+                    `https://www.facebook.com/sharer/sharer.php?u=${encodeURIComponent(currentURL)}`;
+            }
+
+            // Compartir nativo
+            if (nativeShare) {
+                nativeShare.addEventListener('click', async (e) => {
+                    e.preventDefault();
+                    toggleMenu(false);
+                    if (navigator.share) {
+                        try {
+                            await navigator.share({
+                                title,
+                                url: currentURL
+                            });
+                        } catch (err) {
+                            console.error('Error al compartir:', err);
+                        }
+                    } else {
+                        alert('Tu navegador no soporta la API de compartir. Usa "Copiar enlace".');
+                    }
+                });
+            }
+
+            // Copiar enlace
+            if (copyLink) {
+                copyLink.addEventListener('click', async (e) => {
+                    e.preventDefault();
+                    try {
+                        await navigator.clipboard.writeText(currentURL);
+                        toggleMenu(false);
+                        // Mensaje de éxito: usa un toast o alert simple
+                        alert('¡Enlace copiado al portapapeles!');
+                    } catch (err) {
+                        console.error('No se pudo copiar:', err);
+                        alert('Error al copiar enlace.');
+                    }
+                });
+            }
+
+            // Evitar que los links del menú cierren la página accidentalmente (los externos seguirán)
+            const menuLinks = shareMenu.querySelectorAll('a');
+            menuLinks.forEach(a => {
+                a.addEventListener('click', (e) => {
+                    // Los que tienen href="#" deben prevenir la navegación
+                    if (a.getAttribute('href') === '#') e.preventDefault();
+                    // cerrar menú al clicar
+                    toggleMenu(false);
+                });
+            });
+
+            // Cerrar con ESC
+            document.addEventListener('keydown', (e) => {
+                if (e.key === 'Escape') toggleMenu(false);
+            });
         });
-
-        // Copiar enlace
-        document.getElementById('copyLink').addEventListener('click', (e) => {
-            e.preventDefault();
-            navigator.clipboard.writeText(currentURL)
-                .then(() => alert('¡Enlace copiado al portapapeles!'))
-                .catch(err => alert('Error al copiar enlace: ' + err));
-        });
-
-        // Twitter
-        document.getElementById('shareTwitter').href =
-            `https://twitter.com/intent/tweet?url=${encodeURIComponent(currentURL)}&text=${encodeURIComponent(title)}`;
-
-        // WhatsApp
-        document.getElementById('shareWhatsApp').href =
-            `https://api.whatsapp.com/send?text=${encodeURIComponent(title + ' ' + currentURL)}`;
-
-        // Facebook
-        document.getElementById('shareFacebook').href =
-            `https://www.facebook.com/sharer/sharer.php?u=${encodeURIComponent(currentURL)}`;
     </script>
-@endsection
+@endpush

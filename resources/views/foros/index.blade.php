@@ -28,8 +28,6 @@
                     class="px-6 py-3 bg-indigo-600 text-white rounded-lg shadow-lg hover:bg-indigo-700 transition duration-300">
                     Crear Nuevo Foro
                 </a>
-            @else
-                <p class="text-sm text-gray-500 italic">Verifica tu email para poder publicar foros.</p>
             @endif
         </div>
 

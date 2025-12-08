@@ -3,30 +3,22 @@
 namespace App\Http\Controllers;
 
 use Illuminate\Http\Request;
+use Illuminate\Pagination\LengthAwarePaginator;
 use Illuminate\Support\Facades\Http;
 
 class ApiController extends Controller
 {
-    private $apikey = '4ce916eb12f534d995b7f03d80470b48';
-    private $hash = 'ae21b0b6b32d7da943ba2a57cb21a70b';
-    private $ts = '1758626088';
+    protected $tmdbKey = '068f9f8748c67a559a92eafb6a8eeda7';
+    protected $tmdbUrl = 'https://api.themoviedb.org/3';
 
+    // -------------------------
+    //   Página principal
+    // -------------------------
     public function index()
     {
-        // Obtener datos de la API para cada sección
-        $peliculas = Http::get('http://www.omdbapi.com/', [
-            'apikey' => '1f00bd0e',
-            's' => 'Marvel',
-            'type' => 'movie',
-        ])->json()['results'] ?? [];
+        $peliculas = $this->getPeliculasData();
+        $series = $this->getSeriesData();
 
-        $series = Http::get('http://www.omdbapi.com/', [
-            'apikey' => '1f00bd0e',
-            's' => 'Marvel',
-            'type' => 'series',
-        ])->json()['results'] ?? [];
-
-        // Pasar todas las variables a la vista Blade
         return view('descubre.index', compact('peliculas', 'series'));
     }
 
@@ -52,61 +44,87 @@ class ApiController extends Controller
     // 🔹 Mostrar detalle de una serie específica con episodios por temporada
     public function showSeries($id)
     {
-        // Llamada a OMDb para la información general de la serie
-        $response = Http::get('http://www.omdbapi.com/', [
-            'apikey' => '1f00bd0e',
-            'i' => $id,
-            'plot' => 'full'
+        // 1️⃣ Buscar serie en TMDB por IMDb ID
+        $response = Http::get("$this->tmdbUrl/find/$id", [
+            'api_key' => $this->tmdbKey,
+            'language' => 'es-ES',
+            'external_source' => 'imdb_id'
         ]);
 
-        $data = $response->json();
+        $results = $response->json();
 
-        if (!$response->ok() || ($data['Response'] ?? 'False') === 'False') {
-            abort(404, 'Serie no encontrada');
+        if (empty($results['tv_results'])) {
+            abort(404, 'Serie no encontrada en TMDB');
         }
 
-        // Mapear datos para la vista
+        $serieData = $results['tv_results'][0];
+        $tmdbID = $serieData['id'];
+
+        // 2️⃣ Obtener detalles completos de la serie
+        $details = Http::get("$this->tmdbUrl/tv/$tmdbID", [
+            'api_key' => $this->tmdbKey,
+            'language' => 'es-ES'
+        ])->json();
+
+        // 3️⃣ Mapear datos
         $serie = [
-            'id' => $data['imdbID'],
-            'titulo' => $data['Title'] ?? 'Sin título',
-            'anio' => $data['Year'] ?? 'Desconocido',
-            'genero' => $data['Genre'] ?? 'Desconocido',
-            'director' => $data['Director'] ?? 'Desconocido',
-            'actores' => $data['Actors'] ?? 'Desconocido',
-            'sinopsis' => $data['Plot'] ?? 'Sin información disponible.',
-            'poster' => ($data['Poster'] ?? '') !== 'N/A' ? $data['Poster'] : '',
-            'puntuacion' => $data['imdbRating'] ?? 'N/A',
-            'pais' => $data['Country'] ?? 'Desconocido',
-            'idioma' => $data['Language'] ?? 'Desconocido',
-            'temporadas' => $data['totalSeasons'] ?? 0,
-            'tipo' => $data['Type'] ?? 'series',
-            'imdbID' => $data['imdbID'] ?? 'N/A',
+            'id' => $id,
+            'titulo' => $details['name'] ?? 'Sin título',
+            'anio' => $details['first_air_date'] ?? 'Desconocido',
+            'genero' => implode(', ', array_column($details['genres'] ?? [], 'name')),
+            'director' => '',
+            'actores' => '',
+            'sinopsis' => $details['overview'] ?? 'Sin información disponible',
+            'poster' => $details['poster_path']
+                ? "https://image.tmdb.org/t/p/w500" . $details['poster_path']
+                : '',
+            'puntuacion' => $details['vote_average'] ?? 'N/A',
+            'pais' => implode(', ', array_column($details['origin_country'] ?? [], '0')),
+            'idioma' => $details['original_language'] ?? 'Desconocido',
+            'temporadas' => $details['number_of_seasons'] ?? 0,
+            'tipo' => 'series',
+            'imdbID' => $id,
         ];
 
-        dd($serie);
-        $serie = $response->json();
+        // 4️⃣ ACTORES (from credits)
+        $credits = Http::get("$this->tmdbUrl/tv/$tmdbID/credits", [
+            'api_key' => $this->tmdbKey,
+            'language' => 'es-ES'
+        ])->json();
 
-        // Inicializamos los episodios por temporada
-        $episodiosPorTemporada = [];
-        $totalSeasons = isset($serie['temporadas']) && is_numeric($serie['temporadas']) ? (int)$serie['temporadas'] : 0;
+        $actors = array_slice($credits['cast'] ?? [], 0, 10);
+        $serie['actores'] = implode(', ', array_column($actors, 'name'));
 
-        for ($s = 1; $s <= $totalSeasons; $s++) {
-            $resp = Http::get('http://www.omdbapi.com/', [
-                'apikey' => '1f00bd0e',
-                'i' => $serie['id'],
-                'Season' => $s
-            ]);
-
-            $dataSeason = $resp->json();
-            $episodiosPorTemporada[$s] = $dataSeason['Episodes'] ?? [];
+        // 5️⃣ Imágenes de actores
+        $actorImages = [];
+        foreach ($actors as $actor) {
+            if (!empty($actor['profile_path'])) {
+                $actorImages[$actor['name']] = "https://image.tmdb.org/t/p/w300" . $actor['profile_path'];
+            } else {
+                $actorImages[$actor['name']] = $this->getActorImageUrl($actor['name']);
+            }
         }
 
-        dd($episodiosPorTemporada);
-        $episodiosPorTemporada = $response->json();
+        // 6️⃣ Obtener episodios por temporada desde TMDB
+        $totalSeasons = $details['number_of_seasons'] ?? 0;
+        $episodiosPorTemporada = [];
 
-        // Retornar la vista asegurando que todas las variables existen
-        return view('series.show', compact('serie', 'episodiosPorTemporada'));
+        for ($s = 1; $s <= $totalSeasons; $s++) {
+            $seasonData = Http::get("$this->tmdbUrl/tv/$tmdbID/season/$s", [
+                'api_key' => $this->tmdbKey,
+                'language' => 'es-ES'
+            ])->json();
+
+            $episodiosPorTemporada[$s] = $seasonData['episodes'] ?? [];
+        }
+
+        return view('series.show', compact(
+            'serie',
+            'episodiosPorTemporada',
+            'actorImages'
+        ));
     }
+
 
     // 🔹 Mostrar todas las películas de Marvel
     public function indexPeliculas()
@@ -130,56 +148,149 @@ class ApiController extends Controller
     // 🔹 Mostrar detalle de una película específica
     public function showPeliculas($id)
     {
-        $response = Http::get('http://www.omdbapi.com/', [
-            'apikey' => '1f00bd0e',
-            'i' => $id, // buscar por ID de IMDb
-        ]);
+        // Obtener detalles completos de la película
+        $details = Http::get("https://api.themoviedb.org/3/movie/$id", [
+            'api_key' => $this->tmdbKey,
+            'language' => 'es-ES'
+        ])->json();
 
-        $pelicula = $response->json();
+        if (isset($details['success']) && $details['success'] === false) {
+            abort(404, 'Película no encontrada');
+        }
 
-        return view('peliculas.show', compact('pelicula'));
+        // Obtener videos
+        $videos = Http::get("https://api.themoviedb.org/3/movie/$id/videos", [
+            'api_key' => $this->tmdbKey,
+            'language' => 'es-ES'
+        ])->json()['results'] ?? [];
+
+        // Obtener imágenes
+        $imagenes = Http::get("https://api.themoviedb.org/3/movie/$id/images", [
+            'api_key' => $this->tmdbKey
+        ])->json();
+
+        // Créditos
+        $credits = Http::get("https://api.themoviedb.org/3/movie/$id/credits", [
+            'api_key' => $this->tmdbKey,
+            'language' => 'es-ES'
+        ])->json();
+
+        $actors = array_slice($credits['cast'] ?? [], 0, 10);
+
+        $actorImages = [];
+        foreach ($actors as $actor) {
+            $actorImages[$actor['name']] = !empty($actor['profile_path'])
+                ? "https://image.tmdb.org/t/p/w300" . $actor['profile_path']
+                : $this->getActorImageUrl($actor['name']);
+        }
+
+        // Adaptar datos para la vista
+        $pelicula = [
+            'id' => $id,
+            'titulo' => $details['title'] ?? 'Sin título',
+            'anio' => $details['release_date'] ?? 'Desconocido',
+            'genero' => implode(', ', array_column($details['genres'] ?? [], 'name')),
+            'director' => '',
+            'actores' => implode(', ', array_column($actors, 'name')) ?? '',
+            'sinopsis' => $details['overview'] ?? 'Sin información disponible',
+            'poster' => isset($details['poster_path'])
+                ? "https://image.tmdb.org/t/p/w500" . $details['poster_path']
+                : '',
+            'puntuacion' => $details['vote_average'] ?? 'N/A',
+            'pais' => implode(', ', array_column($details['production_countries'] ?? [], 'name')),
+            'idioma' => $details['original_language'] ?? 'Desconocido',
+            'tipo' => 'pelicula',
+            'videos' => $videos,
+            'backdrops' => $imagenes['backdrops'] ?? [],
+            'posters' => $imagenes['posters'] ?? [],
+        ];
+
+        return view('peliculas.show', compact('pelicula', 'actorImages'));
     }
 
-    // Mostrar la vista de búsqueda
+    // -------------------------
+    //   Vista del buscador
+    // -------------------------
     public function buscarView()
     {
         return view('buscar');
     }
 
-    // Endpoint AJAX
+    // -------------------------
+    //   Buscar (AJAX)
+    // -------------------------
     public function buscarAjax(Request $request)
     {
         $query = $request->input('q', '');
 
-        // Series
+        // Siempre buscamos usando TMDB
+        $marvelCompanies = [420, 38679, 38607];
+
+        // SERIES
+        $seriesResponse = Http::get("{$this->tmdbUrl}/search/tv", [
+            'api_key' => $this->tmdbKey,
+            'language' => 'es-ES',
+            'query' => $query ?: 'a', // búsqueda ancha
+        ])->json();
+
         $series = [];
-        if ($query !== '') {
-            $response = Http::get('http://www.omdbapi.com/', [
-                'apikey' => '1f00bd0e',
-                's' => $query,
-                'type' => 'series',
-            ]);
-            $series = $response->json()['Search'] ?? [];
+        foreach ($seriesResponse['results'] ?? [] as $item) {
+            $detail = Http::get("{$this->tmdbUrl}/tv/{$item['id']}", [
+                'api_key' => $this->tmdbKey,
+                'language' => 'es-ES'
+            ])->json();
+
+            $companies = array_column($detail['production_companies'] ?? [], 'id');
+
+            if (count(array_intersect($companies, $marvelCompanies)) > 0) {
+                $series[] = [
+                    'id'    => $detail['id'],
+                    'title' => $detail['name'],
+                    'poster' => $detail['poster_path']
+                        ? "https://image.tmdb.org/t/p/w300{$detail['poster_path']}"
+                        : '/images/no-poster.png',
+                    'anio'  => substr($detail['first_air_date'] ?? '', 0, 4)
+                ];
+            }
         }
 
-        // Películas (OMDB)
+        // PELÍCULAS
+        $moviesResponse = Http::get("{$this->tmdbUrl}/search/movie", [
+            'api_key' => $this->tmdbKey,
+            'language' => 'es-ES',
+            'query' => $query ?: 'a',
+        ])->json();
+
         $peliculas = [];
-        if ($query !== '') {
-            $response = Http::get('http://www.omdbapi.com/', [
-                'apikey' => '1f00bd0e',
-                's' => $query,
-                'type' => 'movie',
-            ]);
-            $peliculas = $response->json()['Search'] ?? [];
+        foreach ($moviesResponse['results'] ?? [] as $item) {
+            $detail = Http::get("{$this->tmdbUrl}/movie/{$item['id']}", [
+                'api_key' => $this->tmdbKey,
+                'language' => 'es-ES'
+            ])->json();
+
+            $companies = array_column($detail['production_companies'] ?? [], 'id');
+
+            if (count(array_intersect($companies, $marvelCompanies)) > 0) {
+                $peliculas[] = [
+                    'id'    => $detail['id'],
+                    'title' => $detail['title'],
+                    'poster' => $detail['poster_path']
+                        ? "https://image.tmdb.org/t/p/w300{$detail['poster_path']}"
+                        : '/images/no-poster.png',
+                    'anio'  => substr($detail['release_date'] ?? '', 0, 4)
+                ];
+            }
         }
 
         return response()->json([
             'series' => $series,
-            'peliculas' => $peliculas,
+            'peliculas' => $peliculas
         ]);
     }
 
-    // Endpoint AJAX para buscar por tipo y texto
+    // -------------------------
+    //   Buscar Reseñas (AJAX)
+    // -------------------------
     public function buscarAjaxReseñas(Request $request)
     {
         $query = $request->input('q', '');
@@ -189,42 +300,145 @@ class ApiController extends Controller
             return response()->json(['results' => []]);
         }
 
-        $results = [];
+        $endpoint = $type === 'serie' ? 'search/tv' : 'search/movie';
 
-        switch ($type) {
-            case 'serie':
-            case 'pelicula':
-                $response = Http::get('http://www.omdbapi.com/', [
-                    'apikey' => '1f00bd0e',
-                    's' => $query,
-                    'type' => $type === 'serie' ? 'series' : 'movie',
-                ]);
-                $results = $response->json()['Search'] ?? [];
-                break;
-        }
+        $response = Http::get("$this->tmdbUrl/$endpoint", [
+            'api_key' => $this->tmdbKey,
+            'language' => 'es-ES',
+            'query' => $query
+        ])->json();
+
+        $items = $response['results'] ?? [];
+
+        $results = collect($items)->map(function ($item) use ($type) {
+
+            return [
+                'id' => $item['id'],
+                'title' => $type === 'serie' ? $item['name'] : $item['title'],
+                'poster' => $item['poster_path']
+                    ? "https://image.tmdb.org/t/p/w300" . $item['poster_path']
+                    : '/images/no-poster.png'
+            ];
+        });
 
         return response()->json(['results' => $results]);
     }
 
+    // -------------------------
+    //   SERIES MARVEL
+    // -------------------------
     public function getSeriesData()
     {
-        $response = Http::get('http://www.omdbapi.com/', [
-            'apikey' => '1f00bd0e',
-            's' => 'Marvel',
-            'type' => 'series',
+        $page = 1;       // página fija (puedes modificar si quieres paginación)
+        $perPage = 20;   // número de resultados por página
+
+        // Llamada a TMDB solo para series del MCU usando el mismo keyword
+        $response = Http::get("$this->tmdbUrl/discover/tv", [
+            'api_key' => $this->tmdbKey,
+            'language' => 'es-ES',
+            'page' => $page,
+            'with_keywords' => '180547', // Marvel Cinematic Universe
+            'include_adult' => false
         ]);
 
-        return $response->json()['Search'] ?? [];
+        $data = $response->json();
+
+        if (!isset($data['results'])) {
+            return [];
+        }
+
+        // Adaptamos los resultados al formato requerido por Blade
+        $seriesAdaptadas = [];
+
+        foreach ($data['results'] as $tv) {
+            $seriesAdaptadas[] = [
+                'id'      => $tv['id'],
+                'title'   => $tv['name'] ?? 'Sin título',
+                'anio'    => isset($tv['first_air_date']) && $tv['first_air_date']
+                    ? substr($tv['first_air_date'], 0, 4)
+                    : 'Desconocido',
+                'poster'  => $tv['poster_path']
+                    ? "https://image.tmdb.org/t/p/w300" . $tv['poster_path']
+                    : '/images/no-poster.png',
+                'sinopsis' => $tv['overview'] ?? 'Sin información disponible',
+            ];
+        }
+
+        return $seriesAdaptadas;
     }
 
+    // -------------------------
+    //   PELÍCULAS MARVEL
+    // -------------------------
     public function getPeliculasData()
     {
-        $response = Http::get('http://www.omdbapi.com/', [
-            'apikey' => '1f00bd0e',
-            's' => 'Marvel',
-            'type' => 'movie',
+        $page = 1;
+        $perPage = 20;
+
+        // Películas del MCU usando keyword oficial
+        $response = Http::get("$this->tmdbUrl/discover/movie", [
+            'api_key' => $this->tmdbKey,
+            'language' => 'es-ES',
+            'page' => $page,
+            'with_keywords' => '180547', // MCU
+            'include_adult' => false
         ]);
 
-        return $response->json()['Search'] ?? [];
+        $data = $response->json();
+
+        if (!isset($data['results'])) {
+            return [];
+        }
+
+        $peliculasAdaptadas = [];
+
+        foreach ($data['results'] as $movie) {
+
+            // ---- Obtener IMDb ID ----
+            $details = Http::get("$this->tmdbUrl/movie/{$movie['id']}", [
+                'api_key' => $this->tmdbKey,
+                'language' => 'es-ES'
+            ])->json();
+
+            $imdbID = $details['imdb_id'] ?? null;
+
+            $peliculasAdaptadas[] = [
+                'id'       => $movie['id'],
+                'imdbID'   => $imdbID,   // <<--- YA ESTÁ
+                'title'    => $movie['title'] ?? 'Sin título',
+                'anio'     => isset($movie['release_date']) && $movie['release_date']
+                    ? substr($movie['release_date'], 0, 4)
+                    : 'Desconocido',
+                'poster' => $movie['poster_path']
+                    ? "https://image.tmdb.org/t/p/w300" . $movie['poster_path']
+                    : '/images/no-poster.png',
+                'sinopsis' => $movie['overview'] ?? 'Sin información disponible',
+            ];
+        }
+
+        return $peliculasAdaptadas;
+    }
+
+    private function getActorImageUrl($actor)
+    {
+        $apiKey = '068f9f8748c67a559a92eafb6a8eeda7';
+
+        // Buscar actor en TMDB
+        $search = Http::get("https://api.themoviedb.org/3/search/person", [
+            'api_key' => $apiKey,
+            'query' => $actor,
+        ]);
+
+        if (!$search->ok() || empty($search['results'])) {
+            return null;
+        }
+
+        $result = $search['results'][0];
+
+        if (!isset($result['profile_path']) || !$result['profile_path']) {
+            return null;
+        }
+
+        return "https://image.tmdb.org/t/p/w300" . $result['profile_path'];
     }
 }

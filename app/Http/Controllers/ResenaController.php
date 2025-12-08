@@ -2,6 +2,9 @@
 
 namespace App\Http\Controllers;
 
+use App\Mail\ContenidoActualizadoMail;
+use App\Mail\ContenidoCreadoMail;
+use App\Mail\ContenidoEliminadoMail;
 use App\Models\Review;
 use App\Models\ReviewReport;
 use Illuminate\Http\Request;
@@ -9,6 +12,7 @@ use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Http;
 use Illuminate\Foundation\Auth\Access\AuthorizesRequests;
 use Illuminate\Support\Facades\Cache;
+use Illuminate\Support\Facades\Mail;
 
 class ResenaController extends Controller
 {
@@ -157,7 +161,7 @@ class ResenaController extends Controller
         $title = $info['Title'] ?? 'Título desconocido';
 
         // Crear reseña
-        Review::create([
+        $review = Review::create([
             'user_id' => Auth::id(),
             'type' => $type,
             'entity_id' => $entityId,
@@ -165,6 +169,12 @@ class ResenaController extends Controller
             'content' => $request->content,
             'rating' => $request->rating,
         ]);
+
+        $review->load('autor');
+        $autor = $review->autor;
+        $url = route('resenas.show', $review->id);
+
+        Mail::to($autor->email)->send(new ContenidoCreadoMail($autor, $review, 'resena', $url));
 
         return redirect()->route('resenas')
             ->with('success', 'Reseña creada correctamente.');
@@ -191,11 +201,24 @@ class ResenaController extends Controller
 
     public function update(Request $request, $id)
     {
-        $review = Review::findOrFail($id);
+        $review = Review::with('autor')->findOrFail($id);
 
         if (Auth::id() !== $review->user_id) {
             abort(403, 'No tienes permiso para actualizar esta reseña.');
         }
+
+        $user = $review->autor;
+        $url = route('resenas.showresena', $review->id);
+
+        // Enviar email avisando
+        Mail::to($user->email)->send(
+            new ContenidoActualizadoMail($user, $review, 'resena', $url)
+        );
+
+        // Copia al admin
+        Mail::to('soportemarvelpedia@gmail.com')->send(
+            new ContenidoActualizadoMail($user, $review, 'resena', $url)
+        );
 
         $request->validate([
             'rating' => 'required|integer|min:1|max:5',
@@ -210,11 +233,25 @@ class ResenaController extends Controller
         return redirect()->route('resenas')->with('success', 'Reseña actualizada correctamente.');
     }
 
-    public function destroy(Review $review)
+    public function destroy($id)
     {
+        $review = Review::with('autor')->findOrFail($id);
+
+        $user = $review->autor;
+
+        // Enviar email avisando
+        Mail::to($user->email)->send(
+            new ContenidoEliminadoMail($user, $review, 'resena')
+        );
+
+        // Copia al admin
+        Mail::to('soportemarvelpedia@gmail.com')->send(
+            new ContenidoEliminadoMail($user, $review, 'resena')
+        );
+
         $review->delete();
 
-        return redirect()->route('resenas')->with('success', 'Reseña eliminada correctamente.');
+        return redirect()->back()->with('success', 'Reseña eliminada correctamente.');
     }
 
     public function report(Review $review)

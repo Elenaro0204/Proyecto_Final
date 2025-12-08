@@ -12,6 +12,16 @@
                     @csrf
                     @method('PUT')
 
+                    @if ($errors->any())
+                        <div class="bg-red-200 text-red-800 p-4 rounded">
+                            <ul>
+                                @foreach ($errors->all() as $error)
+                                    <li>- {{ $error }}</li>
+                                @endforeach
+                            </ul>
+                        </div>
+                    @endif
+
                     {{-- Tipo y entidad NO se pueden cambiar al editar --}}
                     <input type="hidden" name="type" value="{{ $review->type }}">
                     <input type="hidden" name="entity_id" value="{{ $review->entity_id }}">

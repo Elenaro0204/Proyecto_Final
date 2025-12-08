@@ -10,6 +10,16 @@
                 <form action="{{ route('resenas.store') }}" method="POST" class="space-y-3">
                     @csrf
 
+                    @if ($errors->any())
+                        <div class="bg-red-200 text-red-800 p-4 rounded">
+                            <ul>
+                                @foreach ($errors->all() as $error)
+                                    <li>- {{ $error }}</li>
+                                @endforeach
+                            </ul>
+                        </div>
+                    @endif
+
                     {{-- Si viene desde una serie, película, cómic o personaje --}}
                     @if (!empty($type) && !empty($entity_id))
                         <input type="hidden" name="type" value="{{ $type }}">

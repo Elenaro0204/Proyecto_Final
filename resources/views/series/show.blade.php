@@ -25,7 +25,8 @@
             {{-- Información --}}
             <div class="flex-1 space-y-4">
                 <h1 class="text-3xl font-extrabold text-gray-900">{{ $serie['titulo'] }}</h1>
-                <p class="text-gray-500 text-lg">{{ $serie['anio'] }} | {{ ucfirst($serie['tipo']) }}</p>
+                <p class="text-gray-500 text-lg">{{ \Carbon\Carbon::parse($serie['anio'])->format('d/m/Y') }} •
+                    {{ $serie['genero'] }}</p>
 
                 {{-- Badges --}}
                 <div class="flex flex-wrap gap-2">
@@ -65,7 +66,7 @@
                     <div class="bg-indigo-50 p-4 rounded-xl shadow hover:shadow-lg transition flex items-center gap-3">
                         <i class="bi bi-translate text-indigo-500 text-2xl"></i>
                         <div>
-                            <p class="text-sm text-gray-500">Idioma</p>
+                            <p class="text-sm text-gray-500">Idioma original</p>
                             <p class="font-semibold text-gray-800">{{ $serie['idioma'] }}</p>
                         </div>
                     </div>
@@ -85,23 +86,35 @@
                         </a>
                     @endif
 
+                    <a href="https://www.imdb.com/title/{{ $serie['imdbID'] }}" target="_blank"
+                        class="text-white px-4 py-2 rounded-lg shadow hover:opacity-90 transition flex items-center gap-2"
+                        style="background-color: #ff00c8;">
+                        📺 Ver en IMDb
+                    </a>
+
                     {{-- Compartir --}}
-                    <div class="relative">
-                        <button
+                    <div class="relative" x-data>
+                        <button id="shareButton" aria-haspopup="true" aria-expanded="false"
                             class="bg-red-500 text-white px-4 py-2 rounded-lg shadow hover:bg-red-600 transition flex items-center gap-2">
                             <i class="bi bi-share"></i> Compartir
                         </button>
-                        <ul class="absolute top-full mt-2 left-0 bg-white shadow-lg rounded-lg overflow-hidden hidden">
-                            <li><a href="#" id="nativeShare" class="block px-4 py-2 hover:bg-gray-100">Compartir
+
+                        <ul id="shareMenu"
+                            class="absolute top-full mt-2 left-0 bg-white shadow-lg rounded-lg overflow-hidden hidden z-50 w-56">
+                            <li><a href="#" id="nativeShare" class="block px-4 py-2 hover:bg-gray-100"><i
+                                        class="bi bi-phone"></i> Compartir
                                     directamente</a></li>
-                            <li><a href="#" id="copyLink" class="block px-4 py-2 hover:bg-gray-100">Copiar enlace</a>
+                            <li><a href="#" id="copyLink" class="block px-4 py-2 hover:bg-gray-100"><i
+                                        class="bi bi-link-45deg"></i> Copiar enlace</a>
                             </li>
-                            <li><a href="#" id="shareTwitter" target="_blank"
-                                    class="block px-4 py-2 hover:bg-gray-100">Twitter</a></li>
-                            <li><a href="#" id="shareWhatsApp" target="_blank"
-                                    class="block px-4 py-2 hover:bg-gray-100">WhatsApp</a></li>
-                            <li><a href="#" id="shareFacebook" target="_blank"
-                                    class="block px-4 py-2 hover:bg-gray-100">Facebook</a></li>
+                            <li><a href="#" id="shareTwitter" target="_blank" rel="noopener"
+                                    class="block px-4 py-2 hover:bg-gray-100"><i class="bi bi-twitter"></i> Twitter</a></li>
+                            <li><a href="#" id="shareWhatsApp" target="_blank" rel="noopener"
+                                    class="block px-4 py-2 hover:bg-gray-100"><i class="bi bi-whatsapp"></i> WhatsApp</a>
+                            </li>
+                            <li><a href="#" id="shareFacebook" target="_blank" rel="noopener"
+                                    class="block px-4 py-2 hover:bg-gray-100"><i class="bi bi-facebook"></i> Facebook</a>
+                            </li>
                         </ul>
                     </div>
                 </div>
@@ -112,25 +125,24 @@
         <div class="bg-white rounded-xl shadow p-6">
             <h2 class="text-2xl font-bold mb-3">Sinopsis</h2>
             <p class="text-gray-700">
-                {{ $serie['sinopsis_es'] ?? $serie['sinopsis'] }}
+                {{ $serie['overview'] ?? $serie['sinopsis'] }}
             </p>
         </div>
 
         {{-- Actores destacados --}}
         @if (!empty($serie['actores']))
             <div>
-                <h3 class="text-2xl font-bold mb-4">🎭 Actores</h3>
+                <h3 class="text-2xl font-bold mb-4">🎭 Reparto Principal</h3>
                 <div class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-6">
                     @foreach (explode(',', $serie['actores']) as $actor)
                         @php
                             $actor = trim($actor);
                             $wikiUrl = 'https://es.wikipedia.org/wiki/' . str_replace(' ', '_', $actor);
-                            $imgDefault =
-                                'https://upload.wikimedia.org/wikipedia/commons/8/89/Portrait_Placeholder.png';
+                            $imgUrl = $actorImages[$actor] ?? null;
                         @endphp
                         <a href="{{ $wikiUrl }}" target="_blank"
                             class="flex flex-col items-center text-center bg-white rounded-xl shadow hover:shadow-lg p-3 transition">
-                            <img src="{{ $imgDefault }}" alt="{{ $actor }}"
+                            <img src="{{ $imgUrl }}" alt="{{ $actor }}"
                                 class="w-24 h-24 rounded-full mb-2 border border-gray-200 object-cover">
                             <span class="font-semibold text-indigo-600 hover:underline">{{ $actor }}</span>
                             <small class="text-gray-400">Ver en Wikipedia</small>
@@ -141,119 +153,192 @@
         @endif
 
         {{-- Episodios por temporada --}}
-        @if (!empty($episodiosPorTemporada))
-            <div class="mt-8 mb-8">
-                @foreach ($episodiosPorTemporada as $temporada => $episodios)
-                    <div x-data="{ openTemporada: false }" class="card shadow-sm border-0 rounded-3 overflow-hidden">
+        <div class="bg-white rounded-xl shadow p-6 mt-8 mb-8">
+            <h3 class="text-2xl font-bold mb-4">📺 Temporadas</h3>
+            <div class="space-y-4">
+                @if (!empty($episodiosPorTemporada))
 
-                        {{-- Botón de temporada --}}
-                        <button @click="openTemporada = !openTemporada"
-                            class="card-header bg-primary text-white d-flex justify-content-between align-items-center fw-bold"
-                            style="cursor: pointer; font-size: 1.1rem;">
-                            <span>📺 Temporada {{ $temporada }} ({{ count($episodios) }})</span>
-                            <div class="d-flex align-items-center">
-                                <svg :class="{
-                                    'rotate-180 text-red-400': openTemporada,
-                                    'text-yellow-400': !openTemporada
-                                }"
-                                    class="ml-2 h-5 w-5 transition-all duration-300 transform"
-                                    xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor">
-                                    <path fill-rule="evenodd"
-                                        d="M5.23 7.21a.75.75 0 011.06.02L10 10.94l3.71-3.71a.75.75 0 111.06 1.06l-4.24 4.25a.75.75 0 01-1.06 0L5.25 8.27a.75.75 0 01-.02-1.06z"
-                                        clip-rule="evenodd" />
-                                </svg>
-                            </div>
-                        </button>
+                    @foreach ($episodiosPorTemporada as $temporada => $episodios)
+                        <div x-data="{ openTemporada: false }" class="card shadow-sm border-0 rounded-3 overflow-hidden">
 
-                        {{-- Contenido de la temporada --}}
-                        <div x-show="openTemporada" x-transition class="card-body bg-light p-3">
-                            @if (!empty($episodios))
-                                <div class="row g-3">
-                                    @foreach ($episodios as $index => $e)
-                                        @php
-                                            // Generamos un id único por episodio
-                                            $episodioId = 'episodio-' . $temporada . '-' . $index;
-                                        @endphp
-                                        <div class="col-md-6">
-                                            <div x-data="{ open: false }"
-                                                class="card h-100 border-0 shadow-sm rounded-3 overflow-hidden transition-all">
+                            {{-- Botón de temporada --}}
+                            <button @click="openTemporada = !openTemporada"
+                                class="card-header bg-primary text-white d-flex justify-content-between align-items-center fw-bold"
+                                style="cursor: pointer; font-size: 1.1rem;">
+                                <span>📺 Temporada {{ $temporada }} ({{ count($episodios) }})</span>
+                                <div class="d-flex align-items-center">
+                                    <svg :class="{
+                                        'rotate-180 text-red-400': openTemporada,
+                                        'text-yellow-400': !openTemporada
+                                    }"
+                                        class="ml-2 h-5 w-5 transition-all duration-300 transform"
+                                        xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor">
+                                        <path fill-rule="evenodd"
+                                            d="M5.23 7.21a.75.75 0 011.06.02L10 10.94l3.71-3.71a.75.75 0 111.06 1.06l-4.24 4.25a.75.75 0 01-1.06 0L5.25 8.27a.75.75 0 01-.02-1.06z"
+                                            clip-rule="evenodd" />
+                                    </svg>
+                                </div>
+                            </button>
 
-                                                {{-- Cabecera del episodio --}}
-                                                <button @click="open = !open"
-                                                    class="card-header bg-white fw-semibold d-flex justify-content-between align-items-center"
-                                                    style="cursor: pointer;">
-                                                    <span class="text-start">
-                                                        <strong>{{ $e['Episode'] }}.</strong> {{ $e['Title'] }}
-                                                    </span>
-                                                    <div class="d-flex align-items-center">
-                                                        <span class="badge bg-warning text-dark ms-2">
-                                                            ⭐ {{ $e['imdbRating'] ?? 'N/A' }}
+                            {{-- Contenido de la temporada --}}
+                            <div x-show="openTemporada" x-transition class="card-body bg-light p-3">
+                                @if (!empty($episodios))
+                                    <div class="row g-3 mb-1">
+                                        @foreach ($episodios as $index => $e)
+                                            @php
+                                                // Generamos un id único por episodio
+                                                $episodioId = 'episodio-' . $temporada . '-' . $index;
+                                            @endphp
+                                            <div class="col-12 mb-1">
+                                                <div x-data="{ open: false }"
+                                                    class="card h-100 border-0 shadow-sm rounded-3 overflow-hidden transition-all">
+
+                                                    {{-- Cabecera del episodio --}}
+                                                    <button @click="open = !open"
+                                                        class="card-header bg-white fw-semibold d-flex justify-content-between align-items-center"
+                                                        style="cursor: pointer;">
+                                                        <span class="text-start">
+                                                            <strong>{{ $e['episode_number'] ?? 'N/A' }}.</strong>
+                                                            {{ $e['name'] ?? 'Sin título' }}
                                                         </span>
-                                                        <svg :class="{ 'rotate-180 text-red-400': open, 'text-yellow-400': !open }"
-                                                            class="ml-2 h-5 w-5 transition-all duration-300 transform"
-                                                            xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20"
-                                                            fill="currentColor">
-                                                            <path fill-rule="evenodd"
-                                                                d="M5.23 7.21a.75.75 0 011.06.02L10 10.94l3.71-3.71a.75.75 0 111.06 1.06l-4.24 4.25a.75.75 0 01-1.06 0L5.25 8.27a.75.75 0 01-.02-1.06z"
-                                                                clip-rule="evenodd" />
-                                                        </svg>
-                                                    </div>
-                                                </button>
+                                                        <div class="d-flex align-items-center">
+                                                            <span class="badge bg-warning text-dark ms-2">
+                                                                ⭐ {{ $e['vote_average'] ?? 'N/A' }}
+                                                            </span>
+                                                            <svg :class="{
+                                                                'rotate-180 text-red-400': open,
+                                                                'text-yellow-400': !
+                                                                    open
+                                                            }"
+                                                                class="ml-2 h-5 w-5 transition-all duration-300 transform"
+                                                                xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20"
+                                                                fill="currentColor">
+                                                                <path fill-rule="evenodd"
+                                                                    d="M5.23 7.21a.75.75 0 011.06.02L10 10.94l3.71-3.71a.75.75 0 111.06 1.06l-4.24 4.25a.75.75 0 01-1.06 0L5.25 8.27a.75.75 0 01-.02-1.06z"
+                                                                    clip-rule="evenodd" />
+                                                            </svg>
+                                                        </div>
+                                                    </button>
 
-                                                {{-- Fondo desplegable --}}
-                                                <div x-show="open" x-transition.opacity class="bg-light"
-                                                    style="overflow: hidden; transition: max-height 0.3s ease; max-height: 1000px;">
-                                                    <div class="card-body p-3 border-top text-secondary"
-                                                        style="font-size: 0.9rem;">
-                                                        <p class="mb-1"><strong>📅 Fecha de estreno:</strong>
-                                                            {{ $e['Released'] ?? 'Sin fecha' }}</p>
-                                                        <p class="mb-1"><strong>⏱ Duración:</strong>
-                                                            {{ $e['Runtime'] ?? 'Desconocida' }}</p>
-                                                        <p class="mb-1"><strong>🎬 Director:</strong>
-                                                            {{ $e['Director'] ?? 'Desconocido' }}</p>
-                                                        <p class="mb-1"><strong>✍️ Guionistas:</strong>
-                                                            {{ $e['Writer'] ?? 'Desconocido' }}</p>
-                                                        <p class="mb-2"><strong>📝 Sinopsis:</strong>
-                                                            {{ $e['Plot'] ?? 'Sin información' }}</p>
-                                                        <p class="text-muted small"><strong>🔗 IMDb:</strong>
-                                                            @if (!empty($e['imdbID']))
-                                                                <a href="https://www.imdb.com/title/{{ $e['imdbID'] }}"
-                                                                    target="_blank"
-                                                                    class="text-warning text-decoration-none">Enlace al
-                                                                    episodio en IMDb</a>
-                                                            @else
-                                                                N/A
-                                                            @endif
-                                                        </p>
+                                                    {{-- Fondo desplegable --}}
+                                                    <div x-show="open" x-transition.opacity class="bg-light"
+                                                        style="overflow: hidden; transition: max-height 0.3s ease; max-height: 1000px;">
+                                                        <div class="card-body p-3 border-top text-secondary"
+                                                            style="font-size: 0.9rem;">
+                                                            <p class="mb-1"><strong>📅 Fecha de estreno:</strong>
+                                                                {{ \Carbon\Carbon::parse($e['air_date'])->format('d/m/Y') ?? 'Sin fecha' }}
+                                                            </p>
+                                                            <p class="mb-1"><strong>⏱ Duración:</strong>
+                                                                {{ $e['runtime'] ? $e['runtime'] . ' min' : 'Desconocida' }}
+                                                            </p>
+                                                            <p class="mb-1"><strong>🎬 Director:</strong>
+                                                                {{ $serie['director'] ?? 'Desconocido' }}</p>
+                                                            <p class="mb-2"><strong>📝 Sinopsis:</strong>
+                                                                {{ $e['overview'] ?? 'Sin información' }}</p>
+                                                            <p class="text-muted small"><strong>🔗 IMDb:</strong>
+                                                                @if (!empty($e['imdbID']))
+                                                                    <a href="https://www.imdb.com/title/{{ $e['imdbID'] }}"
+                                                                        target="_blank"
+                                                                        class="text-primary fw-bold text-decoration-underline">
+                                                                        Ver episodio
+                                                                    </a>
+                                                                @else
+                                                                    N/A
+                                                                @endif
+                                                            </p>
+                                                        </div>
                                                     </div>
+
                                                 </div>
                                             </div>
-                                        </div>
-                                    @endforeach
-                                </div>
-                            @else
-                                <p class="text-muted m-2">No hay episodios disponibles para esta temporada.</p>
-                            @endif
+                                        @endforeach
+                                    </div>
+                                @else
+                                    <p class="text-muted m-2">No hay episodios disponibles para esta temporada.</p>
+                                @endif
+                            </div>
                         </div>
+                    @endforeach
+                @else
+                    <p class="text-muted">No se han encontrado episodios para esta serie.</p>
+                @endif
+            </div>
+        </div>
+
+        {{-- Trailer si está disponible --}}
+        <div class="bg-white rounded-xl shadow p-6 mt-5">
+            <h3 class="text-2xl font-bold mb-4">📺 Trailers</h3>
+
+            <div class="row">
+                @forelse ($serie['videos'] as $video)
+                    @if ($video['site'] === 'YouTube')
+                        <div class="col-md-6 mb-4">
+                            <iframe width="100%" height="315"
+                                src="https://www.youtube.com/embed/{{ $video['key'] }}" class="rounded shadow"
+                                allowfullscreen>
+                            </iframe>
+                        </div>
+                    @endif
+                @empty
+                    <p>No hay vídeos disponibles.</p>
+                @endforelse
+            </div>
+        </div>
+
+        {{-- Galería --}}
+        <div class="bg-white rounded-xl shadow p-6 mt-5">
+            <h3 class="text-2xl font-bold mb-4">📺 Galería</h3>
+
+            <div class="row">
+                @foreach ($backdropsPaginated as $img)
+                    <div class="col-md-4 mb-3">
+                        <img src="https://image.tmdb.org/t/p/w780{{ $img['file_path'] }}"
+                            class="img-fluid rounded shadow-sm" style="cursor:pointer" data-bs-toggle="modal"
+                            data-bs-target="#imgModal"
+                            onclick="showImage('https://image.tmdb.org/t/p/original{{ $img['file_path'] }}')">
                     </div>
                 @endforeach
             </div>
-        @else
-            <p class="text-muted">No se han encontrado episodios para esta serie.</p>
-        @endif
 
-        {{-- Trailer si está disponible --}}
-        @if (!empty($serie['trailer_url']))
-            <div class="card mb-5 mt-5 shadow-sm border-0">
-                <div class="card-body">
-                    <h4 class="mb-3">🎥 Trailer</h4>
-                    <div class="ratio ratio-16x9">
-                        <iframe src="{{ $serie['trailer_url'] }}" title="Trailer de {{ $serie['titulo'] }}"
-                            allowfullscreen></iframe>
-                    </div>
-                </div>
+            {{-- Paginación --}}
+            <div class="d-flex justify-content-center mt-3">
+                {{ $backdropsPaginated->links() }}
             </div>
-        @endif
+        </div>
+
+        {{-- Recomendaciones --}}
+        <div class="bg-white rounded-xl shadow p-6 mt-5">
+            <h3 class="text-2xl font-bold mb-4">⭐ Series Recomendadas</h3>
+
+            <div class="row g-4">
+                @if ($recomendacionesPaginadas->count() > 0)
+                    @foreach ($recomendacionesPaginadas as $rec)
+                        <div class="col-6 col-md-3">
+                            <div class="card shadow-sm border-0 h-100 rounded-lg hover:shadow-lg transition">
+                                <img src="https://image.tmdb.org/t/p/w300{{ $rec['poster_path'] }}"
+                                    class="card-img-top rounded-top" alt="{{ $rec['name'] }}">
+
+                                <div class="card-body text-center">
+                                    <h6 class="fw-bold text-dark mb-1">{{ $rec['name'] }}</h6>
+
+                                    <a href="{{ route('serie.show', $rec['id']) }}"
+                                        class="btn btn-outline-primary btn-sm mt-2">
+                                        Ver detalles
+                                    </a>
+                                </div>
+                            </div>
+                        </div>
+                    @endforeach
+                @else
+                    <p>No hay recomendaciones disponibles.</p>
+                @endif
+            </div>
+
+            {{-- PAGINACIÓN --}}
+            <div class="d-flex justify-content-center mt-4">
+                {{ $recomendacionesPaginadas->appends(['rec_page' => $recomendacionesPaginadas->currentPage()])->links() }}
+            </div>
+        </div>
 
         {{-- Reseñas desde la base de datos --}}
         <div class="bg-white rounded-xl shadow p-6">
@@ -274,7 +359,7 @@
             @if ($reseñas->isEmpty())
                 <p class="text-gray-500 italic">Aún no hay reseñas para esta serie. ¡Sé el primero en opinar!</p>
             @else
-                <div class="space-y-4">
+                <div class="grid grid-cols-1 sm:grid-cols-2 gap-6 mt-6">
                     @foreach ($reseñas as $r)
                         <div class="border-b pb-3">
                             {{-- Avatar --}}
@@ -407,49 +492,127 @@
             @endif
         </div>
     </div>
+
+    <!-- Modal para ver imagen en grande -->
+    <div class="modal fade" id="imgModal" tabindex="-1" aria-hidden="true">
+        <div class="modal-dialog modal-dialog-centered modal-xl">
+            <div class="modal-content bg-dark">
+                <div class="modal-body p-0">
+                    <img id="modalImage" class="img-fluid w-100 rounded">
+                </div>
+            </div>
+        </div>
+    </div>
+
 @endsection
 
 
 @push('scripts')
     <script>
-        const currentURL = window.location.href;
-        const title = document.title;
+        function showImage(url) {
+            document.getElementById('modalImage').src = url;
+        }
 
-        // Compartir nativo
-        document.getElementById('nativeShare').addEventListener('click', async (e) => {
-            e.preventDefault();
-            if (navigator.share) {
-                try {
-                    await navigator.share({
-                        title: title,
-                        url: currentURL
-                    });
-                } catch (err) {
-                    console.error('Error al compartir:', err);
-                }
-            } else {
-                alert('Tu navegador no soporta compartir directamente, usa las otras opciones.');
+        document.addEventListener('DOMContentLoaded', function() {
+            const shareButton = document.getElementById('shareButton');
+            const shareMenu = document.getElementById('shareMenu');
+            const nativeShare = document.getElementById('nativeShare');
+            const copyLink = document.getElementById('copyLink');
+            const shareTwitter = document.getElementById('shareTwitter');
+            const shareWhatsApp = document.getElementById('shareWhatsApp');
+            const shareFacebook = document.getElementById('shareFacebook');
+
+            if (!shareButton || !shareMenu) return;
+
+            const currentURL = window.location.href;
+            const title = document.title || document.querySelector('h1')?.innerText || '';
+
+            // Toggle menú
+            function toggleMenu(open) {
+                const isOpen = shareMenu.classList.contains('hidden') === false;
+                const wantOpen = typeof open === 'boolean' ? open : !isOpen;
+                shareMenu.classList.toggle('hidden', !wantOpen);
+                shareButton.setAttribute('aria-expanded', wantOpen ? 'true' : 'false');
             }
+
+            shareButton.addEventListener('click', (e) => {
+                e.stopPropagation();
+                toggleMenu();
+            });
+
+            // Cerrar al hacer clic fuera
+            document.addEventListener('click', (e) => {
+                if (!shareMenu.classList.contains('hidden') && !shareMenu.contains(e.target) && e.target !==
+                    shareButton) {
+                    toggleMenu(false);
+                }
+            });
+
+            // Rellenar enlaces de compartir
+            if (shareTwitter) {
+                shareTwitter.href =
+                    `https://twitter.com/intent/tweet?url=${encodeURIComponent(currentURL)}&text=${encodeURIComponent(title)}`;
+            }
+            if (shareWhatsApp) {
+                shareWhatsApp.href =
+                    `https://api.whatsapp.com/send?text=${encodeURIComponent(title + ' ' + currentURL)}`;
+            }
+            if (shareFacebook) {
+                shareFacebook.href =
+                    `https://www.facebook.com/sharer/sharer.php?u=${encodeURIComponent(currentURL)}`;
+            }
+
+            // Compartir nativo
+            if (nativeShare) {
+                nativeShare.addEventListener('click', async (e) => {
+                    e.preventDefault();
+                    toggleMenu(false);
+                    if (navigator.share) {
+                        try {
+                            await navigator.share({
+                                title,
+                                url: currentURL
+                            });
+                        } catch (err) {
+                            console.error('Error al compartir:', err);
+                        }
+                    } else {
+                        alert('Tu navegador no soporta la API de compartir. Usa "Copiar enlace".');
+                    }
+                });
+            }
+
+            // Copiar enlace
+            if (copyLink) {
+                copyLink.addEventListener('click', async (e) => {
+                    e.preventDefault();
+                    try {
+                        await navigator.clipboard.writeText(currentURL);
+                        toggleMenu(false);
+                        // Mensaje de éxito: usa un toast o alert simple
+                        alert('¡Enlace copiado al portapapeles!');
+                    } catch (err) {
+                        console.error('No se pudo copiar:', err);
+                        alert('Error al copiar enlace.');
+                    }
+                });
+            }
+
+            // Evitar que los links del menú cierren la página accidentalmente (los externos seguirán)
+            const menuLinks = shareMenu.querySelectorAll('a');
+            menuLinks.forEach(a => {
+                a.addEventListener('click', (e) => {
+                    // Los que tienen href="#" deben prevenir la navegación
+                    if (a.getAttribute('href') === '#') e.preventDefault();
+                    // cerrar menú al clicar
+                    toggleMenu(false);
+                });
+            });
+
+            // Cerrar con ESC
+            document.addEventListener('keydown', (e) => {
+                if (e.key === 'Escape') toggleMenu(false);
+            });
         });
-
-        // Copiar enlace
-        document.getElementById('copyLink').addEventListener('click', (e) => {
-            e.preventDefault();
-            navigator.clipboard.writeText(currentURL)
-                .then(() => alert('¡Enlace copiado al portapapeles!'))
-                .catch(err => alert('Error al copiar enlace: ' + err));
-        });
-
-        // Twitter
-        document.getElementById('shareTwitter').href =
-            `https://twitter.com/intent/tweet?url=${encodeURIComponent(currentURL)}&text=${encodeURIComponent(title)}`;
-
-        // WhatsApp
-        document.getElementById('shareWhatsApp').href =
-            `https://api.whatsapp.com/send?text=${encodeURIComponent(title + ' ' + currentURL)}`;
-
-        // Facebook
-        document.getElementById('shareFacebook').href =
-            `https://www.facebook.com/sharer/sharer.php?u=${encodeURIComponent(currentURL)}`;
     </script>
 @endpush

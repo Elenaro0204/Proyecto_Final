@@ -2,10 +2,14 @@
 
 namespace App\Http\Controllers;
 
+use App\Mail\ContenidoActualizadoMail;
+use App\Mail\ContenidoCreadoMail;
+use App\Mail\ContenidoEliminadoMail;
 use App\Models\Foro;
 use App\Models\ForoReport;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Mail;
 use Illuminate\Support\Facades\Storage;
 
 class ForoController extends Controller
@@ -100,7 +104,13 @@ class ForoController extends Controller
             $data['imagen'] =  basename($path);
         }
 
-        Foro::create($data);
+        $foro = Foro::create($data);
+
+        $foro->load('autor');
+        $autor = $foro->autor;
+        $url = route('foros.show', $foro->id);
+
+        Mail::to($autor->email)->send(new ContenidoCreadoMail($autor, $foro, 'foro', $url));
 
         return redirect()->route('foros.index')->with('success', 'Foro creado correctamente.');
     }
@@ -186,6 +196,19 @@ class ForoController extends Controller
             $data['imagen'] = null;
         }
 
+        $user = $foro->autor;
+        $url = route('foros.show', $foro->id);
+
+        // Enviar email avisando
+        Mail::to($user->email)->send(
+            new ContenidoActualizadoMail($user, $foro, 'foro', $url)
+        );
+
+        // Copia al admin
+        Mail::to('soportemarvelpedia@gmail.com')->send(
+            new ContenidoActualizadoMail($user, $foro, 'foro', $url)
+        );
+
         $foro->update($data);
 
         return redirect()->route('foros.show', $foro->id)
@@ -194,15 +217,22 @@ class ForoController extends Controller
 
     public function destroy($id)
     {
-        $foro = Foro::findOrFail($id);
+        $foro = Foro::with('autor')->findOrFail($id);
 
-        // Solo el autor o admin pueden eliminar
-        if (Auth::id() !== $foro->user_id && !auth()->User::isAdmin()) {
-            abort(403, 'No autorizado');
-        }
+        $user = $foro->autor;
+
+        // Enviar email avisando
+        Mail::to($user->email)->send(
+            new ContenidoEliminadoMail($user, $foro, 'foro')
+        );
+
+        // Copia al admin
+        Mail::to('soportemarvelpedia@gmail.com')->send(
+            new ContenidoEliminadoMail($user, $foro, 'foro')
+        );
 
         $foro->delete();
 
-        return redirect()->route('foros.index')->with('success', 'Foro eliminado correctamente');
+        return redirect()->back()->with('success', 'Foro eliminado correctamente');
     }
 }

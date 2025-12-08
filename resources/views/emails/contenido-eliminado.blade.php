@@ -84,38 +84,39 @@
 <body>
     <div class="email-container">
 
-        <h2>🔔 Contenido Reportado</h2>
+        <h2>🔔 Contenido Eliminado</h2>
 
-        <p>Hola <strong>{{ $owner->name }}</strong>,</p>
+        <p>Hola <strong>{{ $user->name }}</strong>,</p>
 
         <div class="highlight-box">
-            <p><strong>Uno de tus contenidos ha sido reportado.</strong></p>
+            <p><strong>Uno de tus contenidos ha sido eliminado.</strong></p>
         </div>
 
-        <p class="section-title">📌 Contenido afectado:</p>
-        <p>{{ $contenido->entity_title ?? ($contenido->contenido ?? ($contenido->titulo ?? 'Sin título')) }}</p>
+                {{-- PARA MENSAJES --}}
+        @if ($tipo === 'mensaje')
+            <p><strong>Mensaje:</strong></p>
+            <p>{{ $contenido->contenido }}</p>
 
-        <p class="section-title">👤 Reportado por:</p>
-        <p>{{ $reporter->name }}</p>
+            {{-- PARA FOROS --}}
+        @elseif ($tipo === 'foro')
+            <p><strong>Foro:</strong> {{ $contenido->titulo }}</p>
+            <p><strong>Tu publicación:</strong></p>
+            <p>{{ $contenido->mensaje }}</p>
+            {{-- PARA RESEÑAS --}}
+        @elseif ($tipo === 'resena')
+            <p><strong>Reseña de:</strong> {{ $contenido->entity_title }}</p>
+            <p><strong>Tu valoración:</strong> {{ $contenido->rating }}/5 ⭐</p>
+            <p><strong>Tu reseña:</strong></p>
+            <p>{{ $contenido->content }}</p>
 
-        <p class="section-title">⏳ Fecha límite para resolver:</p>
-        <div class="deadline">
-            {{ $reporte->deadline->format('d/m/Y H:i') }}
-        </div>
+            {{-- POR SI FALTARA ALGO --}}
+        @else
+            <p>Contenido eliminado sin tipo específico.</p>
+        @endif
 
-        <center>
-            <a href="{{ $link }}" class="button">🔍 Ver reporte</a>
-        </center>
-
-        <hr>
-
-        <p>
-            Por favor, revisa la plataforma para tomar las acciones necesarias.<br>
-            Mantener tu contenido revisado ayuda a que la comunidad continúe siendo un espacio seguro.
-        </p>
 
         <footer class="footer">
-            <p>© {{ date('Y') }} Marvelpedia — Sistema de revisión de contenido</p>
+            <p>© {{ date('Y') }} Marvelpedia — Notificación automática. Por favor, no respondas a este correo.</p>
             <!-- Firma -->
             <table
                 style="width:100%; border-top:1px solid #ddd; margin-top:25px; padding-top:15px; font-family:Arial, sans-serif;">

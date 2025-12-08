@@ -30,14 +30,27 @@
             <label for="remember_me" class="ml-2 text-sm text-gray-600">{{ __('Recuérdame') }}</label>
         </div>
 
-        <!-- Botón y link -->
-        <div class="flex items-center justify-between mt-6">
+        <!-- Contraseña -->
+        <div class="mt-6 text-center">
             @if (Route::has('password.request'))
                 <a class="text-sm text-indigo-600 hover:underline" href="{{ route('password.request') }}">
                     {{ __('¿Olvidaste tu contraseña?') }}
                 </a>
             @endif
+        </div>
 
+        <!-- Registro -->
+        <div class="mt-6 text-center">
+            <p class="text-sm text-gray-600">
+                ¿No tienes cuenta?
+                <a href="{{ route('register') }}" class="text-indigo-600 hover:underline font-medium">
+                    Regístrate aquí
+                </a>
+            </p>
+        </div>
+
+        <!-- Botón y link -->
+        <div class="flex items-center justify-between mt-6">
             <a href="{{ url()->previous() }}" class="px-4 py-2 rounded-lg bg-gray-200 hover:bg-gray-300">
                 Cancelar
             </a>
@@ -45,7 +58,6 @@
             <x-primary-button class="bg-indigo-600 hover:bg-indigo-700 text-white px-4 py-2 rounded-lg">
                 {{ __('Iniciar Sesión') }}
             </x-primary-button>
-        </div>
         </div>
     </form>
 @endsection

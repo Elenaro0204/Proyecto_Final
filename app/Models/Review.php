@@ -23,6 +23,11 @@ class Review extends Model
         return $this->belongsTo(User::class);
     }
 
+    public function autor()
+    {
+        return $this->belongsTo(User::class, 'user_id');
+    }
+
     public function report()
     {
         return $this->hasMany(ReviewReport::class);
