@@ -5,33 +5,41 @@
 <div
     class="bg-white rounded-lg shadow-md border border-gray-200 hover:shadow-xl transition overflow-hidden flex flex-col">
     @php
+        use Illuminate\Support\Facades\Http;
+
         $poster = null;
         $titleInfo = null;
-        $omdbData = null;
+        $tmdbData = null;
 
-        if (in_array($review->type, ['pelicula', 'serie']) && preg_match('/^tt\d+$/', $review->entity_id)) {
+        $apiKey = '068f9f8748c67a559a92eafb6a8eeda7';
+
+        if (in_array($review->type, ['pelicula', 'serie'])) {
             try {
-                $response = Http::get('https://www.omdbapi.com/', [
-                    'apikey' => '1f00bd0e',
-                    'i' => $review->entity_id,
-                ]);
+                if ($review->type === 'pelicula') {
+                    $response = Http::get("https://api.themoviedb.org/3/movie/{$review->entity_id}", [
+                        'api_key' => $apiKey,
+                        'language' => 'es-ES',
+                    ]);
+                } elseif ($review->type === 'serie') {
+                    $response = Http::get("https://api.themoviedb.org/3/tv/{$review->entity_id}", [
+                        'api_key' => $apiKey,
+                        'language' => 'es-ES',
+                    ]);
+                }
 
                 $data = $response->json();
 
-                if (isset($data['Poster']) && $data['Poster'] != 'N/A') {
-                    $poster = $data['Poster'];
+                if (isset($data['poster_path'])) {
+                    $poster = 'https://image.tmdb.org/t/p/w500' . $data['poster_path'];
                 }
 
-                if (isset($data['Title'])) {
-                    $titleInfo = $data['Title'];
-                }
+                $titleInfo = $data['title'] ?? ($data['name'] ?? 'Desconocido');
 
-                // 👇 ESTA LÍNEA ES LA QUE FALTABA
-                $omdbData = $data;
+                $tmdbData = $data;
             } catch (\Exception $e) {
                 $poster = null;
                 $titleInfo = null;
-                $omdbData = null;
+                $tmdbData = null;
             }
         }
     @endphp
@@ -58,10 +66,10 @@
         <div class="mb-2 text-sm text-gray-500">
             <span class="font-medium capitalize">{{ $review->type }}</span> |
             Título: {{ $titleInfo ?? 'Desconocido' }}
-            @if (isset($omdbData))
-                | Año: {{ $omdbData['Year'] ?? 'Desconocido' }}
-                | Género: {{ $omdbData['Genre'] ?? 'Desconocido' }}
-                | Director: {{ $omdbData['Director'] ?? 'Desconocido' }}
+            @if ($tmdbData)
+                | Año: {{ substr($tmdbData['release_date'] ?? ($tmdbData['first_air_date'] ?? 'Desconocido'), 0, 4) }}
+                | Género:
+                {{ isset($tmdbData['genres']) ? implode(', ', array_column($tmdbData['genres'], 'name')) : 'Desconocido' }}
             @endif
         </div>
 

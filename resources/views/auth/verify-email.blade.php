@@ -3,6 +3,13 @@
 @extends('layouts.guest')
 
 @section('content')
+    @if (request()->has('verified'))
+        <script>
+            // Recargar automáticamente después de verificar el correo
+            window.location.href = "/profile";
+        </script>
+    @endif
+
     <h1 class="text-xl font-semibold text-gray-800 mb-4 text-center">
         ¡Verifica tu correo electrónico!
     </h1>

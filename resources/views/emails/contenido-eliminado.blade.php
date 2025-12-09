@@ -92,18 +92,40 @@
             <p><strong>Uno de tus contenidos ha sido eliminado.</strong></p>
         </div>
 
-                {{-- PARA MENSAJES --}}
+        {{-- PARA MENSAJES --}}
         @if ($tipo === 'mensaje')
+            <h2>🔔 Mensaje Eliminado</h2>
+
+            <p>Hola <strong>{{ $user->name }}</strong>,</p>
+
+            <div class="highlight-box">
+                <p><strong>Uno de tus mensajes ha sido eliminado.</strong></p>
+            </div>
+
             <p><strong>Mensaje:</strong></p>
             <p>{{ $contenido->contenido }}</p>
 
             {{-- PARA FOROS --}}
         @elseif ($tipo === 'foro')
+            <h2>🔔 Foro Eliminado</h2>
+
+            <p>Hola <strong>{{ $user->name }}</strong>,</p>
+
+            <div class="highlight-box">
+                <p><strong>Uno de tus foros ha sido eliminado.</strong></p>
+            </div>
             <p><strong>Foro:</strong> {{ $contenido->titulo }}</p>
             <p><strong>Tu publicación:</strong></p>
             <p>{{ $contenido->mensaje }}</p>
             {{-- PARA RESEÑAS --}}
         @elseif ($tipo === 'resena')
+            <h2>🔔 Reseña Eliminada</h2>
+
+            <p>Hola <strong>{{ $user->name }}</strong>,</p>
+
+            <div class="highlight-box">
+                <p><strong>Una de tus reseñas ha sido eliminada.</strong></p>
+            </div>
             <p><strong>Reseña de:</strong> {{ $contenido->entity_title }}</p>
             <p><strong>Tu valoración:</strong> {{ $contenido->rating }}/5 ⭐</p>
             <p><strong>Tu reseña:</strong></p>

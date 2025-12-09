@@ -104,14 +104,14 @@
 <body>
     <div class="email-container">
 
-        <h2>🔔 Contenido Actualizado</h2>
-
-        <p>Hola <strong>{{ $user->name }}</strong>,</p>
-
-        <p class="section-title">📌 Contenido afectado:</p>
-
         {{-- MENSAJE --}}
         @if ($tipo === 'mensaje')
+            <h2>🔔 Mensaje Actualizado</h2>
+
+            <p>Hola <strong>{{ $user->name }}</strong>,</p>
+
+            <p class="section-title">📌 Mensaje afectado:</p>
+
             <p><strong>Mensaje:</strong></p>
             <div class="highlight-box">
                 {{ $contenido->contenido }}
@@ -121,6 +121,12 @@
 
             {{-- FORO --}}
         @elseif ($tipo === 'foro')
+            <h2>🔔 Foro Actualizado</h2>
+
+            <p>Hola <strong>{{ $user->name }}</strong>,</p>
+
+            <p class="section-title">📌 Foro afectado:</p>
+
             <p><strong>Foro:</strong> {{ $contenido->titulo }}</p>
 
             <p class="section-title">Tu publicación:</p>
@@ -132,6 +138,12 @@
 
             {{-- RESEÑA --}}
         @elseif ($tipo === 'resena')
+            <h2>🔔 Reseña Actualizada</h2>
+
+            <p>Hola <strong>{{ $user->name }}</strong>,</p>
+
+            <p class="section-title">📌 Reseña afectada:</p>
+
             <p><strong>Reseña de:</strong> {{ $contenido->entity_title }}</p>
 
             <p><strong>Valoración:</strong> {{ $contenido->rating }}/5 ⭐</p>

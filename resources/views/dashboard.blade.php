@@ -40,10 +40,6 @@
                 <p><strong>Personaje favorito:</strong> {{ Auth::user()->favorito_personaje }}</p>
             @endif
 
-            {{-- @if (Auth::user()->favorito_comic)
-                <p><strong>Cómic favorito:</strong> {{ Auth::user()->favorito_comic }}</p>
-            @endif --}}
-
             @if (Auth::user()->twitter && Auth::user()->instagram)
                 <div class="d-flex justify-content-center justify-content-md-start gap-2 m-2">
 
@@ -108,13 +104,17 @@
                                 <p><strong>Calificación:</strong> {{ $resena->rating }}/10</p>
                                 <p><strong>Comentario:</strong> {{ $resena->content }}</p>
                                 <p class="text-gray-500 text-sm mt-1">({{ $resena->created_at->diffForHumans() }})</p>
+                                <a href="{{ route('resenas.ver', $resena->id) }}"
+                                    class="px-3 py-1 bg-indigo-500 text-white rounded hover:bg-indigo-600 transition">
+                                    Ver reseña
+                                </a>
                             </div>
                         </div>
                     @empty
                         <p class="text-gray-500">No hay reseñas recientes.</p>
                     @endforelse
 
-                    <div class="mt-3">
+                    <div class="mt-3 overflow-x-auto">
                         {{ $reseñas->appends(['mensajes_page' => request('mensajes_page')])->links() }}
                     </div>
                 </div>
@@ -125,42 +125,47 @@
                 <h4 class="text-l font-bold mb-4">
                     💬 Tus Mensajes
                 </h4>
+                <div class="mt-4 space-y-4">
+                    @forelse ($mensajes as $foro_id => $mensajesForo)
+                        <div class="border rounded-lg p-4 bg-gray-50">
+                            {{-- Título del foro --}}
+                            <button @click="openForos[{{ $foro_id }}] = !openForos[{{ $foro_id }}]"
+                                class="w-full flex justify-between items-center font-semibold text-indigo-600 text-lg hover:bg-gray-100 px-3 py-2 rounded">
+                                <span>Mensajes del Foro: {{ $mensajesForo[0]->foro->titulo ?? 'Foro eliminado' }}</span>
+                                <span x-text="openForos[{{ $foro_id }}] ? '▲' : '▼'"></span>
+                            </button>
 
-                @forelse ($mensajes as $foro_id => $mensajesForo)
-                    <div class="border rounded-lg p-4 bg-gray-50">
-                        {{-- Título del foro --}}
-                        <button @click="openForos[{{ $foro_id }}] = !openForos[{{ $foro_id }}]"
-                            class="w-full flex justify-between items-center font-semibold text-indigo-600 text-lg hover:bg-gray-100 px-3 py-2 rounded">
-                            <span>Mensajes del Foro: {{ $mensajesForo[0]->foro->titulo ?? 'Foro eliminado' }}</span>
-                            <span x-text="openForos[{{ $foro_id }}] ? '▲' : '▼'"></span>
-                        </button>
-
-                        {{-- Mensajes del foro --}}
-                        <div x-show="openForos[{{ $foro_id }}]" x-transition
-                            class="mt-2 ml-4
+                            {{-- Mensajes del foro --}}
+                            <div x-show="openForos[{{ $foro_id }}]" x-transition
+                                class="mt-2 ml-4
                                 text-gray-700 bg-gray-50 p-3 rounded-lg shadow-inner">
-                            @foreach ($mensajesForo as $mensaje)
-                                <div class="pl-4 mb-2 border-l-2 border-indigo-300">
-                                    <p class="text-gray-700">{{ $mensaje->contenido }}</p>
-                                    <p class="text-gray-400 text-sm">({{ $mensaje->created_at->diffForHumans() }})</p>
+                                @foreach ($mensajesForo as $mensaje)
+                                    <div class="pl-4 mb-2 border-l-2 border-indigo-300">
+                                        <p class="text-gray-700">{{ $mensaje->contenido }}</p>
+                                        <p class="text-gray-400 text-sm">({{ $mensaje->created_at->diffForHumans() }})</p>
+                                        <a href="{{ route('foros.show', $mensaje->foro_id) }}"
+                                            class="px-3 py-1 bg-indigo-500 text-white rounded hover:bg-indigo-600 transition">
+                                            Ver mensaje
+                                        </a>
 
-                                    @if ($mensaje->respuestas)
-                                        @foreach ($mensaje->respuestas as $respuesta)
-                                            <div class="pl-4 mt-1 border-l-2 border-indigo-200">
-                                                <p class="text-gray-600">{{ $respuesta->contenido }}</p>
-                                                <p class="text-gray-400 text-xs">
-                                                    ({{ $respuesta->created_at->diffForHumans() }})
-                                                </p>
-                                            </div>
-                                        @endforeach
-                                    @endif
-                                </div>
-                            @endforeach
+                                        @if ($mensaje->respuestas)
+                                            @foreach ($mensaje->respuestas as $respuesta)
+                                                <div class="pl-4 mt-1 border-l-2 border-indigo-200">
+                                                    <p class="text-gray-600">{{ $respuesta->contenido }}</p>
+                                                    <p class="text-gray-400 text-xs">
+                                                        ({{ $respuesta->created_at->diffForHumans() }})
+                                                    </p>
+                                                </div>
+                                            @endforeach
+                                        @endif
+                                    </div>
+                                @endforeach
+                            </div>
                         </div>
-                    </div>
-                @empty
-                    <p class="text-gray-500">No hay mensajes recientes.</p>
-                @endforelse
+                    @empty
+                        <p class="text-gray-500">No hay mensajes recientes.</p>
+                    @endforelse
+                </div>
             </div>
 
             {{-- Foros donde participa el usuario --}}
@@ -178,20 +183,6 @@
 
                         {{-- Contenido del foro desplegable --}}
                         <div x-show="openForos[{{ $foro->id }}]" x-transition class="mt-3 space-y-3 text-gray-700">
-                            {{-- Botones de edición si eres propietaria --}}
-                            @if (auth()->id() === $foro->user_id)
-                                <div class="flex space-x-2 mb-2">
-                                    <a href="{{ route('foros.edit', $foro) }}"
-                                        class="text-blue-600 hover:underline">Editar</a>
-                                    <form action="{{ route('foros.destroy', $foro) }}" method="POST"
-                                        onsubmit="return confirm('¿Seguro que quieres eliminar este foro?');">
-                                        @csrf
-                                        @method('DELETE')
-                                        <button type="submit" class="text-red-600 hover:underline">Eliminar</button>
-                                    </form>
-                                </div>
-                            @endif
-
                             {{-- Información del foro --}}
                             <p>{{ $foro->descripcion }}</p>
                             <p class="text-gray-500 text-sm">Creado: {{ $foro->created_at->format('d/m/Y H:i') }}</p>
@@ -199,6 +190,10 @@
                                 <p class="text-gray-400 text-xs">Última actualización:
                                     {{ $foro->updated_at->diffForHumans() }}</p>
                             @endif
+                            <a href="{{ route('foros.show', $foro->id) }}"
+                                class="px-3 py-1 bg-indigo-500 text-white rounded hover:bg-indigo-600 transition">
+                                Ver Foro
+                            </a>
 
                             {{-- Mensajes --}}
                             <div x-data="{ openMensajesForo: {} }" class="mt-2 space-y-2">
@@ -242,6 +237,10 @@
                 @empty
                     <p class="text-gray-500">No has creado ni participado en ningún foro todavía.</p>
                 @endforelse
+
+                <div class="mt-3 overflow-x-auto">
+                    {{ $foros->appends(['mensajes_page' => request('mensajes_page')])->links() }}
+                </div>
             </div>
 
         </div>

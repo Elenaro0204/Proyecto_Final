@@ -20,35 +20,55 @@ class ProfileController extends Controller
     public function show(Request $request): View
     {
         $user = $request->user();
+        $apiKey = '068f9f8748c67a559a92eafb6a8eeda7';
 
         // Reseñas paginadas
         $reseñas = $user->reviews()
             ->latest()
             ->paginate(5, ['*'], 'reseñas_page');
 
-        // Mensajes paginados
-        $mensajes = $user->mensajes()
-            ->with(['foro', 'respuestas']) // 'respuestas' es la relación de respuestas de un mensaje
-            ->latest()
-            ->get()
-            ->groupBy(fn($m) => $m->foro_id); // agrupa por foro
+        // Mensajes del usuario
+        // Obtener mensajes paginados
+        $mensajesQuery = $user->mensajes()
+            ->with(['foro', 'respuestas'])
+            ->latest();
 
-        // Foros donde el usuario ha participado
-        $forosParticipa  = $user->forosParticipa()
+        $mensajes = $mensajesQuery->paginate(5, ['*'], 'mensajes_page');
+
+        // Agrupamos después de la paginación (colección)
+        $mensajesAgrupados = $mensajes->getCollection()->groupBy('foro_id');
+
+        // Reemplazamos la colección dentro del paginator
+        $mensajes->setCollection($mensajesAgrupados);
+
+
+        // Foros donde participa
+        $forosParticipa = $user->forosParticipa()
             ->with(['mensajes' => function ($q) use ($user) {
                 $q->where('user_id', $user->id)->latest();
             }])
-            ->get();
+            ->paginate(5, ['*'], 'foros_page');
 
-        // Traer info de OMDb para cada reseña
+        // Obtener info de TMDB para cada reseña
         foreach ($reseñas as $resena) {
-            if ($resena->entity_id) {
-                $response = Http::get('https://www.omdbapi.com/', [
-                    'apikey' => '1f00bd0e',
-                    'i' => $resena->entity_id,
+
+            if ($resena->entity_id && $resena->type) {
+
+                // película → movie , serie → tv
+                $tmdbType = $resena->type === 'pelicula' ? 'movie' : 'tv';
+
+                // Llamada a TMDB
+                $response = Http::get("https://api.themoviedb.org/3/{$tmdbType}/{$resena->entity_id}", [
+                    'api_key' => $apiKey,
+                    'language' => 'es-ES'
                 ]);
-                $info = $response->json();
-                $resena->titulo_pelicula = $info['Title'] ?? 'Título no disponible';
+
+                $data = $response->json();
+
+                // Título disponible:
+                $titulo = $data['title'] ?? $data['name'] ?? null;
+
+                $resena->titulo_pelicula = $titulo ?: 'Título no disponible';
             } else {
                 $resena->titulo_pelicula = 'Título no disponible';
             }

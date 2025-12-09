@@ -118,18 +118,18 @@
 <body>
     <div class="email-container">
 
-        <h2>🔔 Contenido Creado</h2>
-
-        <p>Hola <strong>{{ $user->name }}</strong>,</p>
-
-        <div class="highlight-box">
-            <p><strong>Se ha creado un nuevo contenido asociado a tu cuenta.</strong></p>
-        </div>
-
-        <p class="section-title">📌 Contenido afectado:</p>
-
         {{-- MENSAJE --}}
         @if ($tipo === 'mensaje')
+            <h2>🔔 Nuevo Mensaje Creado</h2>
+
+            <p>Hola <strong>{{ $user->name }}</strong>,</p>
+
+            <div class="highlight-box">
+                <p><strong>Se ha creado un nuevo contenido asociado a tu cuenta.</strong></p>
+            </div>
+
+            <p class="section-title">📌 Mensaje afectado:</p>
+
             <p><strong>Mensaje:</strong></p>
             <div class="highlight-box">
                 {{ $contenido->contenido }}
@@ -138,6 +138,16 @@
             <p><a class="button" href="{{ $url ?? url('/foros') }}">👉 Ver nuevo mensaje</a></p>
             {{-- RESPUESTA --}}
         @elseif ($tipo === 'respuesta')
+            <h2>🔔 Nueva Respuesta en el Foro</h2>
+
+            <p>Hola <strong>{{ $user->name }}</strong>,</p>
+
+            <div class="highlight-box">
+                <p><strong>Se ha creado un nuevo contenido asociado a tu cuenta.</strong></p>
+            </div>
+
+            <p class="section-title">📌 Foro afectado:</p>
+
             <p><strong>Te han respondido en el foro:</strong></p>
 
             <p class="section-title">Tu mensaje original:</p>
@@ -154,6 +164,16 @@
 
             {{-- FORO --}}
         @elseif ($tipo === 'foro')
+            <h2>🔔 Nuevo Foro Creado</h2>
+
+            <p>Hola <strong>{{ $user->name }}</strong>,</p>
+
+            <div class="highlight-box">
+                <p><strong>Se ha creado un nuevo contenido asociado a tu cuenta.</strong></p>
+            </div>
+
+            <p class="section-title">📌 Nuevo foro creado:</p>
+
             <p><strong>Foro:</strong> {{ $contenido->titulo }}</p>
 
             <p class="section-title">Tu publicación:</p>
@@ -161,6 +181,16 @@
 
             {{-- RESEÑA --}}
         @elseif ($tipo === 'resena')
+            <h2>🔔 Nueva Reseña Publicada</h2>
+
+            <p>Hola <strong>{{ $user->name }}</strong>,</p>
+
+            <div class="highlight-box">
+                <p><strong>Se ha creado un nuevo contenido asociado a tu cuenta.</strong></p>
+            </div>
+
+            <p class="section-title">📌 Nueva reseña publicada:</p>
+
             <p><strong>Reseña de:</strong> {{ $contenido->entity_title }}</p>
 
             <p><strong>Valoración:</strong> {{ $contenido->rating }}/5 ⭐</p>

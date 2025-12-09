@@ -32,7 +32,8 @@ class ContenidoReportadoMail extends Mailable
 
     public function build()
     {
-        return $this->subject('Tu contenido ha sido reportado')
+        return $this->from('soportemarvelpedia@gmail.com', 'Marvelpedia Soporte')
+            ->subject('Tu contenido ha sido reportado')
             ->view('emails.contenido-reportado');
     }
 }

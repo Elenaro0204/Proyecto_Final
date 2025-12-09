@@ -16,6 +16,8 @@ use Illuminate\Support\Facades\Mail;
 
 class ResenaController extends Controller
 {
+    private $apiKey = "068f9f8748c67a559a92eafb6a8eeda7";
+
     // Mostrar reseñas de una entidad (película, serie...)
     public function index(Request $request)
     {
@@ -82,28 +84,62 @@ class ResenaController extends Controller
 
         $entity = null;
 
-        if ($review->type && $review->entity_id && in_array($review->type, ['pelicula', 'serie'])) {
-            try {
-                $response = Http::get('https://www.omdbapi.com/', [
-                    'apikey' => '1f00bd0e',
-                    'i' => $review->entity_id,
-                ]);
-                $data = $response->json();
-                if (isset($data['Response']) && $data['Response'] === 'True') {
-                    $entity = [
-                        'title' => $data['Title'] ?? null,
-                        'year' => $data['Year'] ?? null,
-                        'genre' => $data['Genre'] ?? null,
-                        'director' => $data['Director'] ?? null,
-                        'actors' => $data['Actors'] ?? null,
-                        'poster' => $data['Poster'] != 'N/A' ? $data['Poster'] : null,
-                        'plot' => $data['Plot'] ?? null,
-                    ];
+        if ($review->type === 'pelicula') {
+            $response = Http::get("https://api.themoviedb.org/3/movie/{$review->entity_id}?api_key={$this->apiKey}&language=es-ES");
+        } elseif ($review->type === 'serie') {
+            $response = Http::get("https://api.themoviedb.org/3/tv/{$review->entity_id}?api_key={$this->apiKey}&language=es-ES");
+        }
+
+        $data = $response->json();
+
+        $tmdbType = $review->type === 'pelicula' ? 'movie' : 'tv';
+
+        $credits = Http::get("https://api.themoviedb.org/3/{$tmdbType}/{$review->entity_id}/credits", [
+            'api_key'   => $this->apiKey,
+            'language'  => 'es-ES'
+        ])->json();
+
+        $director = 'Desconocido';
+        if (!empty($credits['crew'])) {
+            foreach ($credits['crew'] as $member) {
+                if ($member['job'] === 'Director') {
+                    $director = $member['name'];
+                    break;
                 }
-            } catch (\Exception $e) {
-                $entity = null;
             }
         }
+
+        $actorsList = [];
+
+        foreach ($credits['cast'] ?? [] as $actor) {
+            $name = $actor['name'];
+
+            // Crear URL a Wikipedia en español
+            $wikiUrl = "https://es.wikipedia.org/wiki/" . str_replace(' ', '_', $name);
+
+            $actorsList[] = [
+                'name' => $name,
+                'wiki' => $wikiUrl
+            ];
+        }
+
+        // Limitar a 10 actores
+        $actorsList = array_slice($actorsList, 0, 10);
+
+        $entity = [
+            'title'       => $data['title'] ?? $data['name'] ?? null,
+            'year'        => substr($data['release_date'] ?? $data['first_air_date'] ?? 'Desconocido', 0, 4),
+            'overview'    => $data['overview'] ?? 'Sin descripción disponible.',
+            'genres'      => implode(', ', array_column($data['genres'] ?? [], 'name')),
+            'director'    => $director,
+            'actors'      => $actorsList,
+            'score'       => $data['vote_average'] ?? 'N/A',
+            'country'     => implode(', ', array_column($data['production_countries'] ?? [], 'name')),
+            'language'    => $data['original_language'] ?? 'Desconocido',
+            'poster'      => isset($data['poster_path'])
+                ? 'https://image.tmdb.org/t/p/w500' . $data['poster_path']
+                : null,
+        ];
 
         return response()->json([
             'review' => $review,
@@ -123,6 +159,74 @@ class ResenaController extends Controller
         return view('resenas.index', compact('reviews'));
     }
 
+    // Mostrar una reseña específica
+    public function showResena($id)
+    {
+        $review = Review::with('user')->findOrFail($id);
+
+        $entity = null;
+
+        if ($review->type === 'pelicula') {
+            $response = Http::get("https://api.themoviedb.org/3/movie/{$review->entity_id}?api_key={$this->apiKey}&language=es-ES");
+        } elseif ($review->type === 'serie') {
+            $response = Http::get("https://api.themoviedb.org/3/tv/{$review->entity_id}?api_key={$this->apiKey}&language=es-ES");
+        }
+
+        $data = $response->json();
+
+        $tmdbType = $review->type === 'pelicula' ? 'movie' : 'tv';
+
+        $credits = Http::get("https://api.themoviedb.org/3/{$tmdbType}/{$review->entity_id}/credits", [
+            'api_key'   => $this->apiKey,
+            'language'  => 'es-ES'
+        ])->json();
+
+        $director = 'Desconocido';
+        if (!empty($credits['crew'])) {
+            foreach ($credits['crew'] as $member) {
+                if ($member['job'] === 'Director') {
+                    $director = $member['name'];
+                    break;
+                }
+            }
+        }
+
+        $actorsList = [];
+
+        foreach ($credits['cast'] ?? [] as $actor) {
+            $name = $actor['name'];
+
+            // Crear URL a Wikipedia en español
+            $wikiUrl = "https://es.wikipedia.org/wiki/" . str_replace(' ', '_', $name);
+
+            $actorsList[] = [
+                'name' => $name,
+                'wiki' => $wikiUrl
+            ];
+        }
+
+        // Limitar a 10 actores
+        $actorsList = array_slice($actorsList, 0, 10);
+
+        $entity = [
+            'title'       => $data['title'] ?? $data['name'] ?? null,
+            'year'        => substr($data['release_date'] ?? $data['first_air_date'] ?? 'Desconocido', 0, 4),
+            'overview'    => $data['overview'] ?? 'Sin descripción disponible.',
+            'genres'      => implode(', ', array_column($data['genres'] ?? [], 'name')),
+            'director'    => $director,
+            'actors'      => $actorsList,
+            'score'       => $data['vote_average'] ?? 'N/A',
+            'country'     => implode(', ', array_column($data['production_countries'] ?? [], 'name')),
+            'language'    => $data['original_language'] ?? 'Desconocido',
+            'poster'      => isset($data['poster_path'])
+                ? 'https://image.tmdb.org/t/p/w500' . $data['poster_path']
+                : null,
+        ];
+
+        // Si es petición normal → Blade
+        return view('resenas.show', compact('review', 'entity'));
+    }
+
     // Mostrar formulario para crear nueva reseña
     public function create(Request $request, $type = null, $entity_id = null)
     {
@@ -130,11 +234,25 @@ class ResenaController extends Controller
         $info = null;
 
         if ($type && $entity_id) {
-            $response = Http::get('https://www.omdbapi.com/', [
-                'apikey' => '1f00bd0e',
-                'i' => $entity_id,
+
+            $url = $type === 'pelicula'
+                ? "https://api.themoviedb.org/3/movie/{$entity_id}"
+                : "https://api.themoviedb.org/3/tv/{$entity_id}";
+
+            $response = Http::get($url, [
+                'api_key' => $this->apiKey,
+                'language' => 'es-ES',
             ]);
-            $info = $response->json();
+
+            $data = $response->json();
+
+            $info = [
+                'title' => $data['title'] ?? $data['name'] ?? 'Título desconocido',
+                'poster' => isset($data['poster_path'])
+                    ? 'https://image.tmdb.org/t/p/w500' . $data['poster_path']
+                    : null,
+                'overview' => $data['overview'] ?? null,
+            ];
         }
 
         return view('resenas.create', compact('type', 'entity_id', 'title', 'info'));
@@ -153,12 +271,15 @@ class ResenaController extends Controller
         $type = $request->type;
         $entityId = $request->entity_id;
 
-        // Obtener datos desde OMDb al guardar
-        $apiKey = '1f00bd0e';
-        $json = file_get_contents("https://www.omdbapi.com/?i={$request->entity_id}&apikey={$apiKey}");
-        $info = json_decode($json, true);
+        $endpoint = match ($type) {
+            'pelicula' => "https://api.themoviedb.org/3/movie/{$entityId}?api_key={$this->apiKey}&language=es-ES",
+            'serie'    => "https://api.themoviedb.org/3/tv/{$entityId}?api_key={$this->apiKey}&language=es-ES",
+        };
 
-        $title = $info['Title'] ?? 'Título desconocido';
+        $response = Http::get($endpoint)->json();
+
+        // TMDB devuelve "title" para películas y "name" para series
+        $title = $response['title'] ?? $response['name'] ?? 'Título desconocido';
 
         // Crear reseña
         $review = Review::create([
@@ -172,9 +293,17 @@ class ResenaController extends Controller
 
         $review->load('autor');
         $autor = $review->autor;
-        $url = route('resenas.show', $review->id);
 
+        // URL correcta para la vista
+        $url = route('resenas.ver', [
+            'id'   => $review->id,
+        ]);
+
+        // Enviar correo
         Mail::to($autor->email)->send(new ContenidoCreadoMail($autor, $review, 'resena', $url));
+
+        // Enviar copia al administrador
+        Mail::to('soportemarvelpedia@gmail.com')->send(new ContenidoCreadoMail($autor, $review, 'resena', $url));
 
         return redirect()->route('resenas')
             ->with('success', 'Reseña creada correctamente.');
@@ -184,17 +313,23 @@ class ResenaController extends Controller
     {
         $review = Review::findOrFail($id);
 
-        $title = $request->query('title');
-        $info = null;
+        // Cargar info TMDB
+        $endpoint = $review->type === 'pelicula'
+            ? "https://api.themoviedb.org/3/movie/{$review->entity_id}"
+            : "https://api.themoviedb.org/3/tv/{$review->entity_id}";
 
-        // Si quieres mostrar info de la entidad relacionada
-        if ($review->type && $review->entity_id) {
-            $response = Http::get('https://www.omdbapi.com/', [
-                'apikey' => '1f00bd0e',
-                'i' => $review->entity_id,
-            ]);
-            $info = $response->json();
-        }
+        $data = Http::get($endpoint, [
+            'api_key' => $this->apiKey,
+            'language' => 'es-ES',
+        ])->json();
+
+        $info = [
+            'title' => $data['title'] ?? $data['name'] ?? null,
+            'poster' => isset($data['poster_path'])
+                ? 'https://image.tmdb.org/t/p/w500' . $data['poster_path']
+                : null,
+            'overview' => $data['overview'] ?? null,
+        ];
 
         return view('resenas.edit', compact('review', 'title', 'info'));
     }

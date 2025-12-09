@@ -28,10 +28,10 @@
 
                         <div class="bg-gray-100 p-3 rounded mb-4 flex items-center gap-3">
 
-                            {{-- @if ($info && isset($info['Poster']))
-                            <img src="{{ $info['Poster'] }}" alt="{{ $title }}"
-                                class="w-16 h-24 object-cover rounded shadow">
-                        @endif --}}
+                            @if ($info && isset($info['Poster']))
+                                <img src="{{ $info['Poster'] }}" alt="{{ $title }}"
+                                    class="w-16 h-24 object-cover rounded shadow">
+                            @endif
 
                             <div>
                                 <p class="text-gray-700 mb-1">
@@ -50,10 +50,8 @@
                             Tipo de contenido:
                             <select name="type" id="typeSelect" class="border rounded p-2 w-full" required>
                                 <option value="">Selecciona un tipo...</option>
-                                {{-- <option value="comic">Cómic</option> --}}
                                 <option value="pelicula">Película</option>
                                 <option value="serie">Serie</option>
-                                {{-- <option value="personaje">Personaje</option> --}}
                             </select>
                         </label>
 
@@ -109,6 +107,8 @@
             const typeSelect = document.getElementById('typeSelect');
             const searchInput = document.getElementById('searchInput');
             const entitySelect = document.getElementById('entitySelect');
+            const entityIdHidden = document.getElementById('entityIdHidden');
+            const entityTitleHidden = document.getElementById('entityTitleHidden');
             let timeoutId = null;
 
             typeSelect.addEventListener('change', () => {
@@ -117,13 +117,18 @@
                     searchInput.disabled = false;
                     entitySelect.disabled = false;
                     entitySelect.innerHTML = '<option value="">Escribe para buscar...</option>';
+                    entityIdHidden.value = '';
+                    entityTitleHidden.value = '';
                 } else {
                     searchInput.disabled = true;
                     entitySelect.disabled = true;
                     entitySelect.innerHTML = '<option value="">Primero selecciona tipo...</option>';
+                    entityIdHidden.value = '';
+                    entityTitleHidden.value = '';
                 }
             });
 
+            // --- BÚSQUEDA USANDO TMDB ---
             searchInput.addEventListener('input', () => {
                 const type = typeSelect.value;
                 const query = searchInput.value.trim();
@@ -134,18 +139,23 @@
                 }
 
                 clearTimeout(timeoutId);
+
                 timeoutId = setTimeout(() => {
                     fetch(`/api/buscar/resenas?type=${type}&q=${encodeURIComponent(query)}`)
                         .then(res => res.json())
                         .then(data => {
-                            const results = data.results || data[type + 's'] || [];
+                            // TMDB devuelve: results: [...]
+                            const results = data.results || [];
                             entitySelect.innerHTML = '';
 
                             if (results.length > 0) {
                                 results.forEach(item => {
-                                    const name = item.title || item.name || item.Title;
+                                    const name = item.title || item.name || item.Title || item
+                                        .original_title || 'Sin título';
+                                    const id = item.id || item.imdbID || '';
                                     entitySelect.innerHTML +=
-                                        `<option value="${item.id || item.imdbID}" data-title="${name}">${name}</option>`;
+                                        `
+                                        <option data-tmdbid="${id}" data-title="${name}" value="${id}">${name}</option>`;
                                 });
                             } else {
                                 entitySelect.innerHTML =
@@ -155,14 +165,22 @@
                         .catch(() => {
                             entitySelect.innerHTML = '<option value="">Error al buscar resultados</option>';
                         });
+
                 }, 400);
             });
 
-            // Guardar título en el hidden cuando se selecciona entidad
+            // cuando el usuario selecciona una opción guardamos en los hidden (y en el select si quieres)
             entitySelect.addEventListener('change', () => {
                 const option = entitySelect.options[entitySelect.selectedIndex];
-                const title = option.dataset.title || "";
-                document.getElementById('entityTitleHidden').value = title;
+                if (!option) {
+                    entityIdHidden.value = '';
+                    entityTitleHidden.value = '';
+                    return;
+                }
+                const tmdbId = option.dataset.tmdbid ?? option.value ?? '';
+                const title = option.dataset.title ?? option.textContent.trim() ?? '';
+                entityIdHidden.value = tmdbId;
+                entityTitleHidden.value = title;
             });
         </script>
     @endif

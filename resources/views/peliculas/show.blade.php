@@ -99,16 +99,20 @@
 
                         <ul id="shareMenu"
                             class="absolute top-full mt-2 left-0 bg-white shadow-lg rounded-lg overflow-hidden hidden z-50 w-56">
-                            <li><a href="#" id="nativeShare" class="block px-4 py-2 hover:bg-gray-100"><i class="bi bi-phone"></i> Compartir
+                            <li><a href="#" id="nativeShare" class="block px-4 py-2 hover:bg-gray-100"><i
+                                        class="bi bi-phone"></i> Compartir
                                     directamente</a></li>
-                            <li><a href="#" id="copyLink" class="block px-4 py-2 hover:bg-gray-100"><i class="bi bi-link-45deg"></i> Copiar enlace</a>
+                            <li><a href="#" id="copyLink" class="block px-4 py-2 hover:bg-gray-100"><i
+                                        class="bi bi-link-45deg"></i> Copiar enlace</a>
                             </li>
                             <li><a href="#" id="shareTwitter" target="_blank" rel="noopener"
                                     class="block px-4 py-2 hover:bg-gray-100"><i class="bi bi-twitter"></i> Twitter</a></li>
                             <li><a href="#" id="shareWhatsApp" target="_blank" rel="noopener"
-                                    class="block px-4 py-2 hover:bg-gray-100"><i class="bi bi-whatsapp"></i> WhatsApp</a></li>
+                                    class="block px-4 py-2 hover:bg-gray-100"><i class="bi bi-whatsapp"></i> WhatsApp</a>
+                            </li>
                             <li><a href="#" id="shareFacebook" target="_blank" rel="noopener"
-                                    class="block px-4 py-2 hover:bg-gray-100"><i class="bi bi-facebook"></i> Facebook</a></li>
+                                    class="block px-4 py-2 hover:bg-gray-100"><i class="bi bi-facebook"></i> Facebook</a>
+                            </li>
                         </ul>
                     </div>
                 </div>
@@ -185,7 +189,7 @@
             </div>
 
             {{-- Paginación --}}
-            <div class="d-flex justify-content-center mt-3">
+            <div class="mt-3 overflow-x-auto">
                 {{ $backdropsPaginated->links() }}
             </div>
         </div>
@@ -385,6 +389,14 @@
             </div>
         </div>
     </div>
+@endsection
+
+@section('styles')
+    <style>
+        .pagination {
+            flex-wrap: nowrap !important;
+        }
+    </style>
 @endsection
 
 @push('scripts')

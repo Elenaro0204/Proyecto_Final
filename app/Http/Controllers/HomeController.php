@@ -13,7 +13,7 @@ class HomeController extends Controller
 {
     public function index()
     {
-
+        // -------- FOROS ----------
         $foros = Foro::latest()->take(8)->get()->map(function ($f) {
             return [
                 'title' => $f->titulo,
@@ -27,42 +27,44 @@ class HomeController extends Controller
             ];
         });
 
-        // Formatea los datos para el carrusel
+        // -------- RESEÑAS ----------
         $resenas = Review::latest()->take(8)->get()->map(function ($r) {
+
             $titulo = 'Desconocido';
             $imagen = asset('images/fondo-resenas.jpeg');
 
-            // Cacheamos por entity_id y type para no saturar la API
+            // Cacheamos por 6h
             $cacheKey = "{$r->type}_{$r->entity_id}";
             $data = Cache::remember($cacheKey, now()->addHours(6), function () use ($r) {
                 try {
-                    switch ($r->type) {
-                        case 'pelicula':
-                            $response = Http::get('http://www.omdbapi.com/', [
-                                'apikey' => '1f00bd0e',
-                                'i' => $r->entity_id
-                            ]);
-                            return $response->json();
-                        case 'serie':
-                            $response = Http::get('http://www.omdbapi.com/', [
-                                'apikey' => '1f00bd0e',
-                                'i' => $r->entity_id,
-                                'plot' => 'full'
-                            ]);
-                            return $response->json();
+                    // Cambia estas URLs si tus endpoints son otros
+                    if ($r->type === 'pelicula') {
+                        return Http::get("https://marvelpedia.ruix.iesruizgijon.es/api/peliculas/{$r->entity_id}")->json();
+                    }
+
+                    if ($r->type === 'serie') {
+                        return Http::get("https://marvelpedia.ruix.iesruizgijon.es/api/series/{$r->entity_id}")->json();
                     }
                 } catch (\Exception $e) {
                     return [];
                 }
             });
 
-            // Asignamos los valores según el tipo
-            switch ($r->type) {
-                case 'pelicula':
-                case 'serie':
-                    $titulo = $data['Title'] ?? $titulo;
-                    $imagen = ($data['Poster'] ?? '') !== 'N/A' ? $data['Poster'] : $imagen;
-                    break;
+            // Asignamos los valores
+            if (!empty($data)) {
+                $titulo = $data['titulo'] ?? $titulo;
+
+                $imagenApi = $data['imagen'] ?? null;
+
+                if ($imagenApi && $imagenApi !== 'N/A') {
+                    // Si tu API devuelve nombres de archivo locales
+                    if (!Str::startsWith($imagenApi, 'http')) {
+                        $imagen = asset('storage/portadas/' . $imagenApi);
+                    } else {
+                        // Si devuelve URL completa
+                        $imagen = $imagenApi;
+                    }
+                }
             }
 
             return [

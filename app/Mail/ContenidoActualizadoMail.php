@@ -28,16 +28,17 @@ class ContenidoActualizadoMail extends Mailable
     }
 
 
-     public function build()
+    public function build()
     {
         $subject = $this->tipo ? "Tu {$this->tipo} ha sido actualizado" : "Contenido Actualizado";
-        return $this->subject($subject)
-                    ->view('emails.contenido-actualizado')
-                    ->with([
-                        'user' => $this->user,
-                        'contenido' => $this->contenido,
-                        'tipo' => $this->tipo,
-                        'url' => $this->url,
-                    ]);
+        return $this->from('soportemarvelpedia@gmail.com', 'Marvelpedia Soporte')
+            ->subject($subject)
+            ->view('emails.contenido-actualizado')
+            ->with([
+                'user' => $this->user,
+                'contenido' => $this->contenido,
+                'tipo' => $this->tipo,
+                'url' => $this->url,
+            ]);
     }
 }

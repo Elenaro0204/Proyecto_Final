@@ -121,6 +121,7 @@ Route::middleware(['auth', 'verified'])->group(function () {
 
 Route::get('/resenas', [ResenaController::class, 'index'])->name('resenas');
 Route::get('/resenas/{type}/{id}', [ResenaController::class, 'show'])->name('resenas.show');
+Route::get('/resenas/{id}', [ResenaController::class, 'showResena'])->name('resenas.ver');
 
 Route::get('/foros', [ForoController::class, 'index'])->name('foros.index');
 Route::get('/foros/{foro}', [ForoController::class, 'show'])->name('foros.show');

@@ -301,7 +301,7 @@
             </div>
 
             {{-- Paginación --}}
-            <div class="d-flex justify-content-center mt-3">
+            <div class="mt-3 overflow-x-auto">
                 {{ $backdropsPaginated->links() }}
             </div>
         </div>
@@ -503,9 +503,15 @@
             </div>
         </div>
     </div>
-
 @endsection
 
+@section('styles')
+    <style>
+        .pagination {
+            flex-wrap: nowrap !important;
+        }
+    </style>
+@endsection
 
 @push('scripts')
     <script>
