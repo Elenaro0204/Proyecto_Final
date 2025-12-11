@@ -254,7 +254,7 @@
                             <div class="flex items-center gap-3 mb-1">
                                 <img src="{{ $r->user->avatar_url ?? asset('images/default-avatar.jpeg') }}"
                                     alt="Avatar" class="w-12 h-12 rounded-full border-2 border-yellow-400 object-cover">
-                                <strong>{{ $r->user->name ?? 'Anónimo' }}</strong>
+                                <strong><a href="{{ route('users.show', $r->user->id) }}">{{ $r->user->name ?? 'Anónimo' }}</a></strong>
                             </div>
 
                             {{-- Puntuación --}}

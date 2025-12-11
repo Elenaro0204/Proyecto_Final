@@ -33,7 +33,7 @@
             @endif
 
             <div class="mt-4 flex flex-wrap gap-4 items-center">
-                <span class="text-sm opacity-80">Creado por: {{ $foro->user->name ?? 'Desconocido' }}</span>
+                <span class="text-sm opacity-80">Creado por: <a href="{{ route('users.show', $foro->user->id) }}">{{ $foro->user->name ?? 'Desconocido' }}</a></span>
                 <span class="text-sm opacity-80">| {{ $foro->created_at->diffForHumans() }}</span>
                 <span
                     class="px-2 py-1 rounded-full text-sm font-semibold

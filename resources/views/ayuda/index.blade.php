@@ -11,7 +11,7 @@
     <!-- Sección de bienvenida -->
     <x-welcome-section title="¡Socorro! Necesito Ayuda"
         subtitle="Encuentra respuestas a tus preguntas frecuentes y aprende a navegar por Marvelpedia."
-        bgImage="{{ asset('images/fondo_imagen_inicio.jpeg') }}" />
+        bgImage="{{ asset('images/fondo_imagen_inicio.jpg') }}" />
 
     <div class="container p-5">
         <div class="row">

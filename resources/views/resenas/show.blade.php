@@ -14,10 +14,10 @@
         {{-- Cabecera --}}
         <div class="bg-white p-6 rounded-lg shadow-lg space-y-3">
             <h1 class="text-2xl font-bold text-indigo-600">{{ $entity['title'] ?? 'Reseña' }}</h1>
-            <p class="text-gray-500 text-sm">Escrita por <strong>{{ $review->user->name }}</strong> -
+            <p class="text-gray-500 text-sm">Escrita por <strong><a href="{{ route('users.show', $review->user->id) }}">{{ $review->user->name }}</a></strong> -
                 {{ $review->created_at->diffForHumans() }}</p>
 
-            <p class="text-lg mt-2"><strong>Calificación:</strong> ⭐ {{ $review->rating }}/10</p>
+            <p class="text-lg mt-2"><strong>Calificación:</strong> ⭐ {{ $review->rating }}/5</p>
 
             @if ($review->type && $review->entity_id)
                 <p class="text-gray-600"><strong>Tipo:</strong> {{ ucfirst($review->type) }}</p>

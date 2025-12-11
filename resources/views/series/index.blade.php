@@ -10,7 +10,7 @@
 
     <x-welcome-section title="Series del Multiverso Marvel"
         subtitle="Explora todas las series disponibles y descubre sus historias."
-        bgImage="{{ asset('images/fondo_imagen_inicio.jpeg') }}" />
+        bgImage="{{ asset('images/fondo_imagen_inicio.jpg') }}" />
 
     <div class="container mx-auto px-4 py-6">
 

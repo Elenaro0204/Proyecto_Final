@@ -11,7 +11,7 @@
 
             <div
                 class="mt-2 text-sm text-gray-500 flex flex-col sm:flex-row justify-between items-start sm:items-center gap-2">
-                <span>Por: {{ $mensaje->user->name ?? 'Desconocido' }}</span>
+                <span>Por: <a href="{{ route('users.show', $mensaje->user->id) }}">{{ $mensaje->user->name ?? 'Desconocido' }}</a></span>
                 <span>{{ $mensaje->created_at->diffForHumans() }}</span>
             </div>
 

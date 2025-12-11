@@ -224,7 +224,7 @@ class SerieController extends Controller
 
         // Adaptar campos al formato OMDb
         $serie = [
-            'id'          => $imdbID,
+            'id'          => $details['id'],
             'titulo'      => $details['name'] ?? 'Sin título',
             'anio'        => $details['first_air_date'] ?? 'Desconocido',
             'genero'      => implode(', ', array_column($details['genres'], 'name')),

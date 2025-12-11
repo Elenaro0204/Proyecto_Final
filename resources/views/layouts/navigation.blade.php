@@ -69,6 +69,7 @@
                 <x-slot name="content" class="bg-red-800 text-white rounded-lg shadow-lg border border-yellow-400">
                     <x-dropdown-link :href="route('resenas')">{{ __('Reseñas') }}</x-dropdown-link>
                     <x-dropdown-link :href="route('foros.index')">{{ __('Foros') }}</x-dropdown-link>
+                    <x-dropdown-link :href="route('users.index')">{{ __('Usuarios') }}</x-dropdown-link>
                 </x-slot>
             </x-dropdown>
 
@@ -220,6 +221,10 @@
                 <x-nav-link :href="route('foros.index')" :active="request()->routeIs('foros.index')"
                     class="block px-3 py-2 rounded-md hover:text-yellow-400 transition-colors">
                     Foros
+                </x-nav-link>
+                <x-nav-link :href="route('users.index')" :active="request()->routeIs('foros.index')"
+                    class="block px-3 py-2 rounded-md hover:text-yellow-400 transition-colors">
+                    Usuarios
                 </x-nav-link>
             </div>
         </div>

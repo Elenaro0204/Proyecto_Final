@@ -7,7 +7,7 @@
         ['label' => 'Perfil', 'url' => route('profile'), 'level' => 1],
     ]" />
 
-    <x-profile-header :user="Auth::user()" bgImage="{{ asset('images/fondo_imagen_inicio.jpeg') }}" />
+    <x-profile-header :user="Auth::user()" bgImage="{{ asset('images/fondo_imagen_inicio.jpg') }}" />
 
     <div class="container mx-auto py-6">
         <div class="bg-white p-5 rounded shadow space-y-6 mb-6">
@@ -101,7 +101,7 @@
                             <div x-show="openResenas[{{ $resena->id }}]" x-transition
                                 class="mt-2 ml-4
                                 text-gray-700 bg-gray-50 p-3 rounded-lg shadow-inner">
-                                <p><strong>Calificación:</strong> {{ $resena->rating }}/10</p>
+                                <p><strong>Calificación:</strong> {{ $resena->rating }}/5</p>
                                 <p><strong>Comentario:</strong> {{ $resena->content }}</p>
                                 <p class="text-gray-500 text-sm mt-1">({{ $resena->created_at->diffForHumans() }})</p>
                                 <a href="{{ route('resenas.ver', $resena->id) }}"
@@ -203,7 +203,7 @@
                                         <button
                                             @click="openMensajesForo[{{ $mensaje->id }}] = !openMensajesForo[{{ $mensaje->id }}]"
                                             class="w-full flex justify-between items-center text-left font-medium px-2 py-1 hover:bg-gray-100 rounded">
-                                            <span><strong>{{ $mensaje->user->name }}:</strong>
+                                            <span><strong><a href="{{ route('users.show', $mensaje->user->id) }}">{{ $mensaje->user->name }}:</a></strong>
                                                 {{ Str::limit($mensaje->contenido, 50) }}</span>
                                             <span x-text="openMensajesForo[{{ $mensaje->id }}] ? '▲' : '▼'"></span>
                                         </button>
@@ -220,7 +220,7 @@
                                             @if ($mensaje->respuestas)
                                                 @foreach ($mensaje->respuestas as $respuesta)
                                                     <div class="pl-4 mt-1 border-l-2 border-indigo-200">
-                                                        <p><strong>{{ $respuesta->user->name }}:</strong>
+                                                        <p><strong><a href="{{ route('users.show', $respuesta->user->id) }}">{{ $respuesta->user->name }}:</a></strong>
                                                             {{ $respuesta->contenido }}</p>
                                                         <p class="text-gray-400 text-xs">
                                                             ({{ $respuesta->created_at->diffForHumans() }})

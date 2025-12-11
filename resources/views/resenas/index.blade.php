@@ -10,7 +10,7 @@
 
     <x-welcome-section title="Reseñas del Multiverso Marvel"
         subtitle="Descubre lo que la comunidad opina sobre series y personajes. ¡Explora todas las reseñas publicadas!"
-        bgImage="{{ asset('images/fondo_imagen_inicio.jpeg') }}" />
+        bgImage="{{ asset('images/fondo_imagen_inicio.jpg') }}" />
 
     <div class="container mx-auto px-4 py-8" x-data="reviewModal()">
 

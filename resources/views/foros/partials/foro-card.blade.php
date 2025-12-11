@@ -19,7 +19,7 @@
             </div>
 
             <div class="flex flex-col gap-1">
-                <p class="text-xs md:text-sm opacity-70">Creado por: {{ $foro->user->name ?? 'Usuario desconocido' }}
+                <p class="text-xs md:text-sm opacity-70">Creado por: <a href="{{ route('users.show', $foro->user->id) }}">{{ $foro->user->name ?? 'Usuario desconocido' }}</a>
                 </p>
                 <div class="flex items-center gap-2 text-xs md:text-sm opacity-70">
                     <span>Estado:</span>
@@ -83,7 +83,7 @@
                 {{-- Botón para ver detalle --}}
                 <a href="{{ route('foros.show', $foro->id) }}"
                     class="flex-1 inline-flex justify-center items-center px-4 py-2 bg-indigo-500 text-white rounded-lg text-sm shadow hover:bg-indigo-600 transition duration-300">
-                    Ver Foro
+                    Entrar
                 </a>
 
                 {{-- Botones Editar y eliminar --}}

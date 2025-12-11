@@ -31,7 +31,7 @@ class HomeController extends Controller
         $resenas = Review::latest()->take(8)->get()->map(function ($r) {
 
             $titulo = 'Desconocido';
-            $imagen = asset('images/fondo-resenas.jpeg');
+            $imagen = asset('images/fondo-resenas.jpg');
 
             $apiKey = "068f9f8748c67a559a92eafb6a8eeda7";
             $cacheKey = "marvelpedia-cache-{$r->type}_{$r->entity_id}";

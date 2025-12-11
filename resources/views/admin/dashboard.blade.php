@@ -30,6 +30,7 @@
                             <th class="px-4 py-2 border min-w-[120px] text-center">Nickname</th>
                             <th class="px-4 py-2 border min-w-[120px] text-center">Fecha de nacimiento</th>
                             <th class="px-4 py-2 border min-w-[120px] text-center">País</th>
+                            <th class="px-4 py-2 border min-w-[120px] text-center">Favorito</th>
                             <th class="px-4 py-2 border min-w-[100px] text-center">Twitter</th>
                             <th class="px-4 py-2 border min-w-[100px] text-center">Instagram</th>
                             <th class="px-4 py-2 border min-w-[50px] text-center">Rol</th>
@@ -47,7 +48,7 @@
                                             class="h-10 w-10 rounded-full object-cover text-center">
                                     @endif
                                 </td>
-                                <td class="px-4 py-2 border capitalize text-center">{{ $user->name }}</td>
+                                <td class="px-4 py-2 border capitalize text-center"><a href="{{ route('users.show', $user->id) }}"><a href="{{ route('users.show', $user->id) }}">{{ $user->name }}</a></a></td>
                                 <td class="px-4 py-2 border text-center">
                                     <a href="mailto:{{ $user->email }}" class="text-indigo-600 hover:underline">
                                         {{ $user->email }}
@@ -70,6 +71,7 @@
                                     {{ $user->fecha_nacimiento ? \Carbon\Carbon::parse($user->fecha_nacimiento)->format('d/m/Y') : ' ' }}
                                 </td>
                                 <td class="px-4 py-2 border text-center">{{ $user->pais }}</td>
+                                <td class="px-4 py-2 border text-center">{{ $user->favorito_personaje }}</td>
                                 <td class="px-4 py-2 border text-center">
                                     @if ($user->twitter)
                                         <a href="{{ $user->twitter }}" target="_blank"

@@ -57,7 +57,7 @@
                 <img src="{{ $review->user->avatar_url ?? asset('images/default-avatar.jpeg') }}"
                     alt="Avatar de {{ $review->user->name ?? 'Usuario' }}"
                     class="w-16 h-16 rounded-full object-cover border-2 border-yellow-400" />
-                <p class="font-semibold text-lg">{{ $review->user->name ?? 'Anónimo' }}</p>
+                <p class="font-semibold text-lg"><a href="{{ route('users.show', $review->user->id) }}">{{ $review->user->name ?? 'Anónimo' }}</a></p>
             </div>
             <p class="text-yellow-400 font-bold">{{ str_repeat('⭐', $review->rating) }}</p>
         </div>

@@ -5,7 +5,7 @@
 @section('content')
     <x-welcome-section title="Foros del Multiverso Marvel"
         subtitle="Participa en debates sobre películas y series. ¡Únete a la comunidad y comparte tus ideas!"
-        bgImage="{{ asset('images/fondo_imagen_inicio.jpeg') }}" />
+        bgImage="{{ asset('images/fondo_imagen_inicio.jpg') }}" />
 
     <x-breadcrumb-drawer :items="[
         ['label' => 'Inicio', 'url' => route('inicio'), 'level' => 0],

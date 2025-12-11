@@ -11,7 +11,7 @@
 
     <x-welcome-section title="Películas del Multiverso Marvel"
         subtitle="Explora todas las películas disponibles y descubre sus historias."
-        bgImage="{{ asset('images/fondo_imagen_inicio.jpeg') }}" />
+        bgImage="{{ asset('images/fondo_imagen_inicio.jpg') }}" />
 
     <div class="container mx-auto px-4 py-8 space-y-12">
 

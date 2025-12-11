@@ -9,7 +9,7 @@
 
     <x-welcome-section title="Explora el Multiverso Marvel"
         subtitle="Cada recarga te trae nuevos películas y series para descubrir."
-        bgImage="{{ asset('images/fondo_imagen_inicio.jpeg') }}" />
+        bgImage="{{ asset('images/fondo_imagen_inicio.jpg') }}" />
 
     <div class="container mx-auto px-4 sm:px-6 lg:px-8 py-8 space-y-16">
 
@@ -42,7 +42,7 @@
                 @foreach ($seriesCollection->take(8) as $serie)
                     <a href="{{ route('serie.show', $serie['id']) }}">
                         <div
-                            class="relative rounded-xl overflow-hidden shadow-lg transform hover:scale-105 hover:shadow-2xl transition duration-500 ease-in-out bg-black/10">
+                            class="relative rounded-xl overflow-hidden shadow-lg transform hover:scale-105 hover:shadow-2xl transition duration-500 ease-in-out bg-black/5">
                             <img class="w-full h-52 sm:h-60 md:h-64 lg:h-72 object-cover"
                                 src="{{ $serie['poster'] != 'N/A' ? $serie['poster'] : asset('images/default-serie.png') }}"
                                 alt="{{ $serie['title'] }}">
@@ -78,7 +78,7 @@
                 @foreach ($peliculasCollection->take(8) as $pelicula)
                     <a href="{{ route('pelicula.show', $pelicula['imdbID']) }}">
                         <div
-                            class="relative rounded-xl overflow-hidden shadow-lg transform hover:scale-105 hover:shadow-2xl transition duration-500 ease-in-out bg-black/10">
+                            class="relative rounded-xl overflow-hidden shadow-lg transform hover:scale-105 hover:shadow-2xl transition duration-500 ease-in-out bg-black/5">
 
                             <img class="w-full h-52 sm:h-60 md:h-64 lg:h-72 object-cover"
                                 src="{{ $pelicula['poster'] ?? asset('images/default-movie.png') }}"
@@ -116,7 +116,7 @@
                     const card = document.createElement('a');
                     card.href = item.type === 'series' ? rutaSerie + item.imdbID : rutaPelicula + item.imdbID;
                     card.innerHTML = `
-                <div class="relative rounded-xl overflow-hidden shadow-lg transform hover:scale-105 hover:shadow-2xl transition duration-500 ease-in-out bg-black/10">
+                <div class="relative rounded-xl overflow-hidden shadow-lg transform hover:scale-105 hover:shadow-2xl transition duration-500 ease-in-out bg-black/5">
                     <img class="w-full h-52 sm:h-60 md:h-64 lg:h-72 object-cover"
                         src="${item.poster || '/images/default-movie.png'}"
                         alt="${item.title}">

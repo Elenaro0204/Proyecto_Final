@@ -29,9 +29,11 @@
 
                         <p class="text-gray-600 capitalize mb-2">
                             Autor del foro:
-                            <span class="font-semibold">
-                                {{ $report->foro->user->name ?? 'Desconocido' }}
-                            </span>
+                            <a href="{{ route('users.show', $report->foro->user->id) }}">
+                                <span class="font-semibold">
+                                    {{ $report->foro->user->name ?? 'Desconocido' }}
+                                </span>
+                            </a>
                         </p>
 
                         <p class="text-gray-700 mb-3">

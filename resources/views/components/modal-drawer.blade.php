@@ -102,10 +102,9 @@
                     x-bind:src="data?.review?.user?.avatar_url ?? '/images/default-avatar.jpeg'"
                     alt="Foto de perfil del usuario">
                 <div>
-                    <p class="text-sm text-gray-500 mb-1"><strong>Autor:</strong> <span
-                            x-text="data?.review?.user?.name ?? 'Anónimo'"></span></p>
-                    <p class="text-sm text-gray-500 mb-1"><strong>Email:</strong> <span
-                            x-text="data?.review?.user?.email ?? 'No disponible'"></span></p>
+                    <p class="text-sm text-gray-500 mb-1"><strong>Autor:</strong> <a
+                            href="{{ route('users.show', $review->user->id) }}"><span
+                                x-text="data?.review?.user?.name ?? 'Anónimo'"></span></a></p>
                 </div>
             </div>
         </div>
@@ -114,7 +113,7 @@
         <div class="mb-3">
             <h3 class="font-semibold mb-1">Calificación</h3>
             <p class="text-yellow-400 font-bold"
-                x-text="data?.review?.rating ? '⭐'.repeat(data.review.rating) + ' (' + data.review.rating + '/10)' : 'Sin calificación'">
+                x-text="data?.review?.rating ? '⭐'.repeat(data.review.rating) + ' (' + data.review.rating + '/5)' : 'Sin calificación'">
             </p>
         </div>
 

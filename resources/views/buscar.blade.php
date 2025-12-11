@@ -4,7 +4,7 @@
 @section('content')
     <x-welcome-section title="¡Descubre contenido Marvel!"
         subtitle="Escribe para buscar — los resultados aparecerán en tiempo real."
-        bgImage="{{ asset('images/fondo_imagen_inicio.jpeg') }}" />
+        bgImage="{{ asset('images/fondo_imagen_inicio.jpg') }}" />
 
     <div class="container mx-auto px-4 py-6">
         <div class="max-w-3xl mx-auto">

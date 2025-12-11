@@ -7,7 +7,7 @@
     <!-- Sección de bienvenida -->
     <x-welcome-section title="¡Adéntrate en Marvelpedia!"
         subtitle="Descubre héroes, villanos y todo el universo Marvel en tu enciclopedia definitiva."
-        bgImage="{{ asset('images/fondo_imagen_inicio.jpeg') }}" :carouselId="'bienvenidoCarrusel'" />
+        bgImage="{{ asset('images/fondo_imagen_inicio.jpg') }}" :carouselId="'bienvenidoCarrusel'" />
 
     <!-- Carrusel de contenido destacado -->
     @php
@@ -39,7 +39,7 @@
             [
                 'title' => 'Reseñas',
                 'text' => 'Lee y comparte reseñas de cómics, películas y series.',
-                'image' => asset('images/fondo-resenas.jpeg'),
+                'image' => asset('images/fondo-resenas.jpg'),
                 'link' => route('resenas'),
             ],
             [

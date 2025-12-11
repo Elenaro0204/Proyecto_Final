@@ -331,6 +331,8 @@ class ResenaController extends Controller
             'overview' => $data['overview'] ?? null,
         ];
 
+        $title = $info['title'];
+
         return view('resenas.edit', compact('review', 'title', 'info'));
     }
 
@@ -343,7 +345,7 @@ class ResenaController extends Controller
         }
 
         $user = $review->autor;
-        $url = route('resenas.showresena', $review->id);
+        $url = route('resenas.ver', $review->id);
 
         // Enviar email avisando
         Mail::to($user->email)->send(

@@ -11,9 +11,11 @@ use App\Http\Controllers\PeliculaController;
 use App\Http\Controllers\ResenaController;
 use App\Http\Controllers\SerieController;
 use App\Http\Controllers\AdminController;
+use App\Http\Controllers\Auth\RegisteredUserController;
 use App\Http\Controllers\HomeController;
 use App\Http\Controllers\MensajeController;
 use App\Http\Controllers\SupportController;
+use App\Http\Controllers\UserController;
 use App\Http\Middleware\IsAdmin;
 use Illuminate\Foundation\Auth\EmailVerificationRequest;
 use Illuminate\Http\Request;
@@ -117,6 +119,10 @@ Route::middleware(['auth', 'verified'])->group(function () {
     Route::put('/mensajes/{mensaje}', [MensajeController::class, 'update'])->name('mensajes.update');
     Route::delete('/mensajes/{mensaje}', [MensajeController::class, 'destroy'])->name('mensajes.destroy');
     Route::delete('/mensajes/{mensaje}/eliminar', [MensajeController::class, 'eliminar'])->name('mensajes.eliminar');
+
+    // Usuarios
+    Route::get('/users', [UserController::class, 'index'])->name('users.index');
+    Route::get('/users/{id}', [UserController::class, 'show'])->name('users.show');
 });
 
 Route::get('/resenas', [ResenaController::class, 'index'])->name('resenas');

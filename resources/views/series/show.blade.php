@@ -74,10 +74,10 @@
 
                 {{-- Botones de acción --}}
                 <div class="flex flex-wrap gap-3 mt-4">
-                    @if (isset($serie['imdbID']))
+                    @if (isset($serie['id']))
                         <a href="{{ route('resenas.create.withparams', [
                             'type' => 'serie',
-                            'entity_id' => $serie['imdbID'],
+                            'entity_id' => $serie['id'],
                             'title' => $serie['titulo'] ?? 'Serie',
                         ]) }}"
                             class="bg-yellow-400 text-indigo-900 px-4 py-2 rounded-lg shadow hover:bg-yellow-500 transition flex items-center gap-2">
@@ -344,10 +344,10 @@
         <div class="bg-white rounded-xl shadow p-6">
             <div class="flex items-center justify-between mb-4">
                 <h3 class="text-2xl font-bold mb-4">Reseñas de usuarios</h3>
-                @if (isset($serie['imdbID']))
+                @if (isset($serie['id']))
                     <a href="{{ route('resenas.create.withparams', [
                         'type' => 'serie',
-                        'entity_id' => $serie['imdbID'],
+                        'entity_id' => $serie['id'],
                         'title' => $serie['titulo'] ?? 'serie',
                     ]) }}"
                         class="inline-block mb-4 px-6 py-2 bg-indigo-600 text-white rounded-lg shadow hover:bg-indigo-700 transition">
@@ -369,7 +369,7 @@
                                         alt="Avatar de {{ $review->user->name ?? 'Usuario' }}"
                                         class="w-12 h-12 rounded-full border-2 border-yellow-400 object-cover" />
                                 </div>
-                                <strong>{{ $r->user->name ?? 'Anónimo' }}</strong>
+                                <strong><a href="{{ route('users.show', $r->user->id) }}">{{ $r->user->name ?? 'Anónimo' }}</a></strong>
                             </div>
 
                             {{-- Puntuación --}}

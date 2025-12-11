@@ -21,7 +21,7 @@
              @endphp
              <tr
                  class="review-row hover:bg-gray-50 @if ($isActiveCountdown) bg-yellow-200 border-l-4 border-yellow-500 @endif @if ($userReport) bg-red-200 border-l-4 border-red-500 @endif"">
-                 <td class="px-4 py-2 border text-center">{{ $foro->user->name ?? 'Usuario eliminado' }}</td>
+                 <td class="px-4 py-2 border text-center"><a href="{{ route('users.show', $foro->user->id) }}">{{ $foro->user->name ?? 'Usuario eliminado' }}</a></td>
                  <td class="px-4 py-2 border text-center relative group">
 
                      <div class="truncate max-w-[150px]">
