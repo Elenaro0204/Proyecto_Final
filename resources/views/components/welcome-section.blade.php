@@ -26,14 +26,13 @@
             items-center sm:items-start">
 
                 <a href="{{ route('login') }}"
-                    class="w-fit sm:w-auto px-5 py-3 text-center bg-red-500 text-white
-        rounded-md hover:bg-red-600 font-marvel text-lg sm:text-base">
+                    class="w-fit sm:w-auto px-5 py-3 text-center text-white rounded-md hover:opacity-90 font-marvel text-lg sm:text-base"
+                    style="background-color: #ff00c8;">
                     Iniciar sesión
                 </a>
 
                 <a href="{{ route('register') }}"
-                    class="w-fit sm:w-auto px-5 py-3 text-center bg-yellow-500 text-white
-        rounded-md hover:bg-yellow-600 font-bangers text-lg sm:text-base">
+                    class="w-fit sm:w-auto px-5 py-3 text-center bg-yellow-400 text-white rounded-md hover:bg-yellow-500 font-bangers text-lg sm:text-base">
                     Registrarse
                 </a>
 

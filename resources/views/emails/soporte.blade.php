@@ -83,7 +83,7 @@
                 <tr>
                     <td style="vertical-align:top; width:70px; padding-right:15px;">
                         <!-- Logo (cámbialo por tu URL real) -->
-                        <img src="https://marvelpedia.ruix.iesruizgijon.es/logo.png" alt="Marvelpedia"
+                        <img src="https://marvelpedia.ruix.iesruizgijon.es/Logo.PNG" alt="Marvelpedia"
                             style="width:70px; height:auto; border-radius:6px;">
                     </td>
 

@@ -114,7 +114,7 @@
             <table class="signature-table">
                 <tr>
                     <td style="width: 70px;">
-                        <img src="https://marvelpedia.ruix.iesruizgijon.es/logo.png"
+                        <img src="https://marvelpedia.ruix.iesruizgijon.es/Logo.PNG"
                              alt="Marvelpedia" class="signature-logo">
                     </td>
 

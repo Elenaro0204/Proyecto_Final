@@ -2,6 +2,8 @@
 
 namespace App\Http\Controllers\Admin;
 
+use App\Http\Controllers\Controller;
+use App\Mail\ContenidoReportadoMail;
 use App\Models\Review;
 use App\Models\ReviewReport;
 use Illuminate\Http\Request;
@@ -31,7 +33,20 @@ class ReviewReportController extends Controller
         ]);
 
         // Aquí podrías enviar notificación al autor
-        $review->user->notify(new \App\Notifications\ReviewReported($review, $deadline));
+        // $review->user->notify(new \App\Notifications\ReviewReported($review, $deadline));
+
+        $autor = $review->autor;
+
+        // URL correcta para la vista
+        $url = route('resenas.ver', [
+            'id'   => $review->id,
+        ]);
+
+        // Enviar correo
+        Mail::to($autor->email)->send(new ContenidoReportadoMail($autor, $review, 'resena', $url));
+
+        // Enviar copia al administrador
+        Mail::to('soportemarvelpedia@gmail.com')->send(new ContenidoReportadoMail($autor, $review, 'resena', $url));
 
         return back()->with('success', 'Reseña reportada. El autor puede modificarla en 24 horas.');
     }

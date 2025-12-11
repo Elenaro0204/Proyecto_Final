@@ -2,7 +2,6 @@
 
 namespace App\Mail;
 
-use App\Models\Mensaje;
 use Illuminate\Bus\Queueable;
 use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Mail\Mailable;
@@ -10,31 +9,34 @@ use Illuminate\Mail\Mailables\Content;
 use Illuminate\Mail\Mailables\Envelope;
 use Illuminate\Queue\SerializesModels;
 
-class ContenidoEliminadoMail extends Mailable
+class ContenidoCancelarReportadoMail extends Mailable
 {
     use Queueable, SerializesModels;
 
-    public $user;
+    public $owner;
     public $contenido;
-    private $tipo;
+    public $link;
+    public $tipo;
 
-    public function __construct($user, $contenido, $tipo)
+    public function __construct($owner, $contenido, $link = null, $tipo = null)
     {
-        $this->user = $user;
+        $this->owner = $owner;
         $this->contenido = $contenido;
+        $this->link = $link;
         $this->tipo = $tipo;
     }
 
     public function build()
     {
-        $subject = $this->tipo ? "Tu {$this->tipo} ha sido eliminado" : "Contenido Eliminado";
+        $subject = $this->tipo ? "Se ha cancelado el reporte en tu {$this->tipo}" : "Cancelado Reporte de Contenido";
         return $this->from('soportemarvelpedia@gmail.com', 'Marvelpedia Soporte')
             ->subject($subject)
-            ->view('emails.contenido-eliminado')
+            ->view('emails.contenido-canceladoreportado')
             ->with([
-                'user' => $this->user,
+                'user' => $this->owner,
                 'contenido' => $this->contenido,
-                'tipo' => $this->tipo,  // <- pasar la variable a la vista
+                'link' => $this->link,
+                'tipo' => $this->tipo,
             ]);
     }
 }

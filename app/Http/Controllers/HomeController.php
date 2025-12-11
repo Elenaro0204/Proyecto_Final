@@ -33,37 +33,48 @@ class HomeController extends Controller
             $titulo = 'Desconocido';
             $imagen = asset('images/fondo-resenas.jpeg');
 
-            // Cacheamos por 6h
-            $cacheKey = "{$r->type}_{$r->entity_id}";
-            $data = Cache::remember($cacheKey, now()->addHours(6), function () use ($r) {
+            $apiKey = "068f9f8748c67a559a92eafb6a8eeda7";
+            $cacheKey = "marvelpedia-cache-{$r->type}_{$r->entity_id}";
+
+            // Cacheamos SOLO el array, no el response
+            $data = Cache::remember($cacheKey, now()->addHours(6), function () use ($r, $apiKey) {
+
                 try {
-                    // Cambia estas URLs si tus endpoints son otros
                     if ($r->type === 'pelicula') {
-                        return Http::get("https://marvelpedia.ruix.iesruizgijon.es/api/peliculas/{$r->entity_id}")->json();
+                        $response = Http::get("https://api.themoviedb.org/3/movie/{$r->entity_id}", [
+                            'api_key' => $apiKey,
+                            'language' => 'es-ES'
+                        ]);
+                    } elseif ($r->type === 'serie') {
+                        $response = Http::get("https://api.themoviedb.org/3/tv/{$r->entity_id}", [
+                            'api_key' => $apiKey,
+                            'language' => 'es-ES'
+                        ]);
+                    } else {
+                        return null;
                     }
 
-                    if ($r->type === 'serie') {
-                        return Http::get("https://marvelpedia.ruix.iesruizgijon.es/api/series/{$r->entity_id}")->json();
+                    if ($response->failed()) {
+                        return null;
                     }
+
+                    return $response->json(); // <-- GUARDA SOLO EL ARRAY LIMPIO
                 } catch (\Exception $e) {
-                    return [];
+                    return null;
                 }
             });
 
-            // Asignamos los valores
+            // Si hay datos válidos
             if (!empty($data)) {
-                $titulo = $data['titulo'] ?? $titulo;
 
-                $imagenApi = $data['imagen'] ?? null;
+                // Título diferente en películas y series
+                $titulo = $data['title']
+                    ?? $data['name']
+                    ?? $titulo;
 
-                if ($imagenApi && $imagenApi !== 'N/A') {
-                    // Si tu API devuelve nombres de archivo locales
-                    if (!Str::startsWith($imagenApi, 'http')) {
-                        $imagen = asset('storage/portadas/' . $imagenApi);
-                    } else {
-                        // Si devuelve URL completa
-                        $imagen = $imagenApi;
-                    }
+                // Poster si existe
+                if (!empty($data['poster_path'])) {
+                    $imagen = "https://image.tmdb.org/t/p/w500" . $data['poster_path'];
                 }
             }
 
@@ -71,9 +82,10 @@ class HomeController extends Controller
                 'title' => $titulo,
                 'text' => Str::limit($r->content, 100),
                 'image' => $imagen,
-                'link' => route('resenas.show', ['type' => $r->type, 'id' => $r->entity_id]),
+                'link' => route('resenas.ver', $r->id),
             ];
         });
+
 
         return view('welcome', compact('foros', 'resenas'));
     }

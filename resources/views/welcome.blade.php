@@ -51,7 +51,7 @@
         ];
     @endphp
     <x-carrusel title="Explora el Universo Marvel"
-        subtitle="Personajes, cómics, películas y series que dan vida al mundo Marvel." :cards="$cards"
+        subtitle="Películas y series que dan vida al mundo Marvel." :cards="$cards"
         :carouselId="'carrusel_destacados'" />
 
     <x-carrusel title="Reseñas de Fans"

@@ -84,14 +84,6 @@
 <body>
     <div class="email-container">
 
-        <h2>🔔 Contenido Eliminado</h2>
-
-        <p>Hola <strong>{{ $user->name }}</strong>,</p>
-
-        <div class="highlight-box">
-            <p><strong>Uno de tus contenidos ha sido eliminado.</strong></p>
-        </div>
-
         {{-- PARA MENSAJES --}}
         @if ($tipo === 'mensaje')
             <h2>🔔 Mensaje Eliminado</h2>
@@ -145,7 +137,7 @@
                 <tr>
                     <td style="vertical-align:top; width:70px; padding-right:15px;">
                         <!-- Logo (cámbialo por tu URL real) -->
-                        <img src="https://marvelpedia.ruix.iesruizgijon.es/logo.png" alt="Marvelpedia"
+                        <img src="https://marvelpedia.ruix.iesruizgijon.es/Logo.PNG" alt="Marvelpedia"
                             style="width:70px; height:auto; border-radius:6px;">
                     </td>
 

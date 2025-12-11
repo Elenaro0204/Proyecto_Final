@@ -32,8 +32,17 @@ class ContenidoReportadoMail extends Mailable
 
     public function build()
     {
+        $subject = $this->tipo ? "Tu {$this->tipo} ha sido reportado" : "Contenido Reportado";
         return $this->from('soportemarvelpedia@gmail.com', 'Marvelpedia Soporte')
-            ->subject('Tu contenido ha sido reportado')
-            ->view('emails.contenido-reportado');
+            ->subject($subject)
+            ->view('emails.contenido-reportado')
+            ->with([
+                'user' => $this->owner,
+                'contenido' => $this->contenido,
+                'reporter' => $this->reporter,
+                'reporte' => $this->reporte,
+                'link' => $this->link,
+                'tipo' => $this->tipo,
+            ]);
     }
 }

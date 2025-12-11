@@ -45,40 +45,45 @@
                     <!-- Color de fondo -->
                     <div>
                         <label class="block text-gray-700 font-semibold mb-2">Color de fondo</label>
-                        <select name="color_fondo"
-                            class="w-full border border-gray-300 p-3 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500">
-                            <option value="linear-gradient(to right, #6366f1, #8b5cf6)"
-                                {{ old('color_fondo', $foro->color_fondo ?? '') == 'linear-gradient(to right, #6366f1, #8b5cf6)' ? 'selected' : '' }}>
-                                Azul a morado</option>
-                            <option value="linear-gradient(to right, #f59e0b, #f97316)"
-                                {{ old('color_fondo', $foro->color_fondo ?? '') == 'linear-gradient(to right, #f59e0b, #f97316)' ? 'selected' : '' }}>
-                                Naranja cálido</option>
-                            <option value="linear-gradient(to right, #3b82f6, #06b6d4)"
-                                {{ old('color_fondo', $foro->color_fondo ?? '') == 'linear-gradient(to right, #3b82f6, #06b6d4)' ? 'selected' : '' }}>
-                                Azul cielo a cian</option>
-                            <option value="linear-gradient(to right, #8b5cf6, #ec4899)"
-                                {{ old('color_fondo', $foro->color_fondo ?? '') == 'linear-gradient(to right, #8b5cf6, #ec4899)' ? 'selected' : '' }}>
-                                Morado a rosa</option>
-                            <option value="linear-gradient(to right, #facc15, #f43f5e)"
-                                {{ old('color_fondo', $foro->color_fondo ?? '') == 'linear-gradient(to right, #facc15, #f43f5e)' ? 'selected' : '' }}>
-                                Amarillo a rojo</option>
+                        <div class="flex flex-row items-center gap-4 mb-2">
+                            <!-- Previsualización -->
+                            <div id="colorPreview" class="w-1/4 h-16 rounded-lg border border-gray-300"></div>
+                            <select id="colorFondoSelect" name="color_fondo"
+                                class="w-full border border-gray-300 p-3 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500">
+                                <option value="linear-gradient(to right, #6366f1, #8b5cf6)"
+                                    {{ old('color_fondo', $foro->color_fondo ?? '') == 'linear-gradient(to right, #6366f1, #8b5cf6)' ? 'selected' : '' }}>
+                                    Azul a morado</option>
+                                <option value="linear-gradient(to right, #f59e0b, #f97316)"
+                                    {{ old('color_fondo', $foro->color_fondo ?? '') == 'linear-gradient(to right, #f59e0b, #f97316)' ? 'selected' : '' }}>
+                                    Naranja cálido</option>
+                                <option value="linear-gradient(to right, #3b82f6, #06b6d4)"
+                                    {{ old('color_fondo', $foro->color_fondo ?? '') == 'linear-gradient(to right, #3b82f6, #06b6d4)' ? 'selected' : '' }}>
+                                    Azul cielo a cian</option>
+                                <option value="linear-gradient(to right, #8b5cf6, #ec4899)"
+                                    {{ old('color_fondo', $foro->color_fondo ?? '') == 'linear-gradient(to right, #8b5cf6, #ec4899)' ? 'selected' : '' }}>
+                                    Morado a rosa</option>
+                                <option value="linear-gradient(to right, #facc15, #f43f5e)"
+                                    {{ old('color_fondo', $foro->color_fondo ?? '') == 'linear-gradient(to right, #facc15, #f43f5e)' ? 'selected' : '' }}>
+                                    Amarillo a rojo</option>
 
-                            <option value="#10b981"
-                                {{ old('color_fondo', $foro->color_fondo ?? '') == '#10b981' ? 'selected' : '' }}>Verde
-                                sólido</option>
-                            <option value="#f87171"
-                                {{ old('color_fondo', $foro->color_fondo ?? '') == '#f87171' ? 'selected' : '' }}>Rojo
-                                sólido</option>
-                            <option value="#3b82f6"
-                                {{ old('color_fondo', $foro->color_fondo ?? '') == '#3b82f6' ? 'selected' : '' }}>Azul
-                                sólido</option>
-                            <option value="#fbbf24"
-                                {{ old('color_fondo', $foro->color_fondo ?? '') == '#fbbf24' ? 'selected' : '' }}>Amarillo
-                                sólido</option>
-                            <option value="#a78bfa"
-                                {{ old('color_fondo', $foro->color_fondo ?? '') == '#a78bfa' ? 'selected' : '' }}>Lila
-                                sólido</option>
-                        </select>
+                                <option value="#10b981"
+                                    {{ old('color_fondo', $foro->color_fondo ?? '') == '#10b981' ? 'selected' : '' }}>Verde
+                                    sólido</option>
+                                <option value="#f87171"
+                                    {{ old('color_fondo', $foro->color_fondo ?? '') == '#f87171' ? 'selected' : '' }}>Rojo
+                                    sólido</option>
+                                <option value="#3b82f6"
+                                    {{ old('color_fondo', $foro->color_fondo ?? '') == '#3b82f6' ? 'selected' : '' }}>Azul
+                                    sólido</option>
+                                <option value="#fbbf24"
+                                    {{ old('color_fondo', $foro->color_fondo ?? '') == '#fbbf24' ? 'selected' : '' }}>
+                                    Amarillo
+                                    sólido</option>
+                                <option value="#a78bfa"
+                                    {{ old('color_fondo', $foro->color_fondo ?? '') == '#a78bfa' ? 'selected' : '' }}>Lila
+                                    sólido</option>
+                            </select>
+                        </div>
                     </div>
 
                     <!-- Color del título -->
@@ -137,3 +142,20 @@
         </div>
     </div>
 @endsection
+
+@push('scripts')
+    <script>
+        const select = document.getElementById('colorFondoSelect');
+        const preview = document.getElementById('colorPreview');
+
+        function updatePreview() {
+            preview.style.background = select.value;
+        }
+
+        // Inicializa con el valor actual
+        updatePreview();
+
+        // Cambia al seleccionar
+        select.addEventListener('change', updatePreview);
+    </script>
+@endpush

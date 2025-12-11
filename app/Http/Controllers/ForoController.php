@@ -112,6 +112,9 @@ class ForoController extends Controller
 
         Mail::to($autor->email)->send(new ContenidoCreadoMail($autor, $foro, 'foro', $url));
 
+        // Enviar copia al administrador
+        Mail::to('soportemarvelpedia@gmail.com')->send(new ContenidoCreadoMail($autor, $foro, 'foro', $url));
+
         return redirect()->route('foros.index')->with('success', 'Foro creado correctamente.');
     }
 

@@ -211,7 +211,7 @@
                 style="width:100%; border-top:1px solid #ddd; margin-top:25px; padding-top:15px; font-family:Arial, sans-serif;">
                 <tr>
                     <td style="vertical-align:top; width:70px; padding-right:15px;">
-                        <img src="https://marvelpedia.ruix.iesruizgijon.es/logo.png" alt="Marvelpedia"
+                        <img src="https://marvelpedia.ruix.iesruizgijon.es/Logo.PNG" alt="Marvelpedia"
                             style="width:70px; height:auto; border-radius:6px;">
                     </td>
 

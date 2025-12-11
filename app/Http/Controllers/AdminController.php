@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use Illuminate\Http\Request;
 use App\Models\User;
 use App\Http\Middleware\IsAdmin;
+use App\Mail\ContenidoCancelarReportadoMail;
 use App\Mail\ContenidoReportadoMail;
 use App\Models\Foro;
 use App\Models\ForoReport;
@@ -119,15 +120,27 @@ class AdminController extends Controller
         $reviews = $reviewsQuery->paginate(10);
 
         $reviews->getCollection()->transform(function ($review) {
+            // Por defecto ponemos null
             $review->entity_title = null;
+
             if (in_array($review->type, ['pelicula', 'serie'])) {
-                $response = Http::get('https://www.omdbapi.com/', [
-                    'apikey' => '1f00bd0e',
-                    'i' => $review->entity_id,
+                // Llamada a la nueva API TMDB
+                $apiKey = '068f9f8748c67a559a92eafb6a8eeda7';
+                $endpoint = $review->type === 'pelicula' ? 'movie' : 'tv';
+
+                $response = Http::get("https://api.themoviedb.org/3/{$endpoint}/{$review->entity_id}", [
+                    'api_key' => $apiKey,
+                    'language' => 'es-ES',
                 ]);
-                $data = $response->json();
-                $review->entity_title = $data['Title'] ?? $review->entity_id;
+
+                if ($response->ok()) {
+                    $data = $response->json();
+                    $review->entity_title = $data['title'] ?? $data['name'] ?? $review->entity_id;
+                } else {
+                    $review->entity_title = $review->entity_id;
+                }
             }
+
             return $review;
         });
 
@@ -393,6 +406,24 @@ class AdminController extends Controller
             $review->update(['resolved' => false]);
         }
 
+        // Dueño del contenido
+        $owner = $review->user;
+
+        // Tipo
+        $tipo = 'reseña';
+
+        $link = url("/{$review->type}/{$review->entity_id}");
+
+        // Enviar email al dueño
+        Mail::to($owner->email)->send(
+            new ContenidoCancelarReportadoMail($owner, $review, $link, $tipo)
+        );
+
+        // Copia al admin
+        Mail::to("soportemarvelpedia@gmail.com")->send(
+            new ContenidoCancelarReportadoMail($owner, $review, $link, $tipo)
+        );
+
         return redirect($request->input('redirect_to', url()->previous()))
             ->with('success', 'Reporte cancelado.');
     }
@@ -410,6 +441,26 @@ class AdminController extends Controller
             $foro->update(['resolved' => false]);
         }
 
+        // Dueño del contenido
+        $owner = $foro->user;
+
+        // Tipo
+        $tipo = 'foro';
+
+        $link = route('foros.show', [
+            'foro'   => $foro->id,
+        ]);
+
+        // Enviar email al dueño
+        Mail::to($owner->email)->send(
+            new ContenidoCancelarReportadoMail($owner, $foro, $link, $tipo)
+        );
+
+        // Copia al admin
+        Mail::to("soportemarvelpedia@gmail.com")->send(
+            new ContenidoCancelarReportadoMail($owner, $foro, $link, $tipo)
+        );
+
         return redirect($request->input('redirect_to', url()->previous()))
             ->with('success', 'Reporte cancelado.');
     }
@@ -424,6 +475,29 @@ class AdminController extends Controller
         if ($mensaje->reports()->count() === 0) {
             $mensaje->update(['resolved' => false]);
         }
+
+        // Dueño del contenido
+        $owner = $mensaje->user;
+
+        // Usuario que reporta
+        $reporter = Auth::user();
+
+        // Tipo
+        $tipo = 'mensaje';
+
+        $link = route('foros.show', [
+            'foro'   => $mensaje->foro_id,
+        ]);
+
+        // Enviar email al dueño
+        Mail::to($owner->email)->send(
+            new ContenidoCancelarReportadoMail($owner, $mensaje, $link, $tipo)
+        );
+
+        // Copia al admin
+        Mail::to("soportemarvelpedia@gmail.com")->send(
+            new ContenidoCancelarReportadoMail($owner, $mensaje, $link, $tipo)
+        );
 
         return redirect($request->input('redirect_to', url()->previous()))
             ->with('success', 'Reporte cancelado.');

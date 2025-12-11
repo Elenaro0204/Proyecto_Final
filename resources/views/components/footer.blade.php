@@ -8,7 +8,7 @@
             <div class="text-center md:text-left">
                 <a href="{{ route('profile') }}"
                     class="flex items-center justify-center md:justify-start mb-4">
-                    <img src="{{ asset('logos/Logo.png') }}" alt="Logo" class="h-8 md:h-24 lg:h-28 w-auto mr-2 fill-current">
+                    <img src="{{ asset('logos/Logo.PNG') }}" alt="Logo" class="h-8 md:h-24 lg:h-28 w-auto mr-2 fill-current">
                 </a>
 
                 <h6 class="text-red-500 text-sm uppercase font-semibold mb-2">¡Hablemos!</h6>

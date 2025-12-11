@@ -5,61 +5,67 @@
     <meta charset="UTF-8">
     <style>
         body {
-            font-family: "Arial", sans-serif;
-            background: #f3f5f7;
-            margin: 0;
+            font-family: 'Arial', sans-serif;
+            background-color: #f4f6f9;
             padding: 0;
+            margin: 0;
         }
 
         .email-container {
-            max-width: 620px;
+            max-width: 600px;
+            background: white;
             margin: 30px auto;
-            background: #ffffff;
+            padding: 25px 35px;
             border-radius: 12px;
-            padding: 30px 35px;
-            box-shadow: 0 5px 25px rgba(0, 0, 0, 0.06);
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.08);
             color: #333;
         }
 
         h2 {
+            color: #d32f2f;
             text-align: center;
-            color: #c62828;
-            font-size: 26px;
             margin-bottom: 25px;
         }
 
         p {
             line-height: 1.6;
-            color: #444;
             font-size: 15px;
-            margin: 12px 0;
+            color: #444;
         }
 
         .section-title {
-            margin-top: 25px;
             font-weight: bold;
             color: #222;
-            font-size: 16px;
+            margin-top: 20px;
         }
 
         .highlight-box {
-            background: #fde5ec;
+            background: #fce4ec;
             border-left: 4px solid #d81b60;
-            padding: 15px;
-            border-radius: 6px;
+            padding: 12px 15px;
             margin: 15px 0;
+            border-radius: 6px;
+        }
+
+        .deadline {
+            background: #e3f2fd;
+            border-left: 4px solid #1976d2;
+            padding: 12px 15px;
+            margin: 15px 0;
+            border-radius: 6px;
+            font-weight: bold;
         }
 
         .button {
             display: inline-block;
-            margin-top: 25px;
+            margin: 25px 0;
             padding: 12px 22px;
             background: #1976d2;
-            color: #fff !important;
+            color: white !important;
             font-weight: bold;
             text-decoration: none;
             border-radius: 8px;
-            transition: 0.3s;
+            transition: background 0.3s ease;
         }
 
         .button:hover {
@@ -67,36 +73,10 @@
         }
 
         .footer {
+            margin-top: 30px;
             text-align: center;
             font-size: 13px;
             color: #777;
-            margin-top: 35px;
-        }
-
-        /* Firma */
-        .signature-table {
-            width: 100%;
-            max-width: 430px;
-            margin: 30px auto 0;
-            border-top: 1px solid #ddd;
-            padding-top: 15px;
-            font-family: Arial, sans-serif;
-        }
-
-        .signature-table img {
-            width: 70px;
-            border-radius: 8px;
-        }
-
-        .contact-info {
-            color: #333;
-            font-size: 14px;
-            line-height: 1.5;
-        }
-
-        .contact-info a {
-            color: #1976d2;
-            text-decoration: none;
         }
     </style>
 </head>
@@ -104,20 +84,23 @@
 <body>
     <div class="email-container">
 
-        <h2>📩 ¡Nuevo mensaje en tu foro!</h2>
+        <h2>🔔 Se ha Cancelado el Reporte</h2>
 
-        <p><strong>{{ $autor->name }}</strong> ha publicado un mensaje en tu foro:</p>
+        <p>Hola <strong>{{ $owner->name }}</strong>,</p>
 
-        <p><strong>Foro:</strong> {{ $foro->titulo }}</p>
-
-        <div class="highlight">
-            {{ $mensaje->contenido }}
+        <div class="highlight-box">
+            <p><strong>A uno de tus contenidos le hancancelado el reporte.</strong></p>
         </div>
 
-        <p><a class="button" href="{{ $url ?? url('/foros') }}">👉 Ver mensaje</a></p>
+        <p class="section-title">📌 Contenido afectado:</p>
+        <p>{{ $contenido->entity_title ?? ($contenido->contenido ?? ($contenido->titulo ?? 'Sin título')) }}</p>
+
+        <center>
+            <a href="{{ $link }}" class="button">🔍 Ver reporte</a>
+        </center>
 
         <footer class="footer">
-            © {{ date('Y') }} Marvelpedia — Notificación automática. Por favor, no respondas a este correo.
+            <p>© {{ date('Y') }} Marvelpedia — Sistema de revisión de contenido</p>
             <!-- Firma -->
             <table
                 style="width:100%; border-top:1px solid #ddd; margin-top:25px; padding-top:15px; font-family:Arial, sans-serif;">
@@ -146,8 +129,8 @@
                 </tr>
             </table>
         </footer>
-    </div>
 
+    </div>
 </body>
 
 </html>

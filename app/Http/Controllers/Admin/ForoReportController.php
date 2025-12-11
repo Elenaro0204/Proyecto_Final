@@ -2,6 +2,8 @@
 
 namespace App\Http\Controllers\Admin;
 
+use App\Http\Controllers\Controller;
+use App\Mail\ContenidoReportadoMail;
 use App\Models\Foro;
 use App\Models\ForoReport;
 use Illuminate\Http\Request;
@@ -30,7 +32,15 @@ class ForoReportController extends Controller
         ]);
 
         // Notificar al autor del foro
-        $foro->user->notify(new \App\Notifications\ForoReported($foro, $deadline));
+        // $foro->user->notify(new \App\Notifications\ForoReported($foro, $deadline));
+
+        $autor = $foro->autor;
+        $url = route('foros.show', $foro->id);
+
+        Mail::to($autor->email)->send(new ContenidoReportadoMail($autor, $foro, 'foro', $url));
+
+        // Enviar copia al administrador
+        Mail::to('soportemarvelpedia@gmail.com')->send(new ContenidoReportadoMail($autor, $foro, 'foro', $url));
 
         return back()->with('success', 'Foro reportado. El autor tiene 24 horas para revisarlo.');
     }
