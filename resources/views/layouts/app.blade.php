@@ -15,6 +15,7 @@
     <link href="https://fonts.bunny.net/css?family=figtree:400,500,600&display=swap" rel="stylesheet" />
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.5/font/bootstrap-icons.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
 
     {{-- Fuente Bangers --}}
     <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -165,6 +166,17 @@
 </html>
 
 <script>
+    // Evitar el caché al navegar con el botón atrás
+    document.addEventListener("alpine:init", () => {
+        window.onpageshow = function(event) {
+            if (event.persisted) {
+                Alpine.flushAndStopDeferringMutations();
+                location.reload();
+            }
+        };
+    });
+
+    // Lógica del loader global
     document.addEventListener("DOMContentLoaded", () => {
         const loader = document.getElementById("global-loader");
 
@@ -178,6 +190,7 @@
         });
     });
 
+    // Ajustar la altura del navbar al expandirse en móviles
     document.getElementById('navbarContent')?.addEventListener('shown.bs.collapse', function() {
         this.style.height = 'auto';
     });

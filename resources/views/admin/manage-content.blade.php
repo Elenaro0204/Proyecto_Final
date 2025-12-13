@@ -15,15 +15,19 @@
             </div>
         @endif
 
-        <div class="bg-white shadow rounded-lg p-6">
-            <h1 class="text-2xl font-bold mb-6 text-center">📝 Gestión de Reseñas</h1>
+        <div class="shadow rounded-lg p-6">
+            <div class="absolute inset-0 bg-white opacity-50 z-0"></div>
+
+            <div class="relative z-10 flex flex-col items-center text-center w-full">
+                <h1 class="text-3xl text-red-700 font-bold mb-3 uppercase">Gestion de Reseñas</h1>
+            </div>
 
             {{-- Buscador --}}
             <form id="reviews-filter-form" method="GET" action="{{ route('admin.manage-content') }}"
-                class="mb-4 flex flex-col sm:flex-row gap-2 items-stretch sm:items-center">
+                class="relative z-10 mb-4 flex flex-col sm:flex-row gap-2 items-stretch sm:items-center">
 
-                <input type="text" name="q" value="{{ request('q') }}" placeholder="Buscar reseñas..."
-                    class="border rounded p-2 w-full sm:w-1/2">
+                <input type="text" name="q" value="{{ request('q') }}" placeholder="🔍 Buscar reseñas..."
+                    class="border rounded p-2 w-full">
 
                 <select name="type" class="border rounded p-2 w-full sm:w-1/4">
                     <option value="">Todos los tipos</option>
@@ -37,25 +41,29 @@
             </form>
 
             {{-- Tabla de reseñas --}}
-            <div id="reviews-container" class="overflow-x-auto rounded-lg shadow">
+            <div id="reviews-container" class="relative z-10 overflow-x-auto rounded-lg shadow bg-white">
                 @include('admin.resenas.partials.reviews-table', ['reviews' => $reviews])
             </div>
         </div>
 
-        <div class="bg-white shadow rounded-lg p-6">
-            <h1 class="text-2xl font-bold mb-6 text-center">💬 Gestión de Foros</h1>
+        <div class="shadow rounded-lg p-6">
+            <div class="absolute inset-0 bg-white opacity-50 z-0"></div>
+
+            <div class="relative z-10 flex flex-col items-center text-center w-full">
+                <h1 class="text-3xl text-red-700 font-bold mb-3 uppercase">Gestion de Foros</h1>
+            </div>
 
             {{-- Buscador --}}
             <form method="GET" action="{{ route('admin.manage-content') }}"
-                class="mb-4 flex flex-col sm:flex-row gap-2 items-stretch sm:items-center" id="form-buscar-foros">
+                class="relative z-10 mb-4 flex flex-col sm:flex-row gap-2 items-stretch sm:items-center" id="form-buscar-foros">
                 <input type="text" name="q_foros" id="q_foros" value="{{ request('q_foros') }}"
-                    placeholder="Buscar foros..." class="border rounded p-2 w-full">
+                    placeholder="🔍 Buscar foros..." class="border rounded p-2 w-full">
                 <button type="submit"
                     class="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded w-full sm:w-auto">Buscar</button>
             </form>
 
             {{-- Tabla de foros --}}
-            <div id="foros-table-container" class="overflow-x-auto rounded-lg shadow">
+            <div id="foros-table-container" class="relative z-10 overflow-x-auto rounded-lg shadow bg-white">
                 @include('admin.foros.partials.foros-table', ['foros' => $foros])
             </div>
         </div>

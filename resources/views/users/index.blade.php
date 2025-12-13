@@ -2,6 +2,7 @@
 @extends('layouts.app')
 
 @section('content')
+    {{-- BREADCRUMB Y SECCIÓN DE BIENVENIDA --}}
     <x-breadcrumb-drawer :items="[
         ['label' => 'Inicio', 'url' => route('inicio'), 'level' => 0],
         ['label' => 'Usuarios', 'url' => route('users.index'), 'level' => 1],
@@ -11,78 +12,121 @@
         subtitle="Explora los perfiles de la comunidad, descubre gustos en común y conócelos mejor."
         bgImage="{{ asset('images/fondo_imagen_inicio.jpg') }}" />
 
-    <div class="bg-gradient-to-b from-gray-100 to-gray-200 py-10">
+    <div class="container mx-auto px-4 py-8">
 
-        {{-- FILTROS (Opcional) --}}
-        <section class="container mx-auto max-w-5xl mb-8 px-4">
-            <div class="bg-white shadow rounded-xl p-5 grid grid-cols-1 md:grid-cols-3 gap-4">
-
-                <input type="text" placeholder="🔍 Buscar por nombre..." class="border p-2 rounded w-full">
-
-                <select class="border p-2 rounded w-full">
-                    <option value="">🌍 Filtrar por país</option>
-                    <option>España</option>
-                    <option>México</option>
-                    <option>Argentina</option>
-                </select>
-
-                <button class="bg-indigo-600 text-white px-4 py-2 rounded hover:bg-indigo-700">
-                    Aplicar filtros
-                </button>
-
+        <!-- ⭐ NUEVOS USUARIOS ------------------------------------------------- -->
+        <section>
+            <div class="border-4 border-fuchsia-500 rounded-lg w-full mx-auto my-5 text-center px-4 md:px-0">
+                <h2 class="text-2xl font-semibold text-red-700 p-3 uppercase"> Nuevos miembros</h2>
             </div>
-        </section>
-
-        {{-- LISTADO DE USUARIOS --}}
-        <section class="container mx-auto max-w-6xl px-4">
-            <h2 class="text-2xl font-bold mb-6">Usuarios registrados</h2>
 
             <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-8">
-
-                @foreach ($users as $usuario)
-                    <div
-                        class="bg-white shadow-md rounded-xl overflow-hidden hover:shadow-xl transition transform hover:-translate-y-1">
-
-                        {{-- Banner superior --}}
-                        <div class="h-24 bg-gradient-to-r from-red-600 to-indigo-600"></div>
-
-                        <div class="p-6 flex flex-col items-center">
-
-                            {{-- Avatar --}}
-                            <img src="{{ $usuario->avatar ?? asset('images/default-avatar.jpeg') }}"
-                                class="w-24 h-24 rounded-full border-4 border-white -mt-16 object-cover shadow"
-                                alt="Avatar">
-
-                            {{-- Nombre --}}
-                            <h3 class="text-xl font-semibold mt-4">{{ $usuario->name }}</h3>
-
-                            {{-- Apodo --}}
-                            @if ($usuario->nickname)
-                                <p class="text-gray-500 text-sm">“{{ $usuario->nickname }}”</p>
-                            @endif
-
-                            {{-- País --}}
-                            @if ($usuario->pais)
-                                <p class="text-gray-600 mt-2">🌍 {{ $usuario->pais }}</p>
-                            @endif
-
-                            {{-- Botón --}}
-                            <a href="{{ route('users.show', $usuario->id) }}"
-                                class="mt-4 px-4 py-2 bg-indigo-500 text-white rounded-lg hover:bg-indigo-600 transition">
-                                Ver perfil
-                            </a>
-
-                        </div>
-                    </div>
+                @foreach ($ultimos_usuarios as $usuario)
+                    @include('users.partials.card', ['usuario' => $usuario])
                 @endforeach
-
             </div>
 
-            {{-- PAGINACIÓN --}}
-            <div class="mt-10 flex justify-center">
-                {{ $users->links() }}
+            <div class="mt-6">
+                {{ $ultimos_usuarios->links() }}
             </div>
         </section>
 
+        <!-- ⭐ PODIO COMPLETO (TOPS) ------------------------------------------- -->
+        <section>
+            <div class="border-4 border-fuchsia-500 rounded-lg w-full mx-auto my-5 text-center px-4 md:px-0">
+                <h2 class="text-2xl font-semibold text-red-700 p-3 uppercase">Ranking de la comunidad</h2>
+            </div>
+
+            <div class="grid grid-cols-1 lg:grid-cols-3 gap-10">
+
+                {{-- TOP RESEÑAS --}}
+                <section class="relative rounded-xl overflow-hidden shadow-xl p-6">
+                    <div class="absolute inset-0 bg-white opacity-50 z-0"></div>
+
+                    <div class="relative z-10 flex flex-col items-center text-center w-full">
+                        <h3 class="text-xl text-red-700 font-bold mb-3 uppercase">Mas reseñas</h3>
+                    </div>
+                    <div class="relative z-10">
+                        @include('users.partials.podium', [
+                            'top' => $topResenas,
+                            'campo' => 'reviews_count',
+                            'label' => 'reseñas',
+                        ])
+                    </div>
+                </section>
+
+                {{-- TOP FOROS --}}
+                <section class="relative rounded-xl overflow-hidden shadow-xl p-6">
+                    <div class="absolute inset-0 bg-white opacity-50 z-0"></div>
+
+                    <div class="relative z-10 flex flex-col items-center text-center w-full">
+                        <h3 class="text-xl text-red-700 font-bold mb-3 uppercase">Mas foros creados</h3>
+                    </div>
+                    <div class="relative z-10">
+                        @include('users.partials.podium', [
+                            'top' => $topForos,
+                            'campo' => 'foros_count',
+                            'label' => 'foros',
+                        ])
+                    </div>
+                </section>
+
+                {{-- TOP MENSAJES --}}
+                <section class="relative rounded-xl overflow-hidden shadow-xl p-6">
+                    <div class="absolute inset-0 bg-white opacity-50 z-0"></div>
+
+                    <div class="relative z-10 flex flex-col items-center text-center w-full">
+                        <h3 class="text-xl text-red-700 font-bold mb-3 uppercase">Mas mensajes</h3>
+                    </div>
+                    <div class="relative z-10">
+                        @include('users.partials.podium', [
+                            'top' => $topMensajes,
+                            'campo' => 'mensajes_count',
+                            'label' => 'mensajes',
+                        ])
+                    </div>
+                </section>
+
+            </div>
+        </section>
+
+        <!-- ⭐ FILTROS + TODOS LOS USUARIOS ---------------------------------- -->
+        <section>
+
+            <div class="border-4 border-fuchsia-500 rounded-lg w-full mx-auto my-5 text-center px-4 md:px-0">
+                <h2 class="text-2xl font-semibold text-red-700 p-3 uppercase">Todos los usuarios</h2>
+            </div>
+
+            <form method="GET" action="{{ route('users.index') }}"
+                class="bg-white shadow rounded-xl p-4 mb-10 grid grid-cols-1 md:grid-cols-3 gap-4">
+
+                <input type="text" name="search" value="{{ request('search') }}" placeholder="🔍 Buscar por nombre..."
+                    class="border p-2 rounded w-full">
+
+                <select name="pais" class="border p-2 rounded w-full">
+                    <option value="">🌍 Filtrar por país</option>
+                    @foreach ($paises as $pais)
+                        <option value="{{ $pais }}" {{ request('pais') == $pais ? 'selected' : '' }}>
+                            {{ $pais }}
+                        </option>
+                    @endforeach
+                </select>
+
+                <button class="bg-red-700 text-white px-4 py-2 rounded hover:bg-red-800 w-full sm:w-auto">
+                    Filtrar
+                </button>
+            </form>
+
+            <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-8">
+                @foreach ($users as $usuario)
+                    @include('users.partials.card', ['usuario' => $usuario])
+                @endforeach
+            </div>
+
+            <div class="mt-10 flex justify-center">
+                {{ $users->appends(request()->query())->links() }}
+            </div>
+
+        </section>
     </div>
 @endsection

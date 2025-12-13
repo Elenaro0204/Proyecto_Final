@@ -13,16 +13,19 @@
 @endphp
 
 <section class="container my-5 text-center px-4 md:px-0">
-    @if (!empty($title) || !empty($subtitle))
-        <div class="mb-4">
-            @if (!empty($title))
-                <h2 class="display-5 fw-bold font-bangers text-2xl sm:text-3xl md:text-4xl">{{ $title }}</h2>
-            @endif
-            @if (!empty($subtitle))
-                <p class="lead text-muted font-marvel text-sm sm:text-base md:text-lg">{{ $subtitle }}</p>
-            @endif
-        </div>
-    @endif
+    <div class="border-4 border-fuchsia-500 rounded-lg w-full mx-auto">
+        @if (!empty($title) || !empty($subtitle))
+            <div class="m-4">
+                @if (!empty($title))
+                    <h2 class="text-2xl sm:text-3xl md:text-4xl font-extrabold text-red-700 drop-shadow-lg uppercase">
+                        {{ $title }}</h2>
+                @endif
+                @if (!empty($subtitle))
+                    <p class="mt-2 text-yellow-400 text-base sm:text-lg md:text-xl">{{ $subtitle }}</p>
+                @endif
+            </div>
+        @endif
+    </div>
 
     @if (count($cardsArray) > 0)
         <div id="{{ $carouselId }}" class="carousel slide" data-bs-ride="carousel">
@@ -102,27 +105,27 @@
                         slide.className = `carousel-item ${slideIndex === 0 ? 'active' : ''}`;
                         slide.innerHTML = `<div class="row justify-content-center">
                             ${chunk.map(card => `
-                                                                            <div class="col-12 col-sm-6 col-md-4 mb-4 d-flex justify-content-center">
-                                                                                <div class="card text-white rounded-xl shadow-lg hover:shadow-2xl transition-all duration-300 transform hover:-translate-y-1 flex flex-col justify-between w-full max-w-xs sm:max-w-sm md:max-w-md"
-                                                                                    style="min-height: 400px; background: linear-gradient(180deg, ${card.color_fondo || 'rgba(0,0,0,0.8)'} 0%, rgba(0,0,0,0.6) 100%); border: 2px solid #e63946;">
+                                                                                    <div class="col-12 col-sm-6 col-md-4 mb-4 d-flex justify-content-center">
+                                                                                        <div class="card text-white rounded-xl shadow-lg hover:shadow-2xl transition-all duration-300 transform hover:-translate-y-1 flex flex-col justify-between w-full max-w-xs sm:max-w-sm md:max-w-md"
+                                                                                            style="min-height: 400px; background: linear-gradient(180deg, ${card.color_fondo || 'rgba(0,0,0,0.8)'} 0%, rgba(0,0,0,0.6) 100%); border: 2px solid #e63946;">
 
-                                                                                    ${card.image ? `<img src="${card.image}" class="card-img-top rounded-t-xl" alt="${card.title}" style="height:200px; object-fit: cover; filter: brightness(0.85);">` : ''}
+                                                                                            ${card.image ? `<img src="${card.image}" class="card-img-top rounded-t-xl" alt="${card.title}" style="height:200px; object-fit: cover; filter: brightness(0.85);">` : ''}
 
-                                                                                    <div class="card-body flex flex-col justify-center text-center px-4 py-3">
-                                                                                        <h5 class="card-title font-bangers text-lg sm:text-xl md:text-2xl mb-2" style="color: ${card.color_titulo || '#fff'}; text-shadow: 1px 1px 4px rgba(0,0,0,0.6);">
-                                                                                            ${card.title}
-                                                                                        </h5>
-                                                                                        ${card.text ? `<p class="card-text font-roboto text-sm sm:text-base md:text-base mb-3 text-gray-200">${card.text}</p>` : ''}
+                                                                                            <div class="card-body flex flex-col justify-center text-center px-4 py-3">
+                                                                                                <h5 class="card-title font-bangers text-lg sm:text-xl md:text-2xl mb-2" style="color: ${card.color_titulo || '#fff'}; text-shadow: 1px 1px 4px rgba(0,0,0,0.6);">
+                                                                                                    ${card.title}
+                                                                                                </h5>
+                                                                                                ${card.text ? `<p class="card-text font-roboto text-sm sm:text-base md:text-base mb-3 text-gray-200">${card.text}</p>` : ''}
+                                                                                            </div>
+
+                                                                                            <div class="card-footer text-center bg-transparent border-0 mb-3">
+                                                                                                <a href="${card.link}" class="btn bg-red-500 text-white rounded-full px-6 py-2 hover:bg-red-600 hover:scale-105 transition-transform duration-300 font-marvel">
+                                                                                                    Ver más
+                                                                                                </a>
+                                                                                            </div>
+                                                                                        </div>
                                                                                     </div>
-
-                                                                                    <div class="card-footer text-center bg-transparent border-0 mb-3">
-                                                                                        <a href="${card.link}" class="btn bg-red-500 text-white rounded-full px-6 py-2 hover:bg-red-600 hover:scale-105 transition-transform duration-300 font-marvel">
-                                                                                            Ver más
-                                                                                        </a>
-                                                                                    </div>
-                                                                                </div>
-                                                                            </div>
-                                                                        `).join('')}
+                                                                                `).join('')}
                         </div>`;
                         carouselInner.appendChild(slide);
 

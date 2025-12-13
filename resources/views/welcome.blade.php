@@ -27,7 +27,7 @@
             [
                 'title' => 'Foros',
                 'text' => 'Participa en discusiones, comparte opiniones y conecta con otros fans.',
-                'image' => asset('images/fondo-foros.jpg'),
+                'image' => asset('images/fondo-foros2.jpg'),
                 'link' => route('foros.index'),
             ],
             [
@@ -58,7 +58,7 @@
         subtitle="Lee opiniones, comparte la tuya y descubre qué está marcando tendencia entre los fans." :cards="$resenas"
         :carouselId="'carrusel_resenas'" />
 
-    <x-carrusel title="Foros en Fuego"
+    <x-carrusel title="Foros para los más fanáticos"
         subtitle="Únete a la comunidad, debate, comparte tu pasión y no te pierdas lo que se comenta." :cards="$foros"
         :carouselId="'carrusel_foros'" />
 @endsection

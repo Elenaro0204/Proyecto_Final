@@ -32,8 +32,8 @@
             <input id="email" class="block mt-1 w-full" type="email" name="email" required autofocus>
         </div>
 
-        <div class="flex justify-between mt-4">
-            <a href="{{ url()->previous() }}" class="px-4 py-2 rounded bg-gray-200 hover:bg-gray-300">
+        <div class="flex flex-col sm:flex-row justify-between mt-4 gap-3">
+            <a href="{{ url()->previous() }}" class="px-4 py-2 rounded bg-gray-200 hover:bg-gray-300 text-center">
                 Cancelar
             </a>
 

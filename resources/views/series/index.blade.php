@@ -16,14 +16,14 @@
 
         <!-- Formulario de búsqueda -->
         <form class="relative w-full sm:w-2/3 md:w-1/2 mx-auto">
-            <input type="text" id="searchInput" placeholder="Buscar serie..."
+            <input type="text" id="searchInput" placeholder="🔍 Buscar serie..."
                 class="w-full px-4 py-3 border rounded-xl focus:outline-none focus:ring-2 focus:ring-indigo-500 shadow-md transition">
             <ul id="searchResults"
                 class="absolute w-full bg-white border mt-1 rounded-lg shadow-lg z-50 hidden max-h-60 overflow-y-auto"></ul>
         </form>
 
         <!-- Grid de series -->
-        <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6 mt-6">
+        <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-8 mt-6">
             @foreach ($series as $serie)
                 <a href="{{ route('serie.show', $serie['id']) }}" class="group">
                     <div
@@ -37,7 +37,7 @@
                                 {{ $serie['title'] }}</h2>
                             <p class="text-gray-200 text-sm md:text-base mt-1 line-clamp-2">{{ $serie['anio'] }}</p>
                             <span
-                                class="mt-3 px-4 py-2 bg-yellow-400 text-indigo-900 font-semibold rounded-md shadow hover:bg-yellow-500 transition-colors cursor-pointer">
+                                class="mt-3 px-4 py-2 bg-yellow-400 text-red-900 font-semibold rounded-md shadow hover:bg-yellow-500 transition-colors cursor-pointer">
                                 Ver más
                             </span>
                         </div>

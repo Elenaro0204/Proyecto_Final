@@ -3,75 +3,90 @@
 @extends('layouts.app')
 
 @section('content')
-    <div class="container mx-auto py-6">
-        <h1 class="text-3xl font-extrabold mb-6 text-center text-red-600">🛑 Detalle del Reporte</h1>
+    <x-breadcrumb-drawer :items="[
+        ['label' => 'Inicio', 'url' => route('inicio'), 'level' => 0],
+        ['label' => 'Reportes', 'url' => route('admin.manage-content'), 'level' => 1],
+        ['label' => 'Detalles del Reporte', 'url' => route('admin.manage-content'), 'level' => 2]
+    ]" />
 
-        @if (session('success'))
-            <div class="bg-green-100 border-l-4 border-green-500 text-green-700 p-4 mb-6 rounded shadow">
-                {{ session('success') }}
-            </div>
-        @endif
 
-        @forelse ($reports as $report)
-            <div class="bg-white shadow-lg rounded-xl p-6 mb-6 border border-gray-200">
-                <div class="flex flex-col md:flex-row md:justify-between md:items-start gap-4">
-                    {{-- Información de la reseña --}}
-                    <div class="flex-1">
-                        <h2 class="text-xl font-bold text-gray-800 mb-2">
-                            {{ $report->review->entity_title ?? $report->review->entity_id }}</h2>
-                        <p class="text-gray-600 capitalize mb-2">Tipo: <span
-                                class="font-semibold">{{ $report->review->type }}</span></p>
-                        @php
-                            $userReport = $review->report()->where('reported_by', Auth::id())->first();
-                        @endphp
-                        <p class="text-gray-600 capitalize mb-2">
-                            Reportada por: <span
-                                class="font-semibold">{{ $userReport ? $userReport->reporter->name : '-' }}</span>
-                        </p>
-                        <p class="text-gray-700 mb-3">Contenido de la Reseña: <span
-                                class="font-semibold">{{ $report->review->content }}</span></p>
-                        <p class="text-gray-500 text-sm">
-                            Reportado el: {{ $report->created_at->format('d/m/Y H:i') }}
-                            <span class="ml-2 text-gray-400">({{ $report->created_at->diffForHumans() }})</span>
-                        </p>
+    <div class="container mx-auto py-10 px-4">
+        <div class="max-w-3xl mx-auto relative rounded-xl overflow-hidden shadow-xl p-6">
+            <div class="absolute inset-0 bg-white opacity-50 z-0"></div>
+
+            <div class="relative z-10 px-8 py-6">
+                <div class="relative z-10 flex flex-col items-center text-center w-full">
+                    <h1 class="text-3xl text-red-700 font-bold mb-3">Detalle del Reporte</h1>
+                </div>
+
+                @if (session('success'))
+                    <div class="bg-green-100 border-l-4 border-green-500 text-green-700 p-4 mb-6 rounded shadow">
+                        {{ session('success') }}
                     </div>
+                @endif
 
-                    {{-- Tiempo restante --}}
-                    <div class="flex flex-col items-center md:items-end gap-2">
-                        @php $expires = $report->deadline; @endphp
-                        @if ($expires)
-                            <span class="countdown px-3 py-1 rounded-lg font-mono font-bold shadow"
-                                data-end="{{ $expires->toIso8601String() }}">
-                                Cargando...
-                            </span>
-                        @else
-                            <span class="text-gray-400 font-semibold">Expirado</span>
-                        @endif
+                @forelse ($reports as $report)
+                    <div class="bg-white shadow-lg rounded-xl p-6 mb-6 border border-gray-200">
+                        <div class="flex flex-col md:flex-row md:justify-between md:items-start gap-4">
+                            {{-- Información de la reseña --}}
+                            <div class="flex-1">
+                                <h2 class="text-xl font-bold text-gray-800 mb-2">
+                                    {{ $report->review->entity_title ?? $report->review->entity_id }}</h2>
+                                <p class="text-gray-600 capitalize mb-2">Tipo: <span
+                                        class="font-semibold">{{ $report->review->type }}</span></p>
+                                @php
+                                    $userReport = $review->report()->where('reported_by', Auth::id())->first();
+                                @endphp
+                                <p class="text-gray-600 capitalize mb-2">
+                                    Reportada por: <span
+                                        class="font-semibold">{{ $userReport ? $userReport->reporter->name : '-' }}</span>
+                                </p>
+                                <p class="text-gray-700 mb-3">Contenido de la Reseña: <span
+                                        class="font-semibold">{{ $report->review->content }}</span></p>
+                                <p class="text-gray-500 text-sm">
+                                    Reportado el: {{ $report->created_at->format('d/m/Y H:i') }}
+                                    <span class="ml-2 text-gray-400">({{ $report->created_at->diffForHumans() }})</span>
+                                </p>
+                            </div>
 
-                        {{-- Acciones --}}
-                        <div class="flex justify-between mt-3 gap-2">
-                            <a href="{{ url()->previous() }}"
-                                class="bg-gray-200 hover:bg-gray-300 px-4 py-2 rounded-lg shadow font-semibold transition-colors">
-                                Cancelar
-                            </a>
-                            <form action="{{ route('admin.resenas.report.cancel', $report->id) }}" method="POST">
-                                @csrf
-                                @method('DELETE')
-                                <input type="hidden" name="redirect_to" value="{{ url()->previous() }}">
-                                <button type="submit"
-                                    class="bg-red-500 hover:bg-red-600 text-white px-4 py-2 rounded-lg shadow font-semibold transition-colors">
-                                    Cancelar Reporte
-                                </button>
-                            </form>
+                            {{-- Tiempo restante --}}
+                            <div class="flex flex-col items-center md:items-end gap-2">
+                                @php $expires = $report->deadline; @endphp
+                                @if ($expires)
+                                    <span class="countdown px-3 py-1 rounded-lg font-mono font-bold shadow"
+                                        data-end="{{ $expires->toIso8601String() }}">
+                                        Cargando...
+                                    </span>
+                                @else
+                                    <span class="text-gray-400 font-semibold">Expirado</span>
+                                @endif
+
+                                {{-- Acciones --}}
+                                <div class="flex flex-col sm:flex-row justify-between mt-4 gap-3">
+                                    <a href="{{ url()->previous() }}"
+                                        class="px-4 py-2 rounded bg-gray-200 hover:bg-gray-300 text-center">
+                                        Cancelar
+                                    </a>
+                                    <form action="{{ route('admin.resenas.report.cancel', $report->id) }}" method="POST">
+                                        @csrf
+                                        @method('DELETE')
+                                        <input type="hidden" name="redirect_to" value="{{ url()->previous() }}">
+                                        <button type="submit"
+                                            class="inline-block bg-yellow-400 text-red-900 shadow hover:bg-yellow-600 transition px-4 py-2 rounded">
+                                            Cancelar Reporte
+                                        </button>
+                                    </form>
+                                </div>
+                            </div>
                         </div>
                     </div>
-                </div>
+                @empty
+                    <div class="bg-gray-100 p-6 rounded shadow text-center text-gray-500">
+                        No hay reportes activos para mostrar.
+                    </div>
+                @endforelse
             </div>
-        @empty
-            <div class="bg-gray-100 p-6 rounded shadow text-center text-gray-500">
-                No hay reportes activos para mostrar.
-            </div>
-        @endforelse
+        </div>
     </div>
 @endsection
 

@@ -10,240 +10,336 @@
     <x-profile-header :user="Auth::user()" bgImage="{{ asset('images/fondo_imagen_inicio.jpg') }}" />
 
     <div class="container mx-auto py-6">
-        <div class="bg-white p-5 rounded shadow space-y-6 mb-6">
-            <h2 class="text-2xl font-bold mb-4">👤 Perfil de {{ Auth::user()->name }}</h2>
-            <p><strong>Email:</strong> {{ Auth::user()->email }}</p>
+        <section class="relative rounded-xl overflow-hidden shadow-xl p-6 mb-6">
+            <div class="absolute inset-0 bg-white opacity-50 z-0"></div>
 
-            @if (Auth::user()->nickname)
-                <p><strong>Apodo:</strong> {{ Auth::user()->nickname }}</p>
-            @endif
+            <div class="relative z-10 flex flex-col items-center text-center w-full">
+                <h2 class="text-2xl text-red-700 font-bold mb-3 uppercase">Perfil de {{ Auth::user()->name }}</h2>
+            </div>
 
-            @if (Auth::user()->fecha_nacimiento)
-                @php
-                    $hoy = \Carbon\Carbon::now();
-                    $fecha = \Carbon\Carbon::parse(Auth::user()->fecha_nacimiento);
-                    $esCumple = $hoy->format('d-m') === $fecha->format('d-m');
-                @endphp
+            <!-- CONTENEDOR PRINCIPAL -->
+            <div class="grid grid-cols-1 md:grid-cols-4 gap-6 items-start">
 
-                <p><strong>Fecha de nacimiento:</strong> {{ $fecha->format('d/m/Y') }}
-                    @if ($esCumple)
-                        🎉 ¡Feliz cumpleaños! 🎂
-                    @endif
-                </p>
-            @endif
+                <!-- COLUMNA 1: FOTO + NOMBRE -->
+                <div
+                    class="relative z-10 bg-white p-4 rounded-lg shadow h-full
+                    flex flex-col items-center">
+                    <img src="{{ Auth::user()->avatar_url ? asset('storage/' . Auth::user()->avatar_url) : asset('images/default-avatar.jpeg') }}"
+                        class="rounded-full w-36 h-36 object-cover border-4 border-red-600 shadow-lg">
 
-            @if (Auth::user()->pais)
-                <p><strong>País:</strong> {{ Auth::user()->pais }}</p>
-            @endif
+                    <h3 class="relative z-10 text-2xl font-bold mt-3 text-center md:text-left">
+                        {{ Auth::user()->name }}
+                    </h3>
 
-            @if (Auth::user()->favorito_personaje)
-                <p><strong>Personaje favorito:</strong> {{ Auth::user()->favorito_personaje }}</p>
-            @endif
-
-            @if (Auth::user()->twitter && Auth::user()->instagram)
-                <div class="d-flex justify-content-center justify-content-md-start gap-2 m-2">
-
-                    @if (Auth::user()->twitter)
-                        <a href="{{ Auth::user()->twitter }}" target="_blank"
-                            class="px-3 py-1 rounded-pill d-flex align-items-center gap-2"
-                            style="background:rgba(29, 155, 240, 0.2); border:1px solid rgba(29, 155, 240, 0.5); text-decoration:none; transition:0.3s;">
-                            <i class="bi bi-twitter"></i> <span>Twitter</span>
-                        </a>
+                    @if (Auth::user()->nickname)
+                        <p class="italic text-gray-600 text-lg">"{{ Auth::user()->nickname }}"</p>
                     @endif
 
-                    @if (Auth::user()->instagram)
-                        <a href="{{ Auth::user()->instagram }}" target="_blank"
-                            class="px-3 py-1 rounded-pill d-flex align-items-center gap-2"
-                            style="background:rgba(225, 48, 108, 0.2); border:1px solid rgba(225, 48, 108, 0.5); text-decoration:none; transition:0.3s;">
-                            <i class="bi bi-instagram"></i> <span>Instagram</span>
-                        </a>
+                    <p class="italic text-gray-600 text-m">{{ Auth::user()->email }}</p>
+                </div>
+                <!-- COLUMNA 2: INFO BÁSICA -->
+                <div class="relative z-10 bg-white p-4 rounded-lg shadow h-full space-y-2">
+                    @if ($user->bio)
+                        <div class="relative z-10 flex flex-col items-center text-center w-full">
+                            <h4 class="text-l text-red-700 font-bold mb-3 uppercase">Biografia</h4>
+                        </div>
+                        <p class="text-gray-700">{{ $user->bio }}</p>
+                        <hr>
+                    @endif
+
+                    <div class="relative z-10 flex flex-col items-center text-center w-full mt-3">
+                        <h4 class="text-l text-red-700 font-bold mb-3 uppercase">Informacion</h4>
+                    </div>
+                    <p>📅 Miembro desde: <strong>{{ $user->created_at->format('d/m/Y') }}</strong></p>
+
+                    @if ($user->pais)
+                        <p>🌍 País: <strong>{{ $user->pais }}</strong></p>
+                    @endif
+
+                    @if ($user->fecha_nacimiento)
+                        <p>🎂 Nacimiento:
+                            <strong>{{ \Carbon\Carbon::parse($user->fecha_nacimiento)->format('d/m/Y') }}</strong>
+                        </p>
                     @endif
 
                 </div>
-            @endif
 
-            <p><strong>Fecha de registro:</strong> {{ Auth::user()->created_at->format('d/m/Y') }}</p>
+                <!-- COLUMNA 3: REDES SOCIALES -->
+                <div
+                    class="relative z-10 bg-white p-4 rounded-lg shadow h-full flex flex-col items-center md:items-start space-y-3">
+                    <div class="relative z-10 flex flex-col items-center text-center w-full">
+                        <h4 class="text-l text-red-700 font-bold mb-3 uppercase">Redes Sociales</h4>
+                    </div>
 
-        </div>
+                    @if ($user->twitter && $user->instagram)
+                        @if ($user->twitter)
+                            <a href="{{ $user->twitter }}" target="_blank"
+                                class="px-3 py-2 rounded-lg flex items-center gap-2 text-blue-700 font-semibold bg-blue-100 hover:bg-blue-200">
+                                <i class="bi bi-twitter"></i> Twitter
+                            </a>
+                        @endif
+
+                        @if ($user->instagram)
+                            <a href="{{ $user->instagram }}" target="_blank"
+                                class="px-3 py-2 rounded-lg flex items-center gap-2 text-pink-700 font-semibold bg-pink-100 hover:bg-pink-200">
+                                <i class="bi bi-instagram"></i> Instagram
+                            </a>
+                        @endif
+                    @else
+                        <p class="text-gray-500 italic">Este usuario está en ASGARD</p>
+                    @endif
+                </div>
+
+                <!-- COLUMNA 4: ESTADÍSTICAS Y PREFERENCIAS -->
+                <div class="relative z-10 bg-white p-4 rounded-lg shadow h-full space-y-3">
+
+                    @if ($user->favorito_personaje)
+                        <div>
+                            <div class="relative z-10 flex flex-col items-center text-center w-full">
+                                <h4 class="text-l text-red-700 font-bold mb-3 uppercase">Preferencias</h4>
+                            </div>
+                            <p><strong>Personaje favorito:</strong>
+                                <span class="text-red-600 font-semibold">{{ $user->favorito_personaje }}</span>
+                            </p>
+                        </div>
+
+                        <hr>
+                    @endif
+
+                    <div>
+                        <div class="relative z-10 flex flex-col items-center text-center w-full">
+                            <h4 class="text-l text-red-700 font-bold mb-3 uppercase">Estadisticas</h4>
+                        </div>
+                        <p>📝 Reseñas: <strong>{{ $reseñas->count() }}</strong></p>
+                        <p>📢 Foros creados: <strong>{{ $foros->count() }}</strong></p>
+                        <p>💬 Mensajes: <strong>{{ $mensajes->count() }}</strong></p>
+                    </div>
+                </div>
+        </section>
 
         <!-- Opciones de administrador -->
         @if (Auth::user()->role === 'admin')
-            <div class="bg-blue-50 p-5 rounded shadow space-y-6 mb-6">
-                <h3 class="text-xl font-semibold mb-2">⚙️ Panel de Administrador</h3>
-                <ul class="list-disc ml-5">
-                    <li><a href="{{ route('admin.dashboard') }}" class="text-blue-600 hover:underline">Ver todos los
-                            usuarios</a></li>
-                    <li><a href="{{ route('admin.manage-content') }}" class="text-blue-600 hover:underline">Gestionar
-                            contenido</a></li>
+            <section class="relative rounded-2xl overflow-hidden shadow-xl p-6 mb-6 ">
+                <div class="absolute inset-0 bg-white opacity-50 z-0"></div>
+
+                <div class="relative z-10 flex flex-col items-center text-center w-full mb-6">
+                    <h2 class="text-3xl text-red-700 font-extrabold uppercase tracking-wide">
+                        Panel de Administrador
+                    </h2>
+                    <p class="text-gray-600 mt-2">Acceso rápido a las herramientas de gestión</p>
+                </div>
+
+                <ul class="relative z-10 space-y-4">
+
+                    <!-- Gestionar usuarios -->
+                    <li>
+                        <a href="{{ route('admin.dashboard') }}"
+                            class="flex items-center gap-4 p-4 bg-white rounded-xl shadow hover:shadow-md transition border border-gray-200 hover:bg-gray-50">
+                            <i class="fas fa-users-cog text-red-600 text-2xl"></i>
+                            <span class="text-blue-700 font-semibold hover:underline text-lg">
+                                Gestionar usuarios
+                            </span>
+                        </a>
+                    </li>
+
+                    <!-- Gestionar contenido -->
+                    <li>
+                        <a href="{{ route('admin.manage-content') }}"
+                            class="flex items-center gap-4 p-4 bg-white rounded-xl shadow hover:shadow-md transition border border-gray-200 hover:bg-gray-50">
+                            <i class="fas fa-folder-open text-red-600 text-2xl"></i>
+                            <span class="text-blue-700 font-semibold hover:underline text-lg">
+                                Gestionar contenido
+                            </span>
+                        </a>
+                    </li>
+
                 </ul>
-            </div>
+
+            </section>
         @endif
 
-        <!-- Actividad reciente -->
-        <div class="bg-gray-100 p-5 rounded shadow space-y-6 mb-6">
-            <h3 class="text-xl font-bold mb-4">📌 Actividad Reciente</h3>
+        <!-- ACTIVIDAD RECIENTE -->
+        <section class="relative rounded-2xl overflow-hidden shadow-2xl p-6 mb-6">
+            <div class="absolute inset-0 bg-white opacity-50 z-0"></div>
 
-            {{-- RESEÑAS --}}
-            <div x-data="{ openResenas: {} }" class="bg-white p-4 rounded shadow">
-                <h4 class="text-l font-bold mb-4">
-                    📝 Tus Reseñas
-                </h4>
+            <!-- Título -->
+            <div class="relative z-10 text-center mb-6">
+                <h2 class="text-3xl font-extrabold text-red-700 uppercase drop-shadow-sm">
+                    Actividad Reciente
+                </h2>
+                <p class="text-gray-600 text-sm">Resumen de tu actividad en la plataforma</p>
+            </div>
 
-                <div x-show="openResenas" x-transition class="mt-4 space-y-4">
+            <!-- CONTENEDOR GENERAL -->
+            <div class="space-y-6">
+
+                <!-- RESEÑAS -->
+                <div x-data="{ openResenas: {} }"
+                    class="relative z-10 bg-white p-4 rounded-xl shadow-md border border-gray-200 hover:shadow-lg transition">
+
+                    <div class="relative z-10 flex flex-col items-center text-center w-full">
+                        <h3 class="text-xl text-red-700 font-bold mb-3 uppercase">Tus Reseñas</h3>
+                    </div>
+
                     @forelse ($reseñas as $resena)
-                        <div class="border rounded-lg p-4 bg-gray-50">
+                        <div class="border border-gray-200 rounded-lg bg-gray-50 mb-3 shadow-sm">
+
                             <button @click="openResenas[{{ $resena->id }}] = !openResenas[{{ $resena->id }}]"
-                                class="w-full flex justify-between items-center font-semibold text-indigo-600 text-lg hover:bg-gray-100 px-3 py-2 rounded">
+                                class="w-full flex justify-between items-center px-4 py-3 text-red-700 font-semibold hover:bg-gray-100 transition rounded-lg">
+
                                 <span>{{ $resena->titulo_pelicula }}</span>
-                                <span x-text="openResenas[{{ $resena->id }}] ? '▲' : '▼'"></span>
+                                <i class="fas fa-chevron-down transition-transform"
+                                    :class="openResenas[{{ $resena->id }}] ? 'rotate-180' : ''"></i>
                             </button>
 
-                            <div x-show="openResenas[{{ $resena->id }}]" x-transition
-                                class="mt-2 ml-4
-                                text-gray-700 bg-gray-50 p-3 rounded-lg shadow-inner">
-                                <p><strong>Calificación:</strong> {{ $resena->rating }}/5</p>
-                                <p><strong>Comentario:</strong> {{ $resena->content }}</p>
-                                <p class="text-gray-500 text-sm mt-1">({{ $resena->created_at->diffForHumans() }})</p>
-                                <a href="{{ route('resenas.ver', $resena->id) }}"
-                                    class="px-3 py-1 bg-indigo-500 text-white rounded hover:bg-indigo-600 transition">
-                                    Ver reseña
-                                </a>
+                            <div x-show="openResenas[{{ $resena->id }}]" x-collapse
+                                class="px-5 py-3 text-gray-700 space-y-1">
+                                <p><strong>⭐ Calificación:</strong> {{ $resena->rating }}/5</p>
+                                <p><strong>💬 Comentario:</strong> {{ $resena->content }}</p>
+                                <p class="text-gray-500 text-xs">{{ $resena->created_at->diffForHumans() }}</p>
+                                <div class="flex justify-between mt-4">
+                                    <a href="{{ route('resenas.ver', $resena->id) }}"
+                                        class="px-4 py-2 bg-yellow-400 text-red-800 font-semibold rounded-lg hover:bg-yellow-500 transition">
+                                        Ver
+                                    </a>
+                                </div>
                             </div>
                         </div>
                     @empty
-                        <p class="text-gray-500">No hay reseñas recientes.</p>
+                        <p class="text-gray-500 italic">No has escrito reseñas aún.</p>
                     @endforelse
 
-                    <div class="mt-3 overflow-x-auto">
+                    <div class="mt-4 overflow-x-auto">
                         {{ $reseñas->appends(['mensajes_page' => request('mensajes_page')])->links() }}
                     </div>
                 </div>
-            </div>
 
-            {{-- MENSAJES --}}
-            <div x-data="{ openForos: {} }" class="bg-white p-4 rounded shadow">
-                <h4 class="text-l font-bold mb-4">
-                    💬 Tus Mensajes
-                </h4>
-                <div class="mt-4 space-y-4">
+                <!-- MENSAJES EN FOROS -->
+                <div x-data="{ openForos: {} }"
+                    class="relative z-10 bg-white p-4 rounded-xl shadow-md border border-gray-200 hover:shadow-lg transition">
+
+                    <div class="relative z-10 flex flex-col items-center text-center w-full">
+                        <h3 class="text-xl text-red-700 font-bold mb-3 uppercase">
+                            Tus Mensajes
+                        </h3>
+                    </div>
+
                     @forelse ($mensajes as $foro_id => $mensajesForo)
-                        <div class="border rounded-lg p-4 bg-gray-50">
-                            {{-- Título del foro --}}
+                        <div class="border border-gray-200 rounded-lg bg-gray-50 mb-3 shadow-sm">
+
                             <button @click="openForos[{{ $foro_id }}] = !openForos[{{ $foro_id }}]"
-                                class="w-full flex justify-between items-center font-semibold text-indigo-600 text-lg hover:bg-gray-100 px-3 py-2 rounded">
-                                <span>Mensajes del Foro: {{ $mensajesForo[0]->foro->titulo ?? 'Foro eliminado' }}</span>
-                                <span x-text="openForos[{{ $foro_id }}] ? '▲' : '▼'"></span>
+                                class="w-full flex justify-between items-center px-4 py-3 text-red-700 font-semibold hover:bg-gray-100 transition rounded-lg">
+
+                                <span>Foro: {{ $mensajesForo[0]->foro->titulo ?? 'Foro eliminado' }}</span>
+                                <i class="fas fa-chevron-down transition-transform"
+                                    :class="openForos[{{ $foro_id }}] ? 'rotate-180' : ''"></i>
                             </button>
 
-                            {{-- Mensajes del foro --}}
-                            <div x-show="openForos[{{ $foro_id }}]" x-transition
-                                class="mt-2 ml-4
-                                text-gray-700 bg-gray-50 p-3 rounded-lg shadow-inner">
+                            <div x-show="openForos[{{ $foro_id }}]" x-collapse class="px-5 py-3 space-y-4">
                                 @foreach ($mensajesForo as $mensaje)
-                                    <div class="pl-4 mb-2 border-l-2 border-indigo-300">
+                                    <div class="border-l-4 border-red-300 pl-4">
                                         <p class="text-gray-700">{{ $mensaje->contenido }}</p>
-                                        <p class="text-gray-400 text-sm">({{ $mensaje->created_at->diffForHumans() }})</p>
-                                        <a href="{{ route('foros.show', $mensaje->foro_id) }}"
-                                            class="px-3 py-1 bg-indigo-500 text-white rounded hover:bg-indigo-600 transition">
-                                            Ver mensaje
-                                        </a>
+                                        <p class="text-gray-400 text-xs">{{ $mensaje->created_at->diffForHumans() }}</p>
 
-                                        @if ($mensaje->respuestas)
-                                            @foreach ($mensaje->respuestas as $respuesta)
-                                                <div class="pl-4 mt-1 border-l-2 border-indigo-200">
-                                                    <p class="text-gray-600">{{ $respuesta->contenido }}</p>
-                                                    <p class="text-gray-400 text-xs">
-                                                        ({{ $respuesta->created_at->diffForHumans() }})
-                                                    </p>
-                                                </div>
-                                            @endforeach
-                                        @endif
+                                        <div class="flex justify-between mt-4">
+                                            <a href="{{ route('foros.show', $mensaje->foro_id) }}"
+                                                class="px-4 py-2 bg-yellow-400 text-red-800 font-semibold rounded-lg hover:bg-yellow-500 transition">
+                                                Ver
+                                            </a>
+                                        </div>
+
+                                        @foreach ($mensaje->respuestas as $res)
+                                            <div class="ml-4 mt-2 border-l-2 border-indigo-200 pl-3 text-gray-600 text-sm">
+                                                <p>{{ $res->contenido }}</p>
+                                                <span
+                                                    class="text-gray-400 text-xs">{{ $res->created_at->diffForHumans() }}</span>
+                                            </div>
+                                        @endforeach
                                     </div>
                                 @endforeach
                             </div>
                         </div>
                     @empty
-                        <p class="text-gray-500">No hay mensajes recientes.</p>
+                        <p class="text-gray-500 italic">No has enviado mensajes recientemente.</p>
                     @endforelse
+
+                    <div class="mt-3 overflow-x-auto">
+                        {{ $mensajes->links() }}
+                    </div>
                 </div>
-            </div>
 
-            {{-- Foros donde participa el usuario --}}
-            <div x-data="{ openForos: {} }" class="bg-white p-4 rounded shadow space-y-4">
-                <h4 class="text-l font-bold mb-4">🗂️ Tus Foros</h4>
+                <!-- FOROS DEL USUARIO -->
+                <div x-data="{ panelForos: {} }"
+                    class="relative z-10 bg-white p-4 rounded-xl shadow-md border border-gray-200 hover:shadow-lg transition">
 
-                @forelse ($foros as $foro)
-                    <div class="border rounded-lg p-4 bg-gray-50">
-                        {{-- Título del foro, clic para desplegar --}}
-                        <button @click="openForos[{{ $foro->id }}] = !openForos[{{ $foro->id }}]"
-                            class="w-full flex justify-between items-center font-semibold text-indigo-600 text-lg hover:bg-gray-100 px-3 py-2 rounded">
-                            <span>{{ $foro->titulo }}</span>
-                            <span x-text="openForos[{{ $foro->id }}] ? '▲' : '▼'"></span>
-                        </button>
+                    <div class="relative z-10 flex flex-col items-center text-center w-full">
+                        <h3 class="text-xl text-red-700 font-bold mb-3 uppercase">Tus Foros
+                        </h3>
+                    </div>
 
-                        {{-- Contenido del foro desplegable --}}
-                        <div x-show="openForos[{{ $foro->id }}]" x-transition class="mt-3 space-y-3 text-gray-700">
-                            {{-- Información del foro --}}
-                            <p>{{ $foro->descripcion }}</p>
-                            <p class="text-gray-500 text-sm">Creado: {{ $foro->created_at->format('d/m/Y H:i') }}</p>
-                            @if ($foro->updated_at != $foro->created_at)
-                                <p class="text-gray-400 text-xs">Última actualización:
-                                    {{ $foro->updated_at->diffForHumans() }}</p>
-                            @endif
-                            <a href="{{ route('foros.show', $foro->id) }}"
-                                class="px-3 py-1 bg-indigo-500 text-white rounded hover:bg-indigo-600 transition">
-                                Ver Foro
-                            </a>
+                    @forelse ($foros as $foro)
+                        <div class="border border-gray-200 rounded-lg bg-gray-50 mb-3 shadow-sm">
 
-                            {{-- Mensajes --}}
-                            <div x-data="{ openMensajesForo: {} }" class="mt-2 space-y-2">
-                                @foreach ($foro->mensajes as $mensaje)
-                                    <div class="pl-2 border-l-2 border-indigo-300 rounded-sm">
-                                        {{-- Título del mensaje, clic para desplegar --}}
-                                        <button
-                                            @click="openMensajesForo[{{ $mensaje->id }}] = !openMensajesForo[{{ $mensaje->id }}]"
-                                            class="w-full flex justify-between items-center text-left font-medium px-2 py-1 hover:bg-gray-100 rounded">
-                                            <span><strong><a href="{{ route('users.show', $mensaje->user->id) }}">{{ $mensaje->user->name }}:</a></strong>
-                                                {{ Str::limit($mensaje->contenido, 50) }}</span>
-                                            <span x-text="openMensajesForo[{{ $mensaje->id }}] ? '▲' : '▼'"></span>
-                                        </button>
+                            <button @click="panelForos[{{ $foro->id }}] = !panelForos[{{ $foro->id }}]"
+                                class="w-full flex justify-between items-center px-4 py-3 text-red-700 font-semibold hover:bg-gray-100 transition rounded-lg">
 
-                                        {{-- Contenido completo del mensaje --}}
-                                        <div x-show="openMensajesForo[{{ $mensaje->id }}]" x-transition
-                                            class="mt-1 ml-4 space-y-1 text-gray-700">
-                                            <p>{{ $mensaje->contenido }}</p>
-                                            <p class="text-gray-400 text-xs">
-                                                ({{ $mensaje->created_at->diffForHumans() }})
+                                <span>{{ $foro->titulo }}</span>
+                                <i class="fas fa-chevron-down transition-transform"
+                                    :class="panelForos[{{ $foro->id }}] ? 'rotate-180' : ''"></i>
+                            </button>
+
+                            <div x-show="panelForos[{{ $foro->id }}]" x-collapse
+                                class="px-4 py-3 text-gray-700 space-y-3">
+
+                                <p>{{ $foro->descripcion }}</p>
+                                <p class="text-gray-500 text-xs">Creado: {{ $foro->created_at->format('d/m/Y H:i') }}</p>
+
+                                <div class="flex justify-between mt-4">
+                                    <a href="{{ route('foros.show', $foro->id) }}"
+                                        class="px-4 py-2 bg-yellow-400 text-red-800 font-semibold rounded-lg hover:bg-yellow-500 transition">
+                                        Ver
+                                    </a>
+                                </div>
+
+                                <!-- Mensajes del foro -->
+                                <div class="ml-2 space-y-2 border-l-2 border-red-300 pl-3">
+                                    @foreach ($foro->mensajes as $mensaje)
+                                        <div class="bg-white p-2 rounded border border-gray-200 shadow-sm">
+
+                                            <p class="font-semibold">
+                                                <a href="{{ route('users.show', $mensaje->user->id) }}"
+                                                    class="text-red-600">
+                                                    {{ $mensaje->user->name }}:
+                                                </a>
+                                                {{ Str::limit($mensaje->contenido, 50) }}
                                             </p>
 
-                                            {{-- Respuestas --}}
-                                            @if ($mensaje->respuestas)
-                                                @foreach ($mensaje->respuestas as $respuesta)
-                                                    <div class="pl-4 mt-1 border-l-2 border-indigo-200">
-                                                        <p><strong><a href="{{ route('users.show', $respuesta->user->id) }}">{{ $respuesta->user->name }}:</a></strong>
-                                                            {{ $respuesta->contenido }}</p>
-                                                        <p class="text-gray-400 text-xs">
-                                                            ({{ $respuesta->created_at->diffForHumans() }})
-                                                        </p>
-                                                    </div>
-                                                @endforeach
-                                            @endif
+                                            @foreach ($mensaje->respuestas as $respuesta)
+                                                <p class="ml-4 text-gray-600 text-sm">
+                                                    <strong class="text-red-500">
+                                                        <a
+                                                            href="{{ route('users.show', $respuesta->user->id) }}">{{ $respuesta->user->name }}:</a>
+                                                    </strong>
+                                                    {{ $respuesta->contenido }}
+                                                </p>
+                                            @endforeach
                                         </div>
-                                    </div>
-                                @endforeach
+                                    @endforeach
+                                </div>
                             </div>
                         </div>
+                    @empty
+                        <p class="text-gray-500 italic">No participas en ningún foro todavía.</p>
+                    @endforelse
+
+                    <div class="mt-3 overflow-x-auto">
+                        {{ $foros->links() }}
                     </div>
-                @empty
-                    <p class="text-gray-500">No has creado ni participado en ningún foro todavía.</p>
-                @endforelse
-
-                <div class="mt-3 overflow-x-auto">
-                    {{ $foros->appends(['mensajes_page' => request('mensajes_page')])->links() }}
                 </div>
-            </div>
 
-        </div>
+            </div>
+        </section>
+
     </div>
 @endsection
 

@@ -125,7 +125,7 @@
         <!-- Contenedor central -->
         <div class="flex flex-col justify-center items-center px-4 w-full max-w-md">
             <!-- Logo -->
-            <a class="mb-6 flex items-center" href="{{ route('profile') }}">
+            <a class="mb-6 flex items-center" href="{{ route('inicio') }}">
                 <img src="{{ asset('logos/Logo.PNG') }}" alt="Logo" class="me-2"
                     style="height: 100px; width: auto;">
             </a>

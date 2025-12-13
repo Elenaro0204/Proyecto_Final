@@ -121,7 +121,7 @@ class ForoController extends Controller
     // Ver un foro con sus mensajes
     public function show($id)
     {
-        $foro = Foro::findOrFail($id);
+        $foro = Foro::with('report')->findOrFail($id);
 
         $user = Auth::user();
 

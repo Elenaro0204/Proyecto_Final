@@ -69,7 +69,9 @@
                 <x-slot name="content" class="bg-red-800 text-white rounded-lg shadow-lg border border-yellow-400">
                     <x-dropdown-link :href="route('resenas')">{{ __('Reseñas') }}</x-dropdown-link>
                     <x-dropdown-link :href="route('foros.index')">{{ __('Foros') }}</x-dropdown-link>
-                    <x-dropdown-link :href="route('users.index')">{{ __('Usuarios') }}</x-dropdown-link>
+                    @auth
+                        <x-dropdown-link :href="route('users.index')">{{ __('Usuarios') }}</x-dropdown-link>
+                    @endauth
                 </x-slot>
             </x-dropdown>
 
@@ -96,7 +98,7 @@
                             class="inline-flex items-center px-3 py-2 rounded-md bg-red-900 text-white hover:bg-red-800 transition-colors">
                             <!-- Imagen del avatar -->
                             <div class="flex-shrink-0 mr-2">
-                                <img src="{{ Auth::user()->avatar_url ?? asset('images/default-avatar.jpeg') }}"
+                                <img src="{{ Auth::user()->avatar_url ? asset('storage/' . Auth::user()->avatar_url) : asset('images/default-avatar.jpeg') }}"
                                     alt="Avatar de {{ Auth::user()->name }}"
                                     class="rounded-full border-2 border-yellow-400 w-10 h-10 object-cover">
                             </div>
@@ -159,8 +161,8 @@
         x-transition:enter-start="opacity-0 -translate-x-full" x-transition:enter-end="opacity-100 translate-x-0"
         x-transition:leave="transition ease-in duration-300" x-transition:leave-start="opacity-100 translate-x-0"
         x-transition:leave-end="opacity-0 -translate-x-full"
-        class="fixed top-20 left-0 w-auto bg-gradient-to-b from-red-700 to-blue-700 text-white shadow-lg z-50 flex flex-col"
-        style="height: calc(100vh - 5rem);">
+        class="fixed top-20 left-0 w-auto h-full bg-gradient-to-b from-red-700 to-blue-700 text-white shadow-lg z-50 flex flex-col overflow-y-auto"
+        style="max-height: calc(100vh - 5rem);">
 
         <!-- Otros enlaces simples -->
         <div class="p-2">
@@ -222,10 +224,12 @@
                     class="block px-3 py-2 rounded-md hover:text-yellow-400 transition-colors">
                     Foros
                 </x-nav-link>
-                <x-nav-link :href="route('users.index')" :active="request()->routeIs('foros.index')"
-                    class="block px-3 py-2 rounded-md hover:text-yellow-400 transition-colors">
-                    Usuarios
-                </x-nav-link>
+                @auth
+                    <x-nav-link :href="route('users.index')" :active="request()->routeIs('users.index')"
+                        class="block px-3 py-2 rounded-md hover:text-yellow-400 transition-colors">
+                        Usuarios
+                    </x-nav-link>
+                @endauth
             </div>
         </div>
 
@@ -257,7 +261,7 @@
                         class="w-full flex justify-between items-center px-3 py-2 text-left font-semibold rounded-md hover:text-yellow-300 transition-colors">
                         <!-- Imagen del avatar y nombre -->
                         <div class="flex items-center space-x-3">
-                            <img src="{{ Auth::user()->avatar_url ?? asset('images/default-avatar.jpeg') }}"
+                            <img src="{{ Auth::user()->avatar_url ? asset('storage/' . Auth::user()->avatar_url) : asset('images/default-avatar.jpeg') }}"
                                 alt="Avatar de {{ Auth::user()->name }}"
                                 class="rounded-full border-2 border-yellow-400 w-10 h-10 object-cover">
                             <div class="font-medium text-base text-yellow-400">{{ Auth::user()->name }}</div>
@@ -311,7 +315,7 @@
         </div>
 
         <!-- Logo abajo -->
-        <div class="p-4 mt-auto flex justify-center">
+        <div class="p-4 mt-36 flex justify-center">
             <img src="{{ asset('logos/Icono.PNG') }}" alt="Logo" class="w-32">
         </div>
     </div>

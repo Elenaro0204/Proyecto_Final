@@ -3,9 +3,13 @@
 
 @section('content')
     <div class="container mx-auto py-10 px-4">
-        <div class="max-w-3xl mx-auto bg-white rounded-xl shadow-lg overflow-hidden">
-            <div class="px-8 py-6">
-                <h2 class="text-2xl font-bold mb-4">Publicar nueva reseña</h2>
+        <div class="max-w-3xl mx-auto relative rounded-xl overflow-hidden shadow-xl p-6">
+            <div class="absolute inset-0 bg-white opacity-50 z-0"></div>
+
+            <div class="relative z-10 px-8 py-6">
+                <div class="relative z-10 flex flex-col items-center text-center w-full">
+                    <h2 class="text-2xl text-red-700 font-bold mb-3">Publicar nueva reseña</h2>
+                </div>
 
                 <form action="{{ route('resenas.store') }}" method="POST" class="space-y-3">
                     @csrf
@@ -37,7 +41,7 @@
                                 <p class="text-gray-700 mb-1">
                                     Estás escribiendo una reseña sobre:
                                 </p>
-                                <h3 class="font-bold text-lg text-indigo-700">{{ $info['Title'] ?? $title }}</h3>
+                                <h3 class="font-bold text-lg text-red-700">{{ $info['Title'] ?? $title }}</h3>
                                 <small class="text-gray-500 capitalize">
                                     Tipo: {{ $type }}
                                 </small>
@@ -58,7 +62,7 @@
                         <label class="block">
                             Buscar entidad:
                             <input type="text" id="searchInput" class="border rounded p-2 w-full"
-                                placeholder="Escribe para buscar..." disabled>
+                                placeholder="🔍 Escribe para buscar..." disabled>
                         </label>
 
                         <label class="block">
@@ -87,18 +91,19 @@
                         </select>
                     </label>
 
-                    <div class="flex justify-between mt-4">
-                        <a href="{{ url()->previous() }}" class="px-4 py-2 rounded bg-gray-200 hover:bg-gray-300">
+                    <div class="flex flex-col sm:flex-row justify-between mt-4 gap-3">
+                        <a href="{{ url()->previous() }}" class="px-4 py-2 rounded bg-gray-200 hover:bg-gray-300 text-center">
                             Cancelar
                         </a>
 
-                        <button type="submit" class="bg-red-600 hover:bg-red-700 text-white px-4 py-2 rounded">
+                        <button type="submit"
+                            class="inline-block bg-yellow-400 text-red-900 shadow hover:bg-yellow-600 transition px-4 py-2 rounded">
                             Publicar reseña
                         </button>
                     </div>
                 </form>
             </div>
-        </div>
+    </div>
     </div>
 
     {{-- JS solo se ejecuta si no viene con tipo y entidad definidos --}}
@@ -116,7 +121,7 @@
                 if (type) {
                     searchInput.disabled = false;
                     entitySelect.disabled = false;
-                    entitySelect.innerHTML = '<option value="">Escribe para buscar...</option>';
+                    entitySelect.innerHTML = '<option value="">🔍 Escribe para buscar...</option>';
                     entityIdHidden.value = '';
                     entityTitleHidden.value = '';
                 } else {
@@ -134,7 +139,7 @@
                 const query = searchInput.value.trim();
 
                 if (!type || query.length < 1) {
-                    entitySelect.innerHTML = '<option value="">Escribe para buscar...</option>';
+                    entitySelect.innerHTML = '<option value="">🔍 Escribe para buscar...</option>';
                     return;
                 }
 

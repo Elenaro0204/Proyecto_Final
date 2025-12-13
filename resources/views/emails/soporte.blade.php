@@ -62,7 +62,12 @@
 
 <body>
     <div class="container">
-        <h2>Nuevo mensaje de soporte</h2>
+
+        @if ($tipo === 'opinion')
+            <h2>Nueva Opinión</h2>
+        @else
+            <h2>Nuevo mensaje de soporte</h2>
+        @endif
 
         <div class="info">
             <p><span class="label">Nombre:</span> {{ $nombre }}</p>
@@ -83,7 +88,7 @@
                 <tr>
                     <td style="vertical-align:top; width:70px; padding-right:15px;">
                         <!-- Logo (cámbialo por tu URL real) -->
-                        <img src="https://marvelpedia.ruix.iesruizgijon.es/Logo.PNG" alt="Marvelpedia"
+                        <img src="https://marvelpedia.ruix.iesruizgijon.es/logos/Icono.PNG" alt="Marvelpedia"
                             style="width:70px; height:auto; border-radius:6px;">
                     </td>
 

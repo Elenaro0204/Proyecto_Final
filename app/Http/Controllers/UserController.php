@@ -13,10 +13,48 @@ use Illuminate\Support\Str;
 
 class UserController extends Controller
 {
-    public function index()
+    public function index(Request $request)
     {
-        $users = User::paginate(20);
-        return view('users.index', compact('users'));
+        $query = User::query();
+
+        // Buscar por nombre
+        if ($request->filled('search')) {
+            $query->where('name', 'like', '%' . $request->search . '%');
+        }
+
+        // Filtrar por país
+        if ($request->filled('pais')) {
+            $query->where('pais', $request->pais);
+        }
+
+        $users = $query->paginate(8);
+
+        // Últimos usuarios (paginación)
+        $ultimos_usuarios = User::orderBy('created_at', 'desc')
+            ->paginate(8, ['*'], 'ultimos_page');
+
+        // Usuarios con más reseñas
+        $topResenas = User::withCount('reviews')
+            ->orderBy('reviews_count', 'desc')
+            ->take(5)
+            ->get();
+
+        // Usuarios con más foros
+        $topForos = User::withCount('foros')
+            ->orderBy('foros_count', 'desc')
+            ->take(5)
+            ->get();
+
+        // Usuarios con más mensajes
+        $topMensajes = User::withCount('mensajes')
+            ->orderBy('mensajes_count', 'desc')
+            ->take(5)
+            ->get();
+
+        // Lista de países únicos del sistema
+        $paises = User::whereNotNull('pais')->distinct()->pluck('pais');
+
+        return view('users.index', compact('users', 'ultimos_usuarios', 'paises', 'topResenas', 'topForos', 'topMensajes'));
     }
 
     public function show($id)

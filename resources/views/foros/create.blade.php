@@ -4,11 +4,14 @@
 
 @section('content')
     <div class="container mx-auto py-10 px-4">
-        <div class="max-w-3xl mx-auto bg-white rounded-xl shadow-lg overflow-hidden">
-            <div class="px-8 py-6">
-                <h2 class="text-3xl font-bold text-gray-800 mb-6 text-center">
-                    {{ isset($foro) ? 'Editar Foro' : 'Crear Nuevo Foro' }}
-                </h2>
+        <div class="max-w-3xl mx-auto relative rounded-xl overflow-hidden shadow-xl p-6">
+            <div class="absolute inset-0 bg-white opacity-50 z-0"></div>
+
+            <div class="relative z-10 px-8 py-6">
+                <div class="relative z-10 flex flex-col items-center text-center w-full">
+                    <h2 class="text-2xl text-red-700 font-bold mb-3">{{ isset($foro) ? 'Editar Foro' : 'Crear Nuevo Foro' }}
+                    </h2>
+                </div>
 
                 <form action="{{ isset($foro) ? route('foros.update', $foro->id) : route('foros.store') }}" method="POST"
                     enctype="multipart/form-data" class="space-y-6">
@@ -127,13 +130,13 @@
                     </div>
 
                     <!-- Botones -->
-                    <div class="flex justify-between mt-4">
-                        <a href="{{ url()->previous() }}" class="px-4 py-2 rounded bg-gray-200 hover:bg-gray-300">
+                    <div class="flex flex-col sm:flex-row justify-between mt-4 gap-3">
+                        <a href="{{ url()->previous() }}" class="px-4 py-2 rounded bg-gray-200 hover:bg-gray-300 text-center">
                             Cancelar
                         </a>
 
                         <button type="submit"
-                            class="px-4 py-2 bg-indigo-600 text-white font-semibold rounded-lg hover:bg-indigo-700 transition">
+                            class="px-4 py-2 bg-yellow-400 text-red-800 font-semibold rounded-lg hover:bg-yellow-500 transition">
                             {{ isset($foro) ? 'Guardar Cambios' : 'Crear Foro' }}
                         </button>
                     </div>

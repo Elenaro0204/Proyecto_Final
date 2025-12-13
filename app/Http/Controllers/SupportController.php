@@ -18,10 +18,11 @@ class SupportController extends Controller
             'nombre' => 'required|string|max:255',
             'email' => 'required|email',
             'mensaje' => 'required|string',
+            'tipo' => 'nullable|string',
         ]);
 
         Mail::to('soportemarvelpedia@gmail.com')->send(
-            new SoporteMail($request->nombre, $request->email, $request->mensaje)
+            new SoporteMail($request->nombre, $request->email, $request->mensaje,  $request->tipo ?? 'sin especificar')
         );
 
         return back()->with('success', 'Mensaje enviado correctamente');

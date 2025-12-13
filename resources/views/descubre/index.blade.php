@@ -14,7 +14,7 @@
     <div class="container mx-auto px-4 sm:px-6 lg:px-8 py-8 space-y-16">
 
         <div class="max-w-3xl mx-auto mb-8">
-            <input id="globalSearch" type="text" placeholder="Buscar series o películas"
+            <input id="globalSearch" type="text" placeholder="🔍 Buscar series o películas"
                 class="w-full px-4 py-3 border rounded-lg focus:ring-2 focus:ring-yellow-400" autocomplete="off">
         </div>
 
@@ -23,18 +23,14 @@
         </div>
 
         <!-- SERIES -->
-        <section
-            class="bg-gradient-to-r from-red-900 via-red-700 to-red-900 rounded-xl p-6 shadow-xl hover:shadow-2xl transition-shadow duration-500">
-            <div class="flex flex-col md:flex-row justify-between items-start md:items-center mb-6 gap-2">
-                <div>
-                    <h2 class="text-2xl sm:text-3xl md:text-4xl font-extrabold text-yellow-400 drop-shadow-lg">Series</h2>
-                    <p class="mt-2 text-gray-200 text-base sm:text-lg md:text-xl">Cada serie cuenta un universo, ¿listo para
-                        explorarlo?</p>
-                </div>
-                <a href="{{ route('series') }}"
-                    class="mt-3 md:mt-0 px-4 sm:px-6 lg:px-8 py-2 sm:py-3 bg-yellow-400 text-red-900 font-bold rounded-lg shadow-lg hover:bg-yellow-500 hover:scale-105 transition-transform duration-300">
-                    Ver más series
-                </a>
+        <section class="relative rounded-xl overflow-hidden shadow-xl p-6">
+            <div class="absolute inset-0 bg-gradient-to-r from-red-900 via-red-700 to-red-900 opacity-50"></div>
+
+            <div class="relative z-10 flex flex-col items-center text-center w-full mb-6 gap-2">
+                <h2 class="text-2xl sm:text-3xl md:text-4xl font-extrabold text-red-700 drop-shadow-lg uppercase">Series
+                </h2>
+                <p class="mt-2 text-yellow-400 text-base sm:text-lg md:text-xl">Cada serie cuenta un universo, ¿listo para
+                    explorarlo?</p>
             </div>
 
             <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6">
@@ -55,22 +51,27 @@
                     </a>
                 @endforeach
             </div>
+
+            <div class="relative z-10 flex flex-col justify-center items-center mt-6">
+                <a href="{{ route('series') }}"
+                    class="mt-3 md:mt-0 px-4 sm:px-6 lg:px-8 py-2 sm:py-3 bg-yellow-400 text-red-900 font-bold rounded-lg shadow-lg hover:bg-yellow-500 hover:scale-105 transition-transform duration-300">
+                    Ver más
+                </a>
+            </div>
         </section>
 
         <!-- PELÍCULAS -->
-        <section
-            class="bg-gradient-to-r from-indigo-900 via-indigo-700 to-indigo-900 rounded-xl p-6 shadow-xl hover:shadow-2xl transition-shadow duration-500">
-            <div class="flex flex-col md:flex-row justify-between items-start md:items-center mb-6 gap-2">
-                <div>
-                    <h2 class="text-2xl sm:text-3xl md:text-4xl font-extrabold text-yellow-400 drop-shadow-lg">Películas
-                    </h2>
-                    <p class="mt-2 text-gray-200 text-base sm:text-lg md:text-xl">Cada película, una aventura épica que no
-                        te puedes perder.</p>
-                </div>
-                <a href="{{ route('peliculas.index') }}"
-                    class="mt-3 md:mt-0 px-4 sm:px-6 lg:px-8 py-2 sm:py-3 bg-yellow-400 text-red-900 font-bold rounded-lg shadow-lg hover:bg-yellow-500 hover:scale-105 transition-transform duration-300">
-                    Ver más películas
-                </a>
+        <section class="relative rounded-xl overflow-hidden shadow-xl p-6">
+            <div class="absolute inset-0 bg-gradient-to-r from-indigo-900 via-indigo-700 to-indigo-900 opacity-50"></div>
+
+            <div class="relative z-10 flex flex-col items-center text-center w-full mb-6 gap-2">
+                <h2 class="text-2xl sm:text-3xl md:text-4xl font-extrabold text-red-700 drop-shadow-lg uppercase">
+                    Peliculas
+                </h2>
+
+                <p class="mt-2 text-yellow-400 text-base sm:text-lg md:text-xl">
+                    Cada película, una aventura épica que no te puedes perder.
+                </p>
             </div>
 
             <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6">
@@ -93,6 +94,13 @@
                     </a>
                 @endforeach
             </div>
+
+            <div class="relative z-10 flex flex-col justify-center items-center mt-6">
+                <a href="{{ route('peliculas.index') }}"
+                    class="px-4 sm:px-6 lg:px-8 py-2 sm:py-3 bg-yellow-400 text-red-900 font-bold rounded-lg shadow-lg hover:bg-yellow-500 hover:scale-105 transition-transform duration-300">
+                    Ver más
+                </a>
+            </div>
         </section>
     </div>
 @endsection
@@ -114,7 +122,7 @@
                 container.innerHTML = '';
                 items.forEach(item => {
                     const card = document.createElement('a');
-                    card.href = item.type === 'series' ? rutaSerie + item.imdbID : rutaPelicula + item.imdbID;
+                    card.href = item.type === 'series' ? rutaSerie + item.id : rutaPelicula + item.id;
                     card.innerHTML = `
                 <div class="relative rounded-xl overflow-hidden shadow-lg transform hover:scale-105 hover:shadow-2xl transition duration-500 ease-in-out bg-black/5">
                     <img class="w-full h-52 sm:h-60 md:h-64 lg:h-72 object-cover"

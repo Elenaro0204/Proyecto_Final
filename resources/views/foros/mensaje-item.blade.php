@@ -1,7 +1,7 @@
 <!-- resources/views/foros/mensaje-item.blade.php -->
 
 <div class="bg-white shadow-md rounded-lg p-4 relative mb-2 border-l-4
-    {{ $mensaje->parent_id ? 'border-indigo-400 ml-6' : 'border-indigo-600' }}"
+    {{ $mensaje->parent_id ? 'border-red-400 ml-6' : 'border-red-600' }}"
     x-data="{ editing: false, contenido: '{{ addslashes($mensaje->contenido) }}' }">
 
     <!-- Mensaje normal -->
@@ -11,19 +11,29 @@
 
             <div
                 class="mt-2 text-sm text-gray-500 flex flex-col sm:flex-row justify-between items-start sm:items-center gap-2">
-                <span>Por: <a href="{{ route('users.show', $mensaje->user->id) }}">{{ $mensaje->user->name ?? 'Desconocido' }}</a></span>
+                <span>Por: <a
+                        href="{{ route('users.show', $mensaje->user->id) }}">{{ $mensaje->user->name ?? 'Desconocido' }}</a></span>
                 <span>{{ $mensaje->created_at->diffForHumans() }}</span>
             </div>
 
             {{-- Botones de acción --}}
-            @auth
+            @if (auth()->check() && (auth()->id() === $mensaje->user_id || auth()->user()->role === 'admin'))
                 @php
+                    // Reporte del usuario logueado (admin o creador)
                     $userReport = $mensaje->reports?->firstWhere('reported_by', auth()->id());
-                    $tiempoRestante = $userReport ? max(0, now()->diffInSeconds($userReport->deadline)) : 0;
+
+                    // Reporte real (el único que existe para la reseña, venga de quien venga)
+                    $reporteGeneral = $mensaje->reports?->first();
+
+                    // El creador de la reseña
+                    $esCreador = auth()->id() === $mensaje->user_id;
+
+                    // Tiempo restante: si es creador o admin → usa el reporte general
+                    $tiempoRestante = $reporteGeneral ? max(0, now()->diffInSeconds($reporteGeneral->deadline)) : 0;
                 @endphp
 
                 {{-- Reporte --}}
-                @if ($userReport && $tiempoRestante > 0)
+                @if (($esCreador || $userReport) && $tiempoRestante > 0)
                     <div x-data="{
                         tiempo: {{ $tiempoRestante }},
                         get formato() {
@@ -72,7 +82,7 @@
                                 @csrf
                                 @method('DELETE')
                                 <button type="submit"
-                                    class="px-3 py-1 bg-red-500 hover:bg-red-600 text-white rounded-md text-sm transition">
+                                    class="px-3 py-1 bg-red-700 hover:bg-red-800 text-white rounded-md text-sm transition">
                                     Eliminar
                                 </button>
                             </form>
@@ -88,7 +98,8 @@
                             </a>
                         @else
                             <form action="{{ route('admin.mensajes.report.cancel', $userReport->id) }}" method="POST"
-                                onsubmit="return confirm('¿Seguro que quieres cancelar tu reporte?');" class="inline-block">
+                                onsubmit="return confirm('¿Seguro que quieres cancelar tu reporte?');"
+                                class="inline-block">
                                 @csrf
                                 @method('DELETE')
                                 <button type="submit"
@@ -109,82 +120,85 @@
                     @endif
                 </div>
             @endauth
-        </div>
-    </template>
+    </div>
+</template>
 
-    <!-- Formulario inline de edición -->
-    <template x-if="editing">
-        <form :action="'{{ route('mensajes.update', $mensaje->id) }}'" method="POST" class="mt-2 flex flex-col gap-2">
-            @csrf
-            @method('PUT')
+<!-- Formulario inline de edición -->
+<template x-if="editing">
+    <form :action="'{{ route('mensajes.update', $mensaje->id) }}'" method="POST" class="mt-2 flex flex-col gap-2">
+        @csrf
+        @method('PUT')
 
-            @if ($errors->any())
-                <div class="bg-red-200 text-red-800 p-4 rounded">
-                    <ul>
-                        @foreach ($errors->all() as $error)
-                            <li>- {{ $error }}</li>
-                        @endforeach
-                    </ul>
-                </div>
-            @endif
-
-            <textarea name="contenido" x-model="contenido" rows="3" class="w-full border p-2 rounded-md text-gray-800"></textarea>
-            <div class="flex flex-wrap gap-2">
-                <button type="submit"
-                    class="px-4 py-1 bg-green-600 hover:bg-green-700 text-white rounded-md transition">
-                    Guardar
-                </button>
-                <button type="button" @click="editing = false"
-                    class="px-4 py-1 bg-gray-300 hover:bg-gray-400 rounded-md transition">
-                    Cancelar
-                </button>
+        @if ($errors->any())
+            <div class="bg-red-200 text-red-800 p-4 rounded">
+                <ul>
+                    @foreach ($errors->all() as $error)
+                        <li>- {{ $error }}</li>
+                    @endforeach
+                </ul>
             </div>
-        </form>
-    </template>
+        @endif
 
-    <!-- Botón para responder -->
+        <textarea name="contenido" x-model="contenido" rows="3" class="w-full border p-2 rounded-md text-gray-800"></textarea>
+        <div class="flex flex-col sm:flex-row justify-between mt-4 gap-3">
+            <button type="submit"
+                class="px-4 py-1 bg-yellow-400 hover:bg-yellow-500 text-red-800 rounded-md transition">
+                Guardar
+            </button>
+            <button type="button" @click="editing = false"
+                class="px-4 py-1 bg-gray-300 hover:bg-gray-400 rounded-md transition">
+                Cancelar
+            </button>
+        </div>
+    </form>
+</template>
+
+<!-- Botón para responder -->
+@auth
     <button onclick="openReplyForm({{ $mensaje->id }})"
         class="mt-2 text-indigo-600 hover:underline text-sm">Responder</button>
+@endauth
 
-    <!-- Formulario de respuesta oculto -->
-    <div id="replyForm-{{ $mensaje->id }}" class="mt-2 hidden">
-        <form action="{{ route('mensajes.store') }}" method="POST" class="flex flex-col gap-2">
-            @csrf
+<!-- Formulario de respuesta oculto -->
+<div id="replyForm-{{ $mensaje->id }}" class="mt-2 hidden">
+    <form action="{{ route('mensajes.store') }}" method="POST" class="flex flex-col gap-2">
+        @csrf
 
-            @if ($errors->any())
-                <div class="bg-red-200 text-red-800 p-4 rounded">
-                    <ul>
-                        @foreach ($errors->all() as $error)
-                            <li>- {{ $error }}</li>
-                        @endforeach
-                    </ul>
-                </div>
-            @endif
+        @if ($errors->any())
+            <div class="bg-red-200 text-red-800 p-4 rounded">
+                <ul>
+                    @foreach ($errors->all() as $error)
+                        <li>- {{ $error }}</li>
+                    @endforeach
+                </ul>
+            </div>
+        @endif
 
-            <input type="hidden" name="foro_id" value="{{ $foro->id }}">
-            <input type="hidden" name="parent_id" value="{{ $mensaje->id }}">
-            <textarea name="contenido" rows="2" class="w-full border p-2 rounded-md" placeholder="Escribe tu respuesta..."></textarea>
-            <button type="submit" class="px-4 py-1 bg-indigo-600 hover:bg-indigo-700 text-white rounded-md transition">
-                Enviar
-            </button>
-        </form>
+        <input type="hidden" name="foro_id" value="{{ $foro->id }}">
+        <input type="hidden" name="parent_id" value="{{ $mensaje->id }}">
+        <textarea name="contenido" rows="2" class="w-full border p-2 rounded-md" placeholder="Escribe tu respuesta..."></textarea>
+        <button type="submit"
+            class="px-4 py-1 bg-yellow-400 hover:bg-yellow-500 text-red-800 rounded-md transition">
+            Enviar
+        </button>
+    </form>
+</div>
+
+<!-- Respuestas recursivas -->
+@if ($mensaje->respuestas->isNotEmpty())
+    <div class="ml-6 mt-2 space-y-2">
+        @foreach ($mensaje->respuestas as $respuesta)
+            @include('foros.mensaje-item', ['mensaje' => $respuesta])
+        @endforeach
     </div>
-
-    <!-- Respuestas recursivas -->
-    @if ($mensaje->respuestas->isNotEmpty())
-        <div class="ml-6 mt-2 space-y-2">
-            @foreach ($mensaje->respuestas as $respuesta)
-                @include('foros.mensaje-item', ['mensaje' => $respuesta])
-            @endforeach
-        </div>
-    @endif
+@endif
 </div>
 
 @section('scripts')
-    <script>
-        function openReplyForm(id) {
-            const form = document.getElementById('replyForm-' + id);
-            form.classList.toggle('hidden');
-        }
-    </script>
+<script>
+    function openReplyForm(id) {
+        const form = document.getElementById('replyForm-' + id);
+        form.classList.toggle('hidden');
+    }
+</script>
 @endsection

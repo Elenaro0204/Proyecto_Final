@@ -19,7 +19,8 @@
             </div>
 
             <div class="flex flex-col gap-1">
-                <p class="text-xs md:text-sm opacity-70">Creado por: <a href="{{ route('users.show', $foro->user->id) }}">{{ $foro->user->name ?? 'Usuario desconocido' }}</a>
+                <p class="text-xs md:text-sm opacity-70">Creado por: <a
+                        href="{{ route('users.show', $foro->user->id) }}">{{ $foro->user->name ?? 'Usuario desconocido' }}</a>
                 </p>
                 <div class="flex items-center gap-2 text-xs md:text-sm opacity-70">
                     <span>Estado:</span>
@@ -32,12 +33,21 @@
             </div>
 
             @php
+                // Reporte del usuario logueado (admin o creador)
                 $userReport = $foro->report?->firstWhere('reported_by', auth()->id());
-                $tiempoRestante = $userReport ? max(0, now()->diffInSeconds($userReport->deadline)) : 0;
+
+                // Reporte real (el único que existe para el foro, venga de quien venga)
+                $reporteGeneral = $foro->report?->first();
+
+                // El creador del foro
+                $esCreador = auth()->id() === $foro->user_id;
+
+                // Tiempo restante: si es creador o admin → usa el reporte general
+                $tiempoRestante = $reporteGeneral ? max(0, now()->diffInSeconds($reporteGeneral->deadline)) : 0;
             @endphp
 
             {{-- Reporte --}}
-            @if ($userReport && $tiempoRestante > 0)
+            @if (($esCreador || $userReport) && $tiempoRestante > 0)
                 <div x-data="{
                     tiempo: {{ $tiempoRestante }},
                     get formato() {
@@ -70,7 +80,7 @@
                     },
                     disminuir() { if (this.tiempo > 0) this.tiempo--; }
                 }" x-init="setInterval(() => disminuir(), 1000)"
-                    class="bg-yellow-100 border-l-4 border-yellow-500 text-yellow-800 px-4 py-3 rounded-md shadow-md mt-4 flex flex-col sm:flex-row sm:items-center gap-2">
+                    class="bg-yellow-100 border-l-4 border-yellow-500 text-yellow-800 px-4 py-3 rounded-md shadow-md mt-4 mb-4 flex flex-col sm:flex-row sm:items-center gap-2">
 
                     <div class="font-semibold text-sm sm:text-base">⚠ Este foro ha sido reportado.</div>
                     <div class="text-sm sm:text-base">
@@ -79,10 +89,10 @@
                 </div>
             @endif
 
-            <div class="flex gap-2 mt-4 items-stretch">
+            <div class="flex flex-col sm:flex-row gap-2 mt-auto items-stretch w-full">
                 {{-- Botón para ver detalle --}}
                 <a href="{{ route('foros.show', $foro->id) }}"
-                    class="flex-1 inline-flex justify-center items-center px-4 py-2 bg-indigo-500 text-white rounded-lg text-sm shadow hover:bg-indigo-600 transition duration-300">
+                    class="w-full sm:flex-1 bg-indigo-600 text-white hover:bg-indigo-700 px-3 py-2 rounded text-center transition text-sm font-semibold">
                     Entrar
                 </a>
 
@@ -90,7 +100,7 @@
                 @auth
                     @if (Auth::id() === $foro->user_id)
                         <a href="{{ route('foros.edit', $foro->id) }}"
-                            class="flex-1 inline-flex justify-center items-center px-4 py-2 bg-blue-500 text-white rounded-lg text-sm shadow hover:bg-blue-600 transition duration-300">
+                            class="w-full sm:flex-1 bg-blue-500 hover:bg-blue-600 text-white px-3 py-2 rounded text-center transition text-sm font-semibold">
                             Editar
                         </a>
                         @if (!Auth::user()->isAdmin())
@@ -98,7 +108,7 @@
                                 @csrf
                                 @method('DELETE')
                                 <button type="submit"
-                                    class="w-full inline-flex justify-center items-center px-4 py-2 bg-red-500 text-white rounded-lg text-sm shadow hover:bg-red-600 transition duration-300">
+                                    class="w-full bg-red-500 hover:bg-red-600 text-white px-3 py-2 rounded transition text-sm font-semibold">
                                     Eliminar
                                 </button>
                             </form>
@@ -109,7 +119,7 @@
                     @if (Auth::user()->isAdmin())
                         @if (!$foro->report->firstWhere('reported_by', auth()->id()))
                             <a href="{{ route('admin.foros.addreport', $foro->id) }}"
-                                class="flex-1 inline-flex justify-center items-center px-4 py-2 bg-yellow-500 text-black rounded-lg text-sm shadow hover:bg-yellow-600 transition duration-300">
+                                class="w-full sm:flex-1 bg-yellow-500 hover:bg-yellow-600 text-black px-3 py-2 rounded text-center transition text-sm font-semibold">
                                 Reportar
                             </a>
                         @else
@@ -118,7 +128,7 @@
                                 @csrf
                                 @method('DELETE')
                                 <button type="submit"
-                                    class="flex-1 inline-flex justify-center items-center px-4 py-2 bg-gray-400 text-black rounded-lg text-sm shadow hover:bg-gray-500 transition duration-300">
+                                    class="w-full bg-gray-400 text-black hover:bg-gray-500 px-3 py-2 rounded text-center transition text-sm font-semibold">
                                     Cancelar reporte
                                 </button>
                             </form>
@@ -127,7 +137,7 @@
                             @csrf
                             @method('DELETE')
                             <button type="submit"
-                                class="w-full inline-flex justify-center items-center px-4 py-2 bg-red-700 text-white rounded-lg text-sm shadow hover:bg-red-800 transition duration-300">
+                                class="w-full bg-red-700 hover:bg-red-800 text-white px-3 py-2 rounded transition text-sm font-semibold">
                                 Eliminar
                             </button>
                         </form>

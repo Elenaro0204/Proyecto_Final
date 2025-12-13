@@ -172,10 +172,21 @@ class SerieController extends Controller
         ])->json()['results'] ?? [];
 
         // 🔹 Obtener videos (trailers)
-        $videos = Http::get("$this->tmdbUrl/tv/$tmdbID/videos", [
+        $videos = collect(Http::get("$this->tmdbUrl/tv/$tmdbID/videos", [
             'api_key' => $this->tmdbKey,
             'language' => 'es-ES'
-        ])->json()['results'] ?? [];
+        ])->json()['results'] ?? []);
+
+        $perPageVideos = 4; // por ejemplo
+        $pageVideos = request('videos_page', 1);
+
+        $videosPaginated = new LengthAwarePaginator(
+            $videos->forPage($pageVideos, $perPageVideos),
+            $videos->count(),
+            $perPageVideos,
+            $pageVideos,
+            ['path' => request()->url(), 'query' => request()->query()]
+        );
 
         // 🔹 Recomendaciones
         // IDs de compañías Marvel en TMDB
@@ -269,7 +280,7 @@ class SerieController extends Controller
 
         // Reseñas de BD
         $reseñas = Review::with('user')
-            ->where('entity_id', $imdbID)
+            ->where('entity_id', $serie['id'])
             ->where('type', 'serie')
             ->latest()
             ->get();
@@ -328,7 +339,8 @@ class SerieController extends Controller
             'episodiosPorTemporada',
             'actorImages',
             'backdropsPaginated',
-            'recomendacionesPaginadas'
+            'recomendacionesPaginadas',
+            'videosPaginated',
         ));
     }
 

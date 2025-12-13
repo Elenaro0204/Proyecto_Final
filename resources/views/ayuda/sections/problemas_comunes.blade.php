@@ -1,6 +1,6 @@
 <!-- resources/views/ayuda/problemas_comunes.blade.php -->
 <div id="comunes" class="card mt-4 shadow-lg rounded-3xl border-0">
-    <div class="card-header bg-gradient-to-r from-red-600 via-blue-600 to-purple-600 text-white text-center">
+    <div class="card-header bg-gradient-to-r from-red-600 to-blue-600 text-white text-center py-4">
         <h3 class="text-2xl font-bold">Problemas comunes y soluciones</h3>
     </div>
     <div class="card-body">
@@ -63,9 +63,9 @@
 
         <div class="mt-4 text-center">
             <p class="mb-2 font-semibold">¿No está tu problema aquí? Contáctanos directamente:</p>
-            <button type="button" class="btn bg-gradient-to-r from-red-600 via-blue-600 to-purple-600 text-white"
+            <button type="button" class="px-4 py-2 bg-yellow-400 text-red-800 font-semibold rounded-lg hover:bg-yellow-500 transition"
                 data-bs-toggle="modal" data-bs-target="#contactModal">
-                <i class="fas fa-envelope me-1"></i> Contactar soporte
+                <i class="fas fa-envelope me-1"></i> Contactar con soporte
             </button>
         </div>
 
@@ -73,7 +73,7 @@
         <div class="modal fade" id="contactModal" tabindex="-1" aria-labelledby="contactModalLabel" aria-hidden="true">
             <div class="modal-dialog modal-dialog-centered">
                 <div class="modal-content rounded-2xl shadow-lg">
-                    <div class="modal-header bg-gradient-to-r from-red-600 via-blue-600 to-purple-600 text-white">
+                    <div class="modal-header bg-gradient-to-t from-red-600 to-blue-600 text-white">
                         <h5 class="modal-title" id="contactModalLabel"><i class="fas fa-envelope me-2"></i>Contacta con
                             soporte</h5>
                         <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"
@@ -105,8 +105,10 @@
                                 <label for="mensaje" class="form-label">Mensaje</label>
                                 <textarea class="form-control" id="mensaje" name="mensaje" rows="4" required></textarea>
                             </div>
-                            <button type="submit"
-                                class="btn bg-gradient-to-r from-red-600 via-blue-600 to-purple-600 text-white w-100">Enviar</button>
+                            <div class="flex justify-center mt-4">
+                                <button type="submit"
+                                    class="px-4 py-2 bg-yellow-400 text-red-800 font-semibold rounded-lg hover:bg-yellow-500 transition">Enviar</button>
+                            </div>
                         </form>
                     </div>
                 </div>

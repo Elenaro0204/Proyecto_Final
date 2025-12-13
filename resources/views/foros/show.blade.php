@@ -33,7 +33,8 @@
             @endif
 
             <div class="mt-4 flex flex-wrap gap-4 items-center">
-                <span class="text-sm opacity-80">Creado por: <a href="{{ route('users.show', $foro->user->id) }}">{{ $foro->user->name ?? 'Desconocido' }}</a></span>
+                <span class="text-sm opacity-80">Creado por: <a
+                        href="{{ route('users.show', $foro->user->id) }}">{{ $foro->user->name ?? 'Desconocido' }}</a></span>
                 <span class="text-sm opacity-80">| {{ $foro->created_at->diffForHumans() }}</span>
                 <span
                     class="px-2 py-1 rounded-full text-sm font-semibold
@@ -42,14 +43,23 @@
                 </span>
             </div>
 
-            @if (auth()->check() && auth()->id() === $foro->user_id)
+            @if (auth()->check() && (auth()->id() === $foro->user_id || auth()->user()->role === 'admin'))
                 @php
+                    // Reporte del usuario logueado (admin o creador)
                     $userReport = $foro->report?->firstWhere('reported_by', auth()->id());
-                    $tiempoRestante = $userReport ? max(0, now()->diffInSeconds($userReport->deadline)) : 0;
+
+                    // Reporte real (el único que existe para el foro, venga de quien venga)
+                    $reporteGeneral = $foro->report?->first();
+
+                    // El creador del foro
+                    $esCreador = auth()->id() === $foro->user_id;
+
+                    // Tiempo restante: si es creador o admin → usa el reporte general
+                    $tiempoRestante = $reporteGeneral ? max(0, now()->diffInSeconds($reporteGeneral->deadline)) : 0;
                 @endphp
 
                 {{-- Reporte --}}
-                @if ($userReport && $tiempoRestante > 0)
+                @if (($esCreador || $userReport) && $tiempoRestante > 0)
                     <div x-data="{
                         tiempo: {{ $tiempoRestante }},
                         get formato() {
@@ -90,7 +100,7 @@
                     {{-- Usuario propietario --}}
                     @if (auth()->check() && Auth::id() === $foro->user_id)
                         <a href="{{ route('foros.edit', $foro->id) }}"
-                            class="inline-block px-5 py-2 bg-yellow-400 text-black rounded-full hover:bg-yellow-500 transition shadow-md text-center">
+                            class="bg-yellow-400 text-black hover:bg-yellow-500 px-3 py-1 rounded-md text-sm transition w-fit">
                             Editar foro
                         </a>
 
@@ -100,7 +110,7 @@
                                 @csrf
                                 @method('DELETE')
                                 <button type="submit"
-                                    class="inline-block px-5 py-2 bg-red-500 text-white rounded-full hover:bg-red-600 transition shadow-md text-center">
+                                    class="px-3 py-1 bg-red-700 hover:bg-red-800 text-white rounded-md text-sm transition">
                                     Eliminar
                                 </button>
                             </form>
@@ -111,7 +121,7 @@
                     @if (auth()->check() && Auth::user()->isAdmin())
                         @if (!$foro->report?->firstWhere('reported_by', auth()->id()))
                             <a href="{{ route('admin.foros.addreport', $foro->id) }}"
-                                class="inline-block px-5 py-2 bg-yellow-500 text-black rounded-full hover:bg-yellow-600 transition shadow-md text-center">
+                                class="bg-yellow-500 text-black hover:bg-yellow-600 px-3 py-1 rounded-md text-sm transition">
                                 Reportar
                             </a>
                         @else
@@ -120,7 +130,7 @@
                                 @csrf
                                 @method('DELETE')
                                 <button type="submit"
-                                    class="px-5 py-2 bg-gray-400 text-black rounded-full hover:bg-gray-500 transition shadow-md text-center">
+                                    class="bg-gray-400 text-black hover:bg-gray-500 px-3 py-1 rounded-md text-sm transition">
                                     Cancelar reporte
                                 </button>
                             </form>
@@ -131,7 +141,7 @@
                             @csrf
                             @method('DELETE')
                             <button type="submit"
-                                class="inline-block px-5 py-2 bg-red-500 text-white rounded-full hover:bg-red-600 transition shadow-md text-center">
+                                class="px-3 py-1 bg-red-700 hover:bg-red-800 text-white rounded-md text-sm transition">
                                 Eliminar
                             </button>
                         </form>
@@ -141,14 +151,18 @@
         </div>
 
         <!-- Botón para abrir panel lateral -->
-        <button @click="open = true"
-            class="mb-6 px-5 py-2 bg-indigo-600 text-white rounded-full shadow hover:bg-indigo-700 transition duration-300">
-            Nuevo mensaje
-        </button>
+        @auth
+            <button @click="open = true"
+                class="mb-6 px-5 py-2 bg-red-700 text-white rounded-full shadow hover:bg-red-800 transition duration-300">
+                Nuevo mensaje
+            </button>
+        @endauth
 
         <!-- Mensajes -->
         <div class="mb-8">
-            <h2 class="text-2xl font-semibold text-gray-800 mb-6">Mensajes</h2>
+            <div class="relative z-10 flex flex-col items-center text-center w-full">
+                <h2 class="text-2xl text-red-700 font-bold mb-3 uppercase">Mensajes</h2>
+            </div>
             @if ($foro->mensajes->isEmpty())
                 <p class="text-gray-500 italic">Todavía no hay mensajes en este foro. ¡Sé el primero en comentar!</p>
             @else
@@ -167,12 +181,13 @@
                 x-transition.opacity></div>
 
             <!-- Panel -->
-            <div class="relative w-96 bg-white h-full p-6 shadow-2xl rounded-l-2xl transform transition-transform"
-                x-show="open" x-transition:enter="transition duration-300" x-transition:enter-start="translate-x-full"
-                x-transition:enter-end="translate-x-0" x-transition:leave="transition duration-300"
-                x-transition:leave-start="translate-x-0" x-transition:leave-end="translate-x-full">
+            <div x-show="open" x-transition:enter="transition-all duration-300 ease-out"
+                x-transition:enter-start="translate-x-full opacity-0" x-transition:enter-end="translate-x-0 opacity-100"
+                x-transition:leave="transition-all duration-300 ease-in"
+                x-transition:leave-start="translate-x-0 opacity-100" x-transition:leave-end="translate-x-full opacity-0"
+                class="fixed top-20 right-0 w-96 h-[calc(100%-5rem)] bg-white shadow-xl rounded-l-xl overflow-y-auto z-40 flex flex-col p-6">
 
-                <h2 class="text-xl font-semibold mb-4 border-b pb-2">Nuevo mensaje</h2>
+                <h2 class="text-xl font-semibold mb-4 border-b pb-2 text-red-700">Nuevo mensaje</h2>
                 <form action="{{ route('mensajes.store') }}" method="POST">
                     @csrf
 
@@ -194,7 +209,7 @@
                         <button type="button" @click="open = false"
                             class="px-4 py-2 bg-gray-300 text-gray-800 rounded-lg hover:bg-gray-400 transition">Cancelar</button>
                         <button type="submit"
-                            class="px-4 py-2 bg-indigo-600 text-white rounded-lg hover:bg-indigo-700 transition">Enviar</button>
+                            class="px-4 py-2 bg-red-700 text-white rounded-lg hover:bg-red-800 transition">Enviar</button>
                     </div>
                 </form>
             </div>

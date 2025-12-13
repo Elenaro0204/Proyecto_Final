@@ -14,7 +14,8 @@
         {{-- Cabecera --}}
         <div class="bg-white p-6 rounded-lg shadow-lg space-y-3">
             <h1 class="text-2xl font-bold text-indigo-600">{{ $entity['title'] ?? 'Reseña' }}</h1>
-            <p class="text-gray-500 text-sm">Escrita por <strong><a href="{{ route('users.show', $review->user->id) }}">{{ $review->user->name }}</a></strong> -
+            <p class="text-gray-500 text-sm">Escrita por <strong><a
+                        href="{{ route('users.show', $review->user->id) }}">{{ $review->user->name }}</a></strong> -
                 {{ $review->created_at->diffForHumans() }}</p>
 
             <p class="text-lg mt-2"><strong>Calificación:</strong> ⭐ {{ $review->rating }}/5</p>
@@ -30,20 +31,23 @@
             <p class="text-gray-700 whitespace-pre-line">{{ $review->content }}</p>
 
             {{-- Acciones de la autora --}}
-            {{-- @if (Auth::id() === $review->user_id)
+            @if (Auth::id() === $review->user_id)
                 <div class="mt-4 flex gap-2">
-                    <a href="{{ route('resenas.edit', $review->entity_id) }}"
-                        class="px-4 py-2 bg-yellow-500 text-white rounded hover:bg-yellow-600 transition">Editar</a>
+                    <a href="{{ route('resenas.edit', $review->id) }}"
+                        class="px-4 py-2 bg-yellow-500 text-white rounded hover:bg-yellow-600 transition">
+                        Editar
+                    </a>
 
                     <form action="{{ route('resenas.destroy', $review->id) }}" method="POST"
                         onsubmit="return confirm('¿Seguro que quieres eliminar esta reseña?');">
                         @csrf
                         @method('DELETE')
-                        <button type="submit"
-                            class="px-4 py-2 bg-red-500 text-white rounded hover:bg-red-600 transition">Eliminar</button>
+                        <button type="submit" class="px-4 py-2 bg-red-500 text-white rounded hover:bg-red-600 transition">
+                            Eliminar
+                        </button>
                     </form>
                 </div>
-            @endif --}}
+            @endif
         </div>
 
         @if (!empty($entity))

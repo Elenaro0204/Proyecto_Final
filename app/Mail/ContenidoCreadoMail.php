@@ -29,7 +29,9 @@ class ContenidoCreadoMail extends Mailable
 
     public function build()
     {
-        $subject = $this->tipo ? "Tu {$this->tipo} ha sido creado" : "Contenido Creado";
+        $genero = ($this->tipo === 'resena') ? 'creada' : 'creado';
+
+        $subject = $this->tipo ? "Tu {$this->tipo} ha sido {$genero}" : "Contenido Creado";
         return $this->from('soportemarvelpedia@gmail.com', 'Marvelpedia Soporte')
             ->subject($subject)
             ->view('emails.contenido-creado')

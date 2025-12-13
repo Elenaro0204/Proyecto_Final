@@ -13,7 +13,8 @@
         x-transition:enter-start="opacity-0 -translate-x-full" x-transition:enter-end="opacity-100 translate-x-0"
         x-transition:leave="transition ease-in duration-300" x-transition:leave-start="opacity-100 translate-x-0"
         x-transition:leave-end="opacity-0 -translate-x-full"
-        class="fixed top-20 left-0 z-50 w-3/4 max-w-xs h-screen bg-gradient-to-br from-red-50 via-yellow-50 to-blue-50 shadow-2xl p-4 overflow-y-auto border-r-2 rounded-r-xl border-red-600">
+        class="fixed top-20 left-0 z-50 w-3/4 max-w-xs h-screen bg-gradient-to-b to-red-300 from-blue-200 shadow-2xl p-4 overflow-y-auto border-r-2 rounded-r-xl border-red-600"
+        style="max-height: calc(100vh - 5rem);">
 
         <!-- Botón cerrar -->
         <div class="flex justify-end mb-4">
@@ -31,7 +32,7 @@
 
     <!-- Menú para desktop -->
     <aside
-        class="hidden sm:block bg-gradient-to-br from-red-50 via-yellow-50 to-blue-50 shadow-2xl rounded-3xl p-3 sticky top-24 h-fit overflow-y-auto border-2 border-red-600">
+        class="hidden sm:block bg-gradient-to-b to-red-300 from-blue-200 shadow-2xl rounded-3xl p-3 sticky top-24 h-fit overflow-y-auto border-2 border-red-600">
         @include('ayuda.sections.menu_lateral_content')
     </aside>
 </div>

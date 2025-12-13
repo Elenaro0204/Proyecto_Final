@@ -16,7 +16,8 @@
     <div class="container p-5">
         <div class="row">
             <!-- Barra lateral -->
-            <div class="col-12 col-md-3 mb-4">
+            <div class="col-12 col-md-3 mb-4 sticky overflow-y-auto z-10"
+                style="top: 120px; max-height: calc(100vh - 140px);">
                 @include('ayuda.sections.menu_lateral')
             </div>
 

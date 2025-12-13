@@ -5,7 +5,7 @@
 
     <!-- Botón escritorio: vertical a la izquierda -->
     <button @click="open = true"
-        class="hidden md:flex fixed top-1/2 -translate-y-1/2 left-0 h-auto w-fit px-2 py-4 bg-gradient-to-b from-blue-700 to-red-700 text-white z-50 hover:bg-blue-800 items-center justify-center rounded-l-md shadow-lg transition-all duration-300 ease-in-out"
+        class="hidden md:flex fixed top-1/2 -translate-y-1/2 left-0 h-auto w-fit px-2 py-4 bg-gradient-to-b from-red-700 to-blue-700 text-white z-50 hover:bg-blue-800 items-center justify-center rounded-l-md shadow-lg transition-all duration-300 ease-in-out"
         :class="open ? '-translate-x-4 opacity-0' : 'translate-x-0 opacity-100'"
         style="writing-mode: vertical-rl; transform: rotate(180deg); font-size: 0.75rem;">
         <span class="mb-2" style="transform: rotate(90deg)">

@@ -30,11 +30,44 @@ class AdminController extends Controller
     }
 
     // Dashboard principal
-    public function dashboard()
+    public function dashboard(Request $request)
     {
         $this->checkAdmin();
 
-        $users = User::all();
+        $query = User::query();
+
+        // 🔍 Búsqueda por nombre, email o nickname
+        if ($request->filled('q')) {
+            $q = $request->q;
+            $query->where(function ($sub) use ($q) {
+                $sub->where('name', 'like', "%$q%")
+                    ->orWhere('email', 'like', "%$q%")
+                    ->orWhere('nickname', 'like', "%$q%");
+            });
+        }
+
+        // 👤 Filtro por rol
+        if ($request->filled('role')) {
+            $query->where('role', $request->role);
+        }
+
+        // ✔ Filtro por verificación email
+        if ($request->filled('verified')) {
+            if ($request->verified === "1") {
+                $query->whereNotNull('email_verified_at');
+            } else {
+                $query->whereNull('email_verified_at');
+            }
+        }
+
+        // 📄 Paginación
+        $users = $query->paginate(10)->withQueryString();
+
+        // Si la petición es AJAX → devolver solo la tabla
+        if ($request->ajax()) {
+            return view('admin.users.partials.users-table', compact('users'))->render();
+        }
+
         return view('admin.dashboard', compact('users'));
     }
 
@@ -83,8 +116,8 @@ class AdminController extends Controller
         // Luego subir nueva foto si se ha enviado
         if ($request->hasFile('avatar')) {
             $file = $request->file('avatar');
-            $path = $file->store('avatars', 'public'); // guarda en storage/app/public/avatars
-            $user->avatar_url = '/storage/' . $path; // ruta pública
+            $path = $file->store('avatars', 'public');
+            $user->avatar_url = $path;
         }
 
         $user->save();
@@ -352,7 +385,7 @@ class AdminController extends Controller
         );
 
         // Redirige de vuelta al listado del foro con un hash para abrir el modal
-        return redirect($reporte->input('redirect_to', url()->previous()))
+        return redirect($request->input('redirect_to', url()->previous()))
             ->with('success', 'Reporte enviado correctamente.');
     }
 
@@ -374,23 +407,18 @@ class AdminController extends Controller
     // Ver detalle del reporte de foros
     public function viewReportForo(Foro $foro)
     {
-        $reports = ForoReport::with('reporter', 'foro')
+        $report = ForoReport::with('reporter', 'foro')
             ->where('foro_id', $foro->id)
-            ->get();
+            ->first();
 
-        if ($reports->isEmpty()) {
-            return redirect()->route('admin.manage-content')
-                ->with('warning', 'Este foro aún no tiene reporte.');
-        }
-
-        return view('admin.foros.viewreport', compact('reports', 'foro'));
+        return view('admin.foros.viewreport', compact('report', 'foro'));
     }
 
     // Ver detalle del reporte de mensajes
     public function viewReportMensaje(Mensaje $mensaje)
     {
-        $reports = $mensaje->reports()->with('reporter')->get();
-        return view('admin.mensajes.viewreport', compact('reports', 'mensaje'));
+        $report = $mensaje->reports()->with('reporter')->first();
+        return view('admin.mensajes.viewreport', compact('report', 'mensaje'));
     }
 
     // Cancelar reporte reseñas

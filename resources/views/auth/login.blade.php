@@ -74,12 +74,12 @@
         </div>
 
         <!-- Botón y link -->
-        <div class="flex items-center justify-between mt-6">
-            <a href="{{ url()->previous() }}" class="px-4 py-2 rounded-lg bg-gray-200 hover:bg-gray-300">
+        <div class="flex flex-col sm:flex-row justify-between mt-4 gap-3">
+            <a href="{{ url()->previous() }}" class="px-4 py-2 rounded bg-gray-200 hover:bg-gray-300 text-center">
                 Cancelar
             </a>
 
-            <x-primary-button class="bg-indigo-600 hover:bg-indigo-700 text-white px-4 py-2 rounded-lg">
+            <x-primary-button class="bg-indigo-600 hover:bg-indigo-700 text-white px-4 py-2 rounded-lg justify-center">
                 {{ __('Iniciar Sesión') }}
             </x-primary-button>
         </div>

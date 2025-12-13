@@ -38,17 +38,19 @@
         {{-- Secciones de reseñas --}}
         @php
             $sections = [
-                'Últimas reseñas' => $latestReviews,
+                'Ultimas reseñas' => $latestReviews,
                 'Mejor valoradas' => $topRatedReviews,
-                'Reseñas de películas' => $movieReviews,
+                'Reseñas de peliculas' => $movieReviews,
                 'Reseñas de series' => $serieReviews,
             ];
         @endphp
 
         @foreach ($sections as $title => $reviewsSection)
             <section id={{ $title }} class="mb-12">
-                <h3 class="text-2xl font-semibold text-gray-800 mb-6 border-l-4 border-red-600 pl-3">{{ $title }}
-                </h3>
+                <div class="border-4 border-fuchsia-500 rounded-lg w-full mx-auto my-5 text-center px-4 md:px-0">
+                    <h2 class="text-2xl font-semibold text-red-700 p-3 uppercase">{{ $title }}
+                    </h2>
+                </div>
                 @if ($reviewsSection->count() > 0)
                     <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
                         @include('resenas.partials.cards', ['reviews' => $reviewsSection])
@@ -66,11 +68,13 @@
 
         <!-- Sección: Buscar y Filtrar Reseñas -->
         <section class="mb-12">
-            <h2 class="text-2xl font-bold mb-4 text-gray-800 border-b-2 border-red-500 pb-2">Buscar reseñas</h2>
+            <div class="border-4 border-fuchsia-500 rounded-lg w-full mx-auto my-5 text-center px-4 md:px-0">
+                <h2 class="text-2xl font-semibold text-red-700 p-3 uppercase">Buscar reseñas</h2>
+            </div>
 
             <form id="resena-filtros-form" action="{{ route('resenas') }}" method="GET"
                 class="flex flex-col md:flex-row gap-4 max-w-4xl mx-auto mb-4">
-                <input type="text" name="search" value="{{ request('search') }}" placeholder="Buscar por título..."
+                <input type="text" name="search" value="{{ request('search') }}" placeholder="🔍 Buscar por título..."
                     class="flex-1 px-4 py-2 rounded-lg border border-gray-300 focus:outline-none focus:ring-2 focus:ring-indigo-500">
                 <select name="tipo"
                     class="px-4 py-2 rounded-lg border border-gray-300 focus:outline-none focus:ring-2 focus:ring-indigo-500">

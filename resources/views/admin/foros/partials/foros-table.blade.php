@@ -113,6 +113,6 @@
  </table>
  </div>
 
- <div class="mt-4">
+ <div class="mt-4 overflow-x-auto">
      {{ $foros->links() }}
  </div>

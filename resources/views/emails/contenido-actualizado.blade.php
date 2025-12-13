@@ -128,12 +128,9 @@
             <p class="section-title">📌 Foro afectado:</p>
 
             <p><strong>Foro:</strong> {{ $contenido->titulo }}</p>
+            <p><strong>Descripción:</strong>{{ $contenido->descripcion }}</p>
 
             <p class="section-title">Tu publicación:</p>
-            <div class="highlight-box">
-                {{ $contenido->mensaje }}
-            </div>
-
             <p><a class="button" href="{{ $url ?? url('/foros') }}">👉 Ir al foro</a></p>
 
             {{-- RESEÑA --}}
@@ -165,7 +162,7 @@
                 <tr>
                     <td style="vertical-align:top; width:70px; padding-right:15px;">
                         <!-- Logo (cámbialo por tu URL real) -->
-                        <img src="https://marvelpedia.ruix.iesruizgijon.es/Logo.PNG" alt="Marvelpedia"
+                        <img src="https://marvelpedia.ruix.iesruizgijon.es/logos/Icono.PNG" alt="Marvelpedia"
                             style="width:70px; height:auto; border-radius:6px;">
                     </td>
 

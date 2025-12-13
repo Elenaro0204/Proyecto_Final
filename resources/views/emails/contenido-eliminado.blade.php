@@ -107,8 +107,8 @@
                 <p><strong>Uno de tus foros ha sido eliminado.</strong></p>
             </div>
             <p><strong>Foro:</strong> {{ $contenido->titulo }}</p>
-            <p><strong>Tu publicación:</strong></p>
-            <p>{{ $contenido->mensaje }}</p>
+            <p><strong>Descripción:</strong>{{ $contenido->descripcion }}</p>
+
             {{-- PARA RESEÑAS --}}
         @elseif ($tipo === 'resena')
             <h2>🔔 Reseña Eliminada</h2>
@@ -137,7 +137,7 @@
                 <tr>
                     <td style="vertical-align:top; width:70px; padding-right:15px;">
                         <!-- Logo (cámbialo por tu URL real) -->
-                        <img src="https://marvelpedia.ruix.iesruizgijon.es/Logo.PNG" alt="Marvelpedia"
+                        <img src="https://marvelpedia.ruix.iesruizgijon.es/logos/Icono.PNG" alt="Marvelpedia"
                             style="width:70px; height:auto; border-radius:6px;">
                     </td>
 

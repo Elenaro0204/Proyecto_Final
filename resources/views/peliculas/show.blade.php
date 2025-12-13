@@ -14,7 +14,7 @@
     <div class="container mx-auto px-4 py-8 space-y-12">
 
         {{-- Cabecera con imagen y título --}}
-        <div class="flex flex-col lg:flex-row items-start gap-8">
+        <section class="flex flex-col lg:flex-row items-start gap-8">
             {{-- Imagen --}}
             <div class="flex-shrink-0 w-full lg:w-1/3 relative">
                 <div class="aspect-w-2 aspect-h-3">
@@ -72,28 +72,29 @@
                 </div>
 
                 {{-- Botones de acción --}}
-                <div class="flex flex-wrap gap-3 mt-4">
-                    @if (isset($pelicula['imdbID']))
-                        <a href="{{ route('resenas.create.withparams', [
-                            'type' => 'pelicula',
-                            'entity_id' => $pelicula['imdbID'],
-                            'title' => $pelicula['titulo'],
-                        ]) }}"
-                            class="bg-yellow-400 text-indigo-900 px-4 py-2 rounded-lg shadow hover:bg-yellow-500 transition flex items-center gap-2">
-                            <i class="bi bi-pencil-square"></i> Escribir reseña
-                        </a>
-                    @endif
+                <div class="flex flex-col md:flex-row flex-wrap gap-3 mt-4">
+                    @auth
+                        @if (isset($pelicula['imdbID']))
+                            <a href="{{ route('resenas.create.withparams', [
+                                'type' => 'pelicula',
+                                'entity_id' => $pelicula['imdbID'],
+                                'title' => $pelicula['titulo'],
+                            ]) }}"
+                                class="bg-yellow-400 text-red-900 px-4 py-2 rounded-lg shadow hover:bg-yellow-500 transition flex text-center gap-2 w-fit">
+                                <i class="bi bi-pencil-square"></i> Escribir reseña
+                            </a>
+                        @endif
+                    @endauth
 
                     <a href="https://www.imdb.com/title/{{ $pelicula['imdbID'] }}" target="_blank"
-                        class="text-white px-4 py-2 rounded-lg shadow hover:opacity-90 transition flex items-center gap-2"
-                        style="background-color: #ff00c8;">
+                        class="text-white bg-fuchsia-500 px-4 py-2 rounded-lg shadow hover:opacity-90 transition flex text-center gap-2 w-fit">
                         📺 Ver en IMDb
                     </a>
 
                     {{-- Compartir --}}
                     <div class="relative" x-data>
                         <button id="shareButton" aria-haspopup="true" aria-expanded="false"
-                            class="bg-red-500 text-white px-4 py-2 rounded-lg shadow hover:bg-red-600 transition flex items-center gap-2">
+                            class="bg-red-700 text-white px-4 py-2 rounded-lg shadow hover:bg-red-600 transition flex text-center gap-2">
                             <i class="bi bi-share"></i> Compartir
                         </button>
 
@@ -117,20 +118,28 @@
                     </div>
                 </div>
             </div>
-        </div>
+        </section>
 
         {{-- Sinopsis --}}
-        <div class="bg-white rounded-xl shadow p-6">
-            <h2 class="text-2xl font-bold mb-3">Sinopsis</h2>
-            <p class="text-gray-700">
+        <section class="relative rounded-xl overflow-hidden shadow-xl p-6">
+            <div class="absolute inset-0 bg-white opacity-50 z-0"></div>
+            <div class="relative z-10 flex flex-col items-center text-center w-full">
+                <h2 class="text-2xl text-red-700 font-bold mb-3">Sinopsis</h2>
+            </div>
+            <p class="relative text-gray-700 z-10">
                 {{ $pelicula['overview'] ?? $pelicula['sinopsis'] }}
             </p>
-        </div>
+        </section>
 
         {{-- Actores destacados --}}
         @if (!empty($pelicula['actores']))
-            <div>
-                <h3 class="text-2xl font-bold mb-4">🎭 Repoarto Principal</h3>
+            <section class="relative rounded-xl overflow-hidden shadow-xl p-6">
+                <div class="absolute inset-0 bg-white opacity-50 z-0"></div>
+
+                <div class="relative z-10 flex flex-col items-center text-center w-full">
+                    <h2 class="text-2xl text-red-700 font-bold mb-3">Reparto Principal</h2>
+                </div>
+
                 <div class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-6">
                     @foreach (explode(',', $pelicula['actores']) as $actor)
                         @php
@@ -139,22 +148,26 @@
                             $imgUrl = $actorImages[$actor] ?? null;
                         @endphp
                         <a href="{{ $wikiUrl }}" target="_blank"
-                            class="flex flex-col items-center text-center bg-white rounded-xl shadow hover:shadow-lg p-3 transition">
+                            class="z-10 flex flex-col items-center text-center bg-white rounded-xl shadow hover:shadow-lg p-3 transition">
                             <img src="{{ $imgUrl }}" alt="{{ $actor }}"
                                 class="w-24 h-24 rounded-full mb-2 border border-gray-200 object-cover">
-                            <span class="font-semibold text-indigo-600 hover:underline">{{ $actor }}</span>
+                            <span class="font-semibold text-red-600 hover:underline">{{ $actor }}</span>
                             <small class="text-gray-400">Ver en Wikipedia</small>
                         </a>
                     @endforeach
                 </div>
-            </div>
+            </section>
         @endif
 
         {{-- Trailer si está disponible --}}
-        <div class="bg-white rounded-xl shadow p-6 mt-5">
-            <h3 class="text-2xl font-bold mb-4">📺 Trailers</h3>
+        <section class="relative rounded-xl overflow-hidden shadow-xl p-6">
+            <div class="absolute inset-0 bg-white opacity-50 z-0"></div>
 
-            <div class="row">
+            <div class="relative z-10 flex flex-col items-center text-center w-full">
+                <h2 class="text-2xl text-red-700 font-bold mb-3">Trailers</h2>
+            </div>
+
+            <div class="relative row z-10">
                 @forelse ($pelicula['videos'] as $video)
                     @if ($video['site'] === 'YouTube')
                         <div class="col-md-6 mb-4">
@@ -171,13 +184,18 @@
             <div class="mt-3">
                 {{ $pelicula['videos']->appends(request()->query())->links() }}
             </div>
-        </div>
+
+        </section>
 
         {{-- Galería --}}
-        <div class="bg-white rounded-xl shadow p-6 mt-5">
-            <h3 class="text-2xl font-bold mb-4">📺 Galería</h3>
+        <section class="relative rounded-xl overflow-hidden shadow-xl p-6">
+            <div class="absolute inset-0 bg-white opacity-50 z-0"></div>
 
-            <div class="row">
+            <div class="relative z-10 flex flex-col items-center text-center w-full">
+                <h2 class="text-2xl text-red-700 font-bold mb-3">Galería</h2>
+            </div>
+
+            <div class="relative row z-10">
                 @foreach ($backdropsPaginated as $img)
                     <div class="col-md-4 mb-3">
                         <img src="https://image.tmdb.org/t/p/w780{{ $img['file_path'] }}"
@@ -192,25 +210,31 @@
             <div class="mt-3 overflow-x-auto">
                 {{ $backdropsPaginated->links() }}
             </div>
-        </div>
+        </section>
 
         {{-- Recomendaciones --}}
-        <div class="bg-white rounded-xl shadow p-6 mt-5">
-            <h3 class="text-2xl font-bold mb-4">⭐ Peliculas Recomendadas</h3>
+        <section class="relative rounded-xl overflow-hidden shadow-xl p-6">
+            <div class="absolute inset-0 bg-white opacity-50 z-0"></div>
 
-            <div class="row g-4">
+            <div class="relative z-10 flex flex-col items-center text-center w-full">
+                <h2 class="text-2xl text-red-700 font-bold mb-3">Peliculas Recomendadas</h2>
+            </div>
+
+            <div class="relative row z-10 g-4">
                 @if ($recomendacionesPaginadas->count() > 0)
                     @foreach ($recomendacionesPaginadas as $rec)
                         <div class="col-6 col-md-3">
-                            <div class="card shadow-sm border-0 h-100 rounded-lg hover:shadow-lg transition">
+                            <div
+                                class="card shadow-sm border-0 h-full rounded-lg hover:shadow-lg transition flex flex-col">
+
                                 <img src="https://image.tmdb.org/t/p/w300{{ $rec['poster_path'] }}"
                                     class="card-img-top rounded-top" alt="{{ $rec['title'] }}">
 
-                                <div class="card-body text-center">
+                                <div class="card-body text-center flex flex-col justify-between h-full">
                                     <h6 class="fw-bold text-dark mb-1">{{ $rec['title'] }}</h6>
 
                                     <a href="{{ route('pelicula.show', $rec['id']) }}"
-                                        class="btn btn-outline-primary btn-sm mt-2">
+                                        class="inline-block mt-4 px-6 py-2 bg-yellow-400 text-red-900 rounded-lg shadow hover:bg-yellow-600 transition">
                                         Ver detalles
                                     </a>
                                 </div>
@@ -226,22 +250,26 @@
             <div class="d-flex justify-content-center mt-4">
                 {{ $recomendacionesPaginadas->appends(['rec_page' => $recomendacionesPaginadas->currentPage()])->links() }}
             </div>
-        </div>
+        </section>
 
         {{-- Reseñas --}}
-        <div class="bg-white rounded-xl shadow p-6">
-            <div class="flex items-center justify-between mb-4">
-                <h3 class="text-2xl font-bold mb-4">Reseñas de usuarios</h3>
-                @if (isset($pelicula['imdbID']))
-                    <a href="{{ route('resenas.create.withparams', [
-                        'type' => 'pelicula',
-                        'entity_id' => $pelicula['imdbID'],
-                        'title' => $pelicula['titulo'] ?? 'pelicula',
-                    ]) }}"
-                        class="inline-block mb-4 px-6 py-2 bg-indigo-600 text-white rounded-lg shadow hover:bg-indigo-700 transition">
-                        Escribir reseña
-                    </a>
-                @endif
+        <section class="relative rounded-xl overflow-hidden shadow-xl p-6">
+            <div class="absolute inset-0 bg-white opacity-50 z-0"></div>
+
+            <div class="relative z-10 flex flex-col items-center justify-center mb-4">
+                <h2 class="text-2xl text-red-700 font-bold mb-3">Reseñas de usuarios</h2>
+                @auth
+                    @if (isset($pelicula['imdbID']))
+                        <a href="{{ route('resenas.create.withparams', [
+                            'type' => 'pelicula',
+                            'entity_id' => $pelicula['imdbID'],
+                            'title' => $pelicula['titulo'] ?? 'pelicula',
+                        ]) }}"
+                            class="inline-block mb-4 px-6 py-2 bg-yellow-400 text-red-900 rounded-lg shadow hover:bg-yellow-600 transition">
+                            Escribir reseña
+                        </a>
+                    @endif
+                @endauth
             </div>
 
             @if ($reseñas->isEmpty())
@@ -249,12 +277,13 @@
             @else
                 <div class="grid grid-cols-1 sm:grid-cols-2 gap-6 mt-6">
                     @foreach ($reseñas as $r)
-                        <div class="border-b pb-3">
+                        <div class="relative z-10 border-b pb-3 bg-white rounded-lg p-3">
                             {{-- Avatar --}}
                             <div class="flex items-center gap-3 mb-1">
-                                <img src="{{ $r->user->avatar_url ?? asset('images/default-avatar.jpeg') }}"
+                                <img src="{{ $r->user->avatar_url ? asset('storage/' . $r->user->avatar_url) : asset('images/default-avatar.jpeg') }}"
                                     alt="Avatar" class="w-12 h-12 rounded-full border-2 border-yellow-400 object-cover">
-                                <strong><a href="{{ route('users.show', $r->user->id) }}">{{ $r->user->name ?? 'Anónimo' }}</a></strong>
+                                <strong><a
+                                        href="{{ route('users.show', $r->user->id) }}">{{ $r->user->name ?? 'Anónimo' }}</a></strong>
                             </div>
 
                             {{-- Puntuación --}}
@@ -270,16 +299,25 @@
                             {{-- Fecha --}}
                             <small class="text-gray-400">{{ $r->created_at->diffForHumans() }}</small>
 
-                            @auth
+                            @if (auth()->check() && (auth()->id() === $r->user_id || auth()->user()->role === 'admin'))
                                 @php
+                                    // Reporte del usuario logueado (admin o creador)
                                     $userReport = $r->report?->firstWhere('reported_by', auth()->id());
-                                    $tiempoRestante = $userReport
-                                        ? max(0, now()->diffInSeconds($userReport->deadline))
+
+                                    // Reporte real (el único que existe para el foro, venga de quien venga)
+                                    $reporteGeneral = $r->report?->first();
+
+                                    // El creador del foro
+                                    $esCreador = auth()->id() === $r->user_id;
+
+                                    // Tiempo restante: si es creador o admin → usa el reporte general
+                                    $tiempoRestante = $reporteGeneral
+                                        ? max(0, now()->diffInSeconds($reporteGeneral->deadline))
                                         : 0;
                                 @endphp
 
                                 {{-- Reporte --}}
-                                @if ($userReport && $tiempoRestante > 0)
+                                @if (($esCreador || $userReport) && $tiempoRestante > 0)
                                     <div x-data="{
                                         tiempo: {{ $tiempoRestante }},
                                         get formato() {
@@ -307,13 +345,15 @@
                                     }" x-init="setInterval(() => disminuir(), 1000)"
                                         class="bg-yellow-100 border-l-4 border-yellow-500 text-yellow-800 px-4 py-3 rounded-md shadow-md mt-4 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2">
 
-                                        <div class="font-semibold text-sm sm:text-base">⚠ Este mensaje ha sido reportado.</div>
+                                        <div class="font-semibold text-sm sm:text-base">⚠ Este mensaje ha sido reportado.
+                                        </div>
                                         <div class="text-sm sm:text-base">
-                                            Tiempo restante para modificarlo: <span x-text="formato" class="font-mono"></span>
+                                            Tiempo restante para modificarlo: <span x-text="formato"
+                                                class="font-mono"></span>
                                         </div>
                                     </div>
                                 @endif
-                            @endauth
+                            @endif
 
                             {{-- Botones Editar / Eliminar solo para el autor --}}
                             <div class="mt-3 flex flex-wrap gap-2">
@@ -372,139 +412,139 @@
                                     </form>
                                 @endif
                             </div>
-                        </div>
-                    @endforeach
-                </div>
-            @endif
-        </div>
-    </div>
+                    </div>
+                @endforeach
+            </div>
+        @endif
+    </section>
+</div>
 
-    <!-- Modal para ver imagen en grande -->
-    <div class="modal fade" id="imgModal" tabindex="-1" aria-hidden="true">
-        <div class="modal-dialog modal-dialog-centered modal-xl">
-            <div class="modal-content bg-dark">
-                <div class="modal-body p-0">
-                    <img id="modalImage" class="img-fluid w-100 rounded">
-                </div>
+<!-- Modal para ver imagen en grande -->
+<div class="modal fade" id="imgModal" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered modal-xl">
+        <div class="modal-content bg-dark">
+            <div class="modal-body p-0">
+                <img id="modalImage" class="img-fluid w-100 rounded">
             </div>
         </div>
     </div>
+</div>
 @endsection
 
 @section('styles')
-    <style>
-        .pagination {
-            flex-wrap: nowrap !important;
-        }
-    </style>
+<style>
+    .pagination {
+        flex-wrap: nowrap !important;
+    }
+</style>
 @endsection
 
 @push('scripts')
-    <script>
-        function showImage(url) {
-            document.getElementById('modalImage').src = url;
+<script>
+    function showImage(url) {
+        document.getElementById('modalImage').src = url;
+    }
+
+    document.addEventListener('DOMContentLoaded', function() {
+        const shareButton = document.getElementById('shareButton');
+        const shareMenu = document.getElementById('shareMenu');
+        const nativeShare = document.getElementById('nativeShare');
+        const copyLink = document.getElementById('copyLink');
+        const shareTwitter = document.getElementById('shareTwitter');
+        const shareWhatsApp = document.getElementById('shareWhatsApp');
+        const shareFacebook = document.getElementById('shareFacebook');
+
+        if (!shareButton || !shareMenu) return;
+
+        const currentURL = window.location.href;
+        const title = document.title || document.querySelector('h1')?.innerText || '';
+
+        // Toggle menú
+        function toggleMenu(open) {
+            const isOpen = shareMenu.classList.contains('hidden') === false;
+            const wantOpen = typeof open === 'boolean' ? open : !isOpen;
+            shareMenu.classList.toggle('hidden', !wantOpen);
+            shareButton.setAttribute('aria-expanded', wantOpen ? 'true' : 'false');
         }
 
-        document.addEventListener('DOMContentLoaded', function() {
-            const shareButton = document.getElementById('shareButton');
-            const shareMenu = document.getElementById('shareMenu');
-            const nativeShare = document.getElementById('nativeShare');
-            const copyLink = document.getElementById('copyLink');
-            const shareTwitter = document.getElementById('shareTwitter');
-            const shareWhatsApp = document.getElementById('shareWhatsApp');
-            const shareFacebook = document.getElementById('shareFacebook');
+        shareButton.addEventListener('click', (e) => {
+            e.stopPropagation();
+            toggleMenu();
+        });
 
-            if (!shareButton || !shareMenu) return;
-
-            const currentURL = window.location.href;
-            const title = document.title || document.querySelector('h1')?.innerText || '';
-
-            // Toggle menú
-            function toggleMenu(open) {
-                const isOpen = shareMenu.classList.contains('hidden') === false;
-                const wantOpen = typeof open === 'boolean' ? open : !isOpen;
-                shareMenu.classList.toggle('hidden', !wantOpen);
-                shareButton.setAttribute('aria-expanded', wantOpen ? 'true' : 'false');
+        // Cerrar al hacer clic fuera
+        document.addEventListener('click', (e) => {
+            if (!shareMenu.classList.contains('hidden') && !shareMenu.contains(e.target) && e.target !==
+                shareButton) {
+                toggleMenu(false);
             }
+        });
 
-            shareButton.addEventListener('click', (e) => {
-                e.stopPropagation();
-                toggleMenu();
-            });
+        // Rellenar enlaces de compartir
+        if (shareTwitter) {
+            shareTwitter.href =
+                `https://twitter.com/intent/tweet?url=${encodeURIComponent(currentURL)}&text=${encodeURIComponent(title)}`;
+        }
+        if (shareWhatsApp) {
+            shareWhatsApp.href =
+                `https://api.whatsapp.com/send?text=${encodeURIComponent(title + ' ' + currentURL)}`;
+        }
+        if (shareFacebook) {
+            shareFacebook.href =
+                `https://www.facebook.com/sharer/sharer.php?u=${encodeURIComponent(currentURL)}`;
+        }
 
-            // Cerrar al hacer clic fuera
-            document.addEventListener('click', (e) => {
-                if (!shareMenu.classList.contains('hidden') && !shareMenu.contains(e.target) && e.target !==
-                    shareButton) {
-                    toggleMenu(false);
+        // Compartir nativo
+        if (nativeShare) {
+            nativeShare.addEventListener('click', async (e) => {
+                e.preventDefault();
+                toggleMenu(false);
+                if (navigator.share) {
+                    try {
+                        await navigator.share({
+                            title,
+                            url: currentURL
+                        });
+                    } catch (err) {
+                        console.error('Error al compartir:', err);
+                    }
+                } else {
+                    alert('Tu navegador no soporta la API de compartir. Usa "Copiar enlace".');
                 }
             });
+        }
 
-            // Rellenar enlaces de compartir
-            if (shareTwitter) {
-                shareTwitter.href =
-                    `https://twitter.com/intent/tweet?url=${encodeURIComponent(currentURL)}&text=${encodeURIComponent(title)}`;
-            }
-            if (shareWhatsApp) {
-                shareWhatsApp.href =
-                    `https://api.whatsapp.com/send?text=${encodeURIComponent(title + ' ' + currentURL)}`;
-            }
-            if (shareFacebook) {
-                shareFacebook.href =
-                    `https://www.facebook.com/sharer/sharer.php?u=${encodeURIComponent(currentURL)}`;
-            }
-
-            // Compartir nativo
-            if (nativeShare) {
-                nativeShare.addEventListener('click', async (e) => {
-                    e.preventDefault();
+        // Copiar enlace
+        if (copyLink) {
+            copyLink.addEventListener('click', async (e) => {
+                e.preventDefault();
+                try {
+                    await navigator.clipboard.writeText(currentURL);
                     toggleMenu(false);
-                    if (navigator.share) {
-                        try {
-                            await navigator.share({
-                                title,
-                                url: currentURL
-                            });
-                        } catch (err) {
-                            console.error('Error al compartir:', err);
-                        }
-                    } else {
-                        alert('Tu navegador no soporta la API de compartir. Usa "Copiar enlace".');
-                    }
-                });
-            }
-
-            // Copiar enlace
-            if (copyLink) {
-                copyLink.addEventListener('click', async (e) => {
-                    e.preventDefault();
-                    try {
-                        await navigator.clipboard.writeText(currentURL);
-                        toggleMenu(false);
-                        // Mensaje de éxito: usa un toast o alert simple
-                        alert('¡Enlace copiado al portapapeles!');
-                    } catch (err) {
-                        console.error('No se pudo copiar:', err);
-                        alert('Error al copiar enlace.');
-                    }
-                });
-            }
-
-            // Evitar que los links del menú cierren la página accidentalmente (los externos seguirán)
-            const menuLinks = shareMenu.querySelectorAll('a');
-            menuLinks.forEach(a => {
-                a.addEventListener('click', (e) => {
-                    // Los que tienen href="#" deben prevenir la navegación
-                    if (a.getAttribute('href') === '#') e.preventDefault();
-                    // cerrar menú al clicar
-                    toggleMenu(false);
-                });
+                    // Mensaje de éxito: usa un toast o alert simple
+                    alert('¡Enlace copiado al portapapeles!');
+                } catch (err) {
+                    console.error('No se pudo copiar:', err);
+                    alert('Error al copiar enlace.');
+                }
             });
+        }
 
-            // Cerrar con ESC
-            document.addEventListener('keydown', (e) => {
-                if (e.key === 'Escape') toggleMenu(false);
+        // Evitar que los links del menú cierren la página accidentalmente (los externos seguirán)
+        const menuLinks = shareMenu.querySelectorAll('a');
+        menuLinks.forEach(a => {
+            a.addEventListener('click', (e) => {
+                // Los que tienen href="#" deben prevenir la navegación
+                if (a.getAttribute('href') === '#') e.preventDefault();
+                // cerrar menú al clicar
+                toggleMenu(false);
             });
         });
-    </script>
+
+        // Cerrar con ESC
+        document.addEventListener('keydown', (e) => {
+            if (e.key === 'Escape') toggleMenu(false);
+        });
+    });
+</script>
 @endpush

@@ -73,29 +73,30 @@
                 </div>
 
                 {{-- Botones de acción --}}
-                <div class="flex flex-wrap gap-3 mt-4">
-                    @if (isset($serie['id']))
-                        <a href="{{ route('resenas.create.withparams', [
-                            'type' => 'serie',
-                            'entity_id' => $serie['id'],
-                            'title' => $serie['titulo'] ?? 'Serie',
-                        ]) }}"
-                            class="bg-yellow-400 text-indigo-900 px-4 py-2 rounded-lg shadow hover:bg-yellow-500 transition flex items-center gap-2">
-                            <i class="bi bi-pencil-square"></i>
-                            Escribir reseña
-                        </a>
-                    @endif
+                <div class="flex flex-col md:flex-row flex-wrap gap-3 mt-4">
+                    @auth
+                        @if (isset($serie['id']))
+                            <a href="{{ route('resenas.create.withparams', [
+                                'type' => 'serie',
+                                'entity_id' => $serie['id'],
+                                'title' => $serie['titulo'] ?? 'Serie',
+                            ]) }}"
+                                class="bg-yellow-400 text-red-900 px-4 py-2 rounded-lg shadow hover:bg-yellow-500 transition flex text-center gap-2 w-fit">
+                                <i class="bi bi-pencil-square"></i>
+                                Escribir reseña
+                            </a>
+                        @endif
+                    @endauth
 
                     <a href="https://www.imdb.com/title/{{ $serie['imdbID'] }}" target="_blank"
-                        class="text-white px-4 py-2 rounded-lg shadow hover:opacity-90 transition flex items-center gap-2"
-                        style="background-color: #ff00c8;">
+                        class="text-white bg-fuchsia-500 px-4 py-2 rounded-lg shadow hover:opacity-90 transition flex text-center gap-2 w-fit">
                         📺 Ver en IMDb
                     </a>
 
                     {{-- Compartir --}}
                     <div class="relative" x-data>
                         <button id="shareButton" aria-haspopup="true" aria-expanded="false"
-                            class="bg-red-500 text-white px-4 py-2 rounded-lg shadow hover:bg-red-600 transition flex items-center gap-2">
+                            class="bg-red-700 text-white px-4 py-2 rounded-lg shadow hover:bg-red-600 transition flex text-center gap-2">
                             <i class="bi bi-share"></i> Compartir
                         </button>
 
@@ -122,17 +123,25 @@
         </div>
 
         {{-- Sinopsis --}}
-        <div class="bg-white rounded-xl shadow p-6">
-            <h2 class="text-2xl font-bold mb-3">Sinopsis</h2>
-            <p class="text-gray-700">
+        <section class="relative rounded-xl overflow-hidden shadow-xl p-6">
+            <div class="absolute inset-0 bg-white opacity-50 z-0"></div>
+            <div class="relative z-10 flex flex-col items-center text-center w-full">
+                <h2 class="text-2xl text-red-700 font-bold mb-3">Sinopsis</h2>
+            </div>
+            <p class="relative text-gray-700 z-10">
                 {{ $serie['overview'] ?? $serie['sinopsis'] }}
             </p>
-        </div>
+        </section>
 
         {{-- Actores destacados --}}
         @if (!empty($serie['actores']))
-            <div>
-                <h3 class="text-2xl font-bold mb-4">🎭 Reparto Principal</h3>
+            <section class="relative rounded-xl overflow-hidden shadow-xl p-6">
+                <div class="absolute inset-0 bg-white opacity-50 z-0"></div>
+
+                <div class="relative z-10 flex flex-col items-center text-center w-full">
+                    <h2 class="text-2xl text-red-700 font-bold mb-3">Reparto Principal</h2>
+                </div>
+
                 <div class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-6">
                     @foreach (explode(',', $serie['actores']) as $actor)
                         @php
@@ -141,21 +150,25 @@
                             $imgUrl = $actorImages[$actor] ?? null;
                         @endphp
                         <a href="{{ $wikiUrl }}" target="_blank"
-                            class="flex flex-col items-center text-center bg-white rounded-xl shadow hover:shadow-lg p-3 transition">
+                            class="z-10 flex flex-col items-center text-center bg-white rounded-xl shadow hover:shadow-lg p-3 transition">
                             <img src="{{ $imgUrl }}" alt="{{ $actor }}"
                                 class="w-24 h-24 rounded-full mb-2 border border-gray-200 object-cover">
-                            <span class="font-semibold text-indigo-600 hover:underline">{{ $actor }}</span>
+                            <span class="font-semibold text-red-600 hover:underline">{{ $actor }}</span>
                             <small class="text-gray-400">Ver en Wikipedia</small>
                         </a>
                     @endforeach
                 </div>
-            </div>
+            </section>
         @endif
 
         {{-- Episodios por temporada --}}
-        <div class="bg-white rounded-xl shadow p-6 mt-8 mb-8">
-            <h3 class="text-2xl font-bold mb-4">📺 Temporadas</h3>
-            <div class="space-y-4">
+        <section class="relative rounded-xl overflow-hidden shadow-xl p-6">
+            <div class="absolute inset-0 bg-white opacity-50 z-0"></div>
+
+            <div class="relative z-10 flex flex-col items-center text-center w-full">
+                <h2 class="text-2xl text-red-700 font-bold mb-3">Temporadas</h2>
+            </div>
+            <div class="space-y-4 relative z-10">
                 @if (!empty($episodiosPorTemporada))
 
                     @foreach ($episodiosPorTemporada as $temporada => $episodios)
@@ -165,7 +178,7 @@
                             <button @click="openTemporada = !openTemporada"
                                 class="card-header bg-primary text-white d-flex justify-content-between align-items-center fw-bold"
                                 style="cursor: pointer; font-size: 1.1rem;">
-                                <span>📺 Temporada {{ $temporada }} ({{ count($episodios) }})</span>
+                                <span>Temporada {{ $temporada }} ({{ count($episodios) }})</span>
                                 <div class="d-flex align-items-center">
                                     <svg :class="{
                                         'rotate-180 text-red-400': openTemporada,
@@ -262,15 +275,18 @@
                 @else
                     <p class="text-muted">No se han encontrado episodios para esta serie.</p>
                 @endif
-            </div>
-        </div>
+        </section>
 
         {{-- Trailer si está disponible --}}
-        <div class="bg-white rounded-xl shadow p-6 mt-5">
-            <h3 class="text-2xl font-bold mb-4">📺 Trailers</h3>
+        <section class="relative rounded-xl overflow-hidden shadow-xl p-6">
+            <div class="absolute inset-0 bg-white opacity-50 z-0"></div>
 
-            <div class="row">
-                @forelse ($serie['videos'] as $video)
+            <div class="relative z-10 flex flex-col items-center text-center w-full">
+                <h2 class="text-2xl text-red-700 font-bold mb-3">Trailers</h2>
+            </div>
+
+            <div class="relative row z-10">
+                @forelse ($videosPaginated as $video)
                     @if ($video['site'] === 'YouTube')
                         <div class="col-md-6 mb-4">
                             <iframe width="100%" height="315"
@@ -283,13 +299,22 @@
                     <p>No hay vídeos disponibles.</p>
                 @endforelse
             </div>
-        </div>
+
+            {{-- PAGINACIÓN --}}
+            <div class="mt-3 overflow-x-auto">
+                {{ $videosPaginated->appends(request()->query())->links() }}
+            </div>
+        </section>
 
         {{-- Galería --}}
-        <div class="bg-white rounded-xl shadow p-6 mt-5">
-            <h3 class="text-2xl font-bold mb-4">📺 Galería</h3>
+        <section class="relative rounded-xl overflow-hidden shadow-xl p-6">
+            <div class="absolute inset-0 bg-white opacity-50 z-0"></div>
 
-            <div class="row">
+            <div class="relative z-10 flex flex-col items-center text-center w-full">
+                <h2 class="text-2xl text-red-700 font-bold mb-3">Galería</h2>
+            </div>
+
+            <div class="relative row z-10">
                 @foreach ($backdropsPaginated as $img)
                     <div class="col-md-4 mb-3">
                         <img src="https://image.tmdb.org/t/p/w780{{ $img['file_path'] }}"
@@ -304,25 +329,31 @@
             <div class="mt-3 overflow-x-auto">
                 {{ $backdropsPaginated->links() }}
             </div>
-        </div>
+        </section>
 
         {{-- Recomendaciones --}}
-        <div class="bg-white rounded-xl shadow p-6 mt-5">
-            <h3 class="text-2xl font-bold mb-4">⭐ Series Recomendadas</h3>
+        <section class="relative rounded-xl overflow-hidden shadow-xl p-6">
+            <div class="absolute inset-0 bg-white opacity-50 z-0"></div>
 
-            <div class="row g-4">
+            <div class="relative z-10 flex flex-col items-center text-center w-full">
+                <h2 class="text-2xl text-red-700 font-bold mb-3">Series Recomendadas</h2>
+            </div>
+
+            <div class="relative row z-10 g-4">
                 @if ($recomendacionesPaginadas->count() > 0)
                     @foreach ($recomendacionesPaginadas as $rec)
                         <div class="col-6 col-md-3">
-                            <div class="card shadow-sm border-0 h-100 rounded-lg hover:shadow-lg transition">
+                            <div
+                                class="card shadow-sm border-0 h-full rounded-lg hover:shadow-lg transition flex flex-col">
+
                                 <img src="https://image.tmdb.org/t/p/w300{{ $rec['poster_path'] }}"
                                     class="card-img-top rounded-top" alt="{{ $rec['name'] }}">
 
-                                <div class="card-body text-center">
+                                <div class="card-body text-center flex flex-col justify-between h-full">
                                     <h6 class="fw-bold text-dark mb-1">{{ $rec['name'] }}</h6>
 
                                     <a href="{{ route('serie.show', $rec['id']) }}"
-                                        class="btn btn-outline-primary btn-sm mt-2">
+                                        class="inline-block mt-4 px-6 py-2 bg-yellow-400 text-red-900 rounded-lg shadow hover:bg-yellow-600 transition">
                                         Ver detalles
                                     </a>
                                 </div>
@@ -338,38 +369,43 @@
             <div class="d-flex justify-content-center mt-4">
                 {{ $recomendacionesPaginadas->appends(['rec_page' => $recomendacionesPaginadas->currentPage()])->links() }}
             </div>
-        </div>
+        </section>
 
         {{-- Reseñas desde la base de datos --}}
-        <div class="bg-white rounded-xl shadow p-6">
-            <div class="flex items-center justify-between mb-4">
-                <h3 class="text-2xl font-bold mb-4">Reseñas de usuarios</h3>
-                @if (isset($serie['id']))
-                    <a href="{{ route('resenas.create.withparams', [
-                        'type' => 'serie',
-                        'entity_id' => $serie['id'],
-                        'title' => $serie['titulo'] ?? 'serie',
-                    ]) }}"
-                        class="inline-block mb-4 px-6 py-2 bg-indigo-600 text-white rounded-lg shadow hover:bg-indigo-700 transition">
-                        Escribir reseña
-                    </a>
-                @endif
+        <section class="relative rounded-xl overflow-hidden shadow-xl p-6">
+            <div class="absolute inset-0 bg-white opacity-50 z-0"></div>
+
+            <div class="relative z-10 flex flex-col items-center justify-center mb-4">
+                <h2 class="text-2xl text-red-700 font-bold mb-3">Reseñas de usuarios</h2>
+                @auth
+                    @if (isset($serie['id']))
+                        <a href="{{ route('resenas.create.withparams', [
+                            'type' => 'serie',
+                            'entity_id' => $serie['id'],
+                            'title' => $serie['titulo'] ?? 'serie',
+                        ]) }}"
+                            class="inline-block mb-4 px-6 py-2 bg-yellow-400 text-red-900 rounded-lg shadow hover:bg-yellow-600 transition">
+                            Escribir reseña
+                        </a>
+                    @endif
+                @endauth
             </div>
 
             @if ($reseñas->isEmpty())
                 <p class="text-gray-500 italic">Aún no hay reseñas para esta serie. ¡Sé el primero en opinar!</p>
             @else
-                <div class="grid grid-cols-1 sm:grid-cols-2 gap-6 mt-6">
+                <div class="relative z-10 grid grid-cols-1 sm:grid-cols-2 gap-6 mt-6">
                     @foreach ($reseñas as $r)
-                        <div class="border-b pb-3">
+                        <div class="relative z-10 border-b pb-3 bg-white rounded-lg p-3">
                             {{-- Avatar --}}
                             <div class="flex items-center gap-2 mb-1">
                                 <div class="flex-shrink-0 mr-2">
-                                    <img src="{{ $review->user->avatar_url ?? asset('images/default-avatar.jpeg') }}"
-                                        alt="Avatar de {{ $review->user->name ?? 'Usuario' }}"
+                                    <img src="{{ $r->user->avatar_url ? asset('storage/' . $r->user->avatar_url) : asset('images/default-avatar.jpeg') }}"
+                                        alt="Avatar de {{ $r->user->name ?? 'Usuario' }}"
                                         class="w-12 h-12 rounded-full border-2 border-yellow-400 object-cover" />
                                 </div>
-                                <strong><a href="{{ route('users.show', $r->user->id) }}">{{ $r->user->name ?? 'Anónimo' }}</a></strong>
+                                <strong><a
+                                        href="{{ route('users.show', $r->user->id) }}">{{ $r->user->name ?? 'Anónimo' }}</a></strong>
                             </div>
 
                             {{-- Puntuación --}}
@@ -385,16 +421,25 @@
                             {{-- Fecha --}}
                             <small class="text-gray-400">{{ $r->created_at->diffForHumans() }}</small>
 
-                            @auth
+                            @if (auth()->check() && (auth()->id() === $r->user_id || auth()->user()->role === 'admin'))
                                 @php
+                                    // Reporte del usuario logueado (admin o creador)
                                     $userReport = $r->report?->firstWhere('reported_by', auth()->id());
-                                    $tiempoRestante = $userReport
-                                        ? max(0, now()->diffInSeconds($userReport->deadline))
+
+                                    // Reporte real (el único que existe para el foro, venga de quien venga)
+                                    $reporteGeneral = $r->report?->first();
+
+                                    // El creador del foro
+                                    $esCreador = auth()->id() === $r->user_id;
+
+                                    // Tiempo restante: si es creador o admin → usa el reporte general
+                                    $tiempoRestante = $reporteGeneral
+                                        ? max(0, now()->diffInSeconds($reporteGeneral->deadline))
                                         : 0;
                                 @endphp
 
                                 {{-- Reporte --}}
-                                @if ($userReport && $tiempoRestante > 0)
+                                @if (($esCreador || $userReport) && $tiempoRestante > 0)
                                     <div x-data="{
                                         tiempo: {{ $tiempoRestante }},
                                         get formato() {
@@ -428,7 +473,7 @@
                                         </div>
                                     </div>
                                 @endif
-                            @endauth
+                            @endif
 
                             {{-- Botones Editar / Eliminar solo para el autor --}}
                             <div class="mt-3 flex flex-wrap gap-2">
@@ -490,7 +535,7 @@
                         </div>
                     @endforeach
             @endif
-        </div>
+        </section>
     </div>
 
     <!-- Modal para ver imagen en grande -->

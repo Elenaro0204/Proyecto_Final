@@ -14,13 +14,13 @@ class HomeController extends Controller
     public function index()
     {
         // -------- FOROS ----------
-        $foros = Foro::latest()->take(8)->get()->map(function ($f) {
+        $foros = Foro::latest()->take(9)->get()->map(function ($f) {
             return [
                 'title' => $f->titulo,
                 'text' => Str::limit($f->descripcion ?? '', 100),
                 'image' => $f->imagen
                     ? asset('/storage/portadas/' . $f->imagen)
-                    : asset('images/fondo-foros.jpg'),
+                    : asset('images/fondo-foros2.jpg'),
                 'link' => route('foros.show', $f->id),
                 'bg_color' => $f->color_fondo ?? '#000',
                 'title_color' => $f->color_titulo ?? '#fff',
@@ -28,7 +28,7 @@ class HomeController extends Controller
         });
 
         // -------- RESEÑAS ----------
-        $resenas = Review::latest()->take(8)->get()->map(function ($r) {
+        $resenas = Review::latest()->take(9)->get()->map(function ($r) {
 
             $titulo = 'Desconocido';
             $imagen = asset('images/fondo-resenas.jpg');

@@ -104,7 +104,7 @@ class ProfileController extends Controller
             'name' => 'required|string|max:255',
             'nickname' => 'nullable|string|max:255',
             'email' => 'required|email|max:255|unique:users,email,' . $user->id,
-            'avatar_url' => 'nullable|image|max:2048',
+            'avatar' => 'nullable|image|max:2048',
             'bio' => 'nullable|string|max:1000',
             'fecha_nacimiento' => 'nullable|date|before_or_equal:today',
             'twitter' => 'nullable|url|max:255',
@@ -138,7 +138,7 @@ class ProfileController extends Controller
         if ($request->hasFile('avatar')) {
             $file = $request->file('avatar');
             $path = $file->store('avatars', 'public'); // guarda en storage/app/public/avatars
-            $user->avatar_url = '/storage/' . $path; // ruta pública
+            $user->avatar_url = $path; // ruta pública
         }
 
         // Guardar en la base de datos

@@ -18,22 +18,24 @@
             <div class="mb-8">
                 <h2 class="text-3xl font-semibold text-gray-800">Bienvenido al universo de debates Marvel</h2>
                 <p class="text-gray-600 mt-2">
-                    Explora los foros, participa en conversaciones sobre cómics, series y películas, y conecta con otros
+                    Explora los foros, participa en conversaciones sobre series y películas, y conecta con otros
                     fans.
                 </p>
             </div>
 
             @if (Auth::check() && Auth::user()->hasVerifiedEmail())
                 <a href="{{ route('foros.create') }}"
-                    class="px-6 py-3 bg-indigo-600 text-white rounded-lg shadow-lg hover:bg-indigo-700 transition duration-300">
-                    Crear Nuevo Foro
+                    class="inline-flex items-center gap-2 bg-gradient-to-r from-red-500 to-red-700 text-white font-semibold px-5 py-3 rounded-xl shadow-lg hover:scale-105 transition transform">
+                    <i class="fas fa-pen-nib"></i> Crear Nuevo Foro
                 </a>
             @endif
         </div>
 
         <!-- Foros Públicos -->
         <section class="mb-12">
-            <h2 class="text-2xl font-bold mb-6 text-gray-800 border-b-2 border-indigo-500 pb-2">Públicos</h2>
+            <div class="border-4 border-fuchsia-500 rounded-lg w-full mx-auto my-5 text-center px-4 md:px-0">
+                <h2 class="text-2xl font-semibold text-red-700 p-3 uppercase">Publicos</h2>
+            </div>
             <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
                 @forelse ($foros->where('visibilidad', 'publico') as $foro)
                     @include('foros.partials.foro-card', ['foro' => $foro])
@@ -48,7 +50,9 @@
         <!-- Foros Privados (solo creador) -->
         @auth
             <section class="mb-12">
-                <h2 class="text-2xl font-bold mb-6 text-gray-800 border-b-2 border-red-500 pb-2">Tus Privados</h2>
+                <div class="border-4 border-fuchsia-500 rounded-lg w-full mx-auto my-5 text-center px-4 md:px-0">
+                    <h2 class="text-2xl font-semibold text-red-700 p-3 uppercase">Tus Privados</h2>
+                </div>
                 <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
                     @forelse ($foros->where('visibilidad', 'privado')->where('user_id', auth()->id()) as $foro)
                         @include('foros.partials.foro-card', ['foro' => $foro])
@@ -63,7 +67,9 @@
 
         <!-- Foros más comentados -->
         <section class="mb-12">
-            <h2 class="text-2xl font-bold mb-6 text-gray-800 border-b-2 border-yellow-500 pb-2">Más Comentados</h2>
+            <div class="border-4 border-fuchsia-500 rounded-lg w-full mx-auto my-5 text-center px-4 md:px-0">
+                <h2 class="text-2xl font-semibold text-red-700 p-3 uppercase">Mas Comentados</h2>
+            </div>
             <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
                 @php
                     $forosMasComentados = $foros
@@ -85,7 +91,9 @@
 
         <!-- Foros Recientes -->
         <section class="mb-12">
-            <h2 class="text-2xl font-bold mb-6 text-gray-800 border-b-2 border-green-500 pb-2">Recientes</h2>
+            <div class="border-4 border-fuchsia-500 rounded-lg w-full mx-auto my-5 text-center px-4 md:px-0">
+                <h2 class="text-2xl font-semibold text-red-700 p-3 uppercase">Recientes</h2>
+            </div>
             <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
                 @php
                     $forosRecientes = $foros->where('visibilidad', 'publico')->sortByDesc('created_at')->take(6);
@@ -103,11 +111,13 @@
 
         <!-- Sección: Buscar y Filtrar Foros -->
         <section class="mb-12">
-            <h2 class="text-2xl font-bold mb-4 text-gray-800 border-b-2 border-blue-500 pb-2">Buscar</h2>
+            <div class="border-4 border-fuchsia-500 rounded-lg w-full mx-auto my-5 text-center px-4 md:px-0">
+                <h2 class="text-2xl font-semibold text-red-700 p-3 uppercase">Buscar</h2>
+            </div>
 
             <form id="foro-filtros-form" action="{{ route('foros.index') }}" method="GET"
                 class="flex flex-col md:flex-row gap-4 max-w-4xl mx-auto mb-4">
-                <input type="text" name="search" value="{{ request('search') }}" placeholder="Buscar por título..."
+                <input type="text" name="search" value="{{ request('search') }}" placeholder="🔍 Buscar por título..."
                     class="flex-1 px-4 py-2 rounded-lg border border-gray-300 focus:outline-none focus:ring-2 focus:ring-indigo-500">
                 <select name="visibilidad"
                     class="px-4 py-2 rounded-lg border border-gray-300 focus:outline-none focus:ring-2 focus:ring-indigo-500">

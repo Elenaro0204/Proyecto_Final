@@ -1,10 +1,8 @@
 <!-- resources/views/profile/partials/update-password-form.blade.php -->
 
-<section class="space-y-6">
-
-    <!-- Header -->
-    <header class="text-center mb-6">
-        <h2 class="text-2xl font-extrabold text-red-700 animate-pulse">🛡️ {{ __('Actualizar Contraseña') }}</h2>
+<div class="relative z-10 py-6 sm:py-3">
+    <header class="relative z-10 flex flex-col items-center text-center w-full mb-6">
+        <h1 class="text-3xl text-red-700 font-bold">Actualizar Contraseña</h2>
         <p class="mt-2 text-gray-600 text-lg">
             {{ __('Asegúrese de que su cuenta utilice una contraseña larga y aleatoria para mantener su seguridad.') }}
         </p>
@@ -30,7 +28,7 @@
         <div>
             <x-input-label for="update_password_current_password" :value="__('Contraseña Actual')" />
             <x-text-input id="update_password_current_password" name="current_password" type="password"
-                class="mt-1 block w-full rounded-xl shadow-inner border-2 border-red-400 p-2 hover:shadow-lg transition-all"
+                class="mt-1 block w-full rounded-xl shadow-inner p-2 hover:shadow-lg transition-all"
                 autocomplete="current-password" />
             <x-input-error :messages="$errors->updatePassword->get('current_password')" class="mt-2" />
         </div>
@@ -39,7 +37,7 @@
         <div>
             <x-input-label for="update_password_password" :value="__('Nueva Contraseña')" />
             <x-text-input id="update_password_password" name="password" type="password"
-                class="mt-1 block w-full rounded-xl shadow-inner border-2 border-yellow-400 p-2 hover:shadow-lg transition-all"
+                class="mt-1 block w-full rounded-xl shadow-inner p-2 hover:shadow-lg transition-all"
                 autocomplete="new-password" />
             <x-input-error :messages="$errors->updatePassword->get('password')" class="mt-2" />
         </div>
@@ -48,15 +46,17 @@
         <div>
             <x-input-label for="update_password_password_confirmation" :value="__('Confirmar Contraseña')" />
             <x-text-input id="update_password_password_confirmation" name="password_confirmation" type="password"
-                class="mt-1 block w-full rounded-xl shadow-inner border-2 border-blue-400 p-2 hover:shadow-lg transition-all"
+                class="mt-1 block w-full rounded-xl shadow-inner p-2 hover:shadow-lg transition-all"
                 autocomplete="new-password" />
             <x-input-error :messages="$errors->updatePassword->get('password_confirmation')" class="mt-2" />
         </div>
 
         <!-- Botón Guardar -->
-        <div class="flex items-center justify-end gap-4">
-            <x-primary-button class="bg-red-600 hover:bg-red-700 transform hover:scale-105 transition-all">🔒
-                {{ __('Guardar') }}</x-primary-button>
+        <div class="flex justify-center mt-4">
+            <button type="submit"
+                class="px-4 py-2 bg-yellow-400 text-red-800 font-semibold rounded-lg hover:bg-yellow-500 transition">
+                Guardar
+            </button>
 
             @if (session('status') === 'password-updated')
                 <p x-data="{ show: true }" x-show="show" x-transition x-init="setTimeout(() => show = false, 2000)"

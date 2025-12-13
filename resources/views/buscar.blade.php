@@ -8,7 +8,7 @@
 
     <div class="container mx-auto px-4 py-6">
         <div class="max-w-3xl mx-auto">
-            <input id="globalSearch" type="text" placeholder="Buscar películas o series"
+            <input id="globalSearch" type="text" placeholder="🔍 Buscar películas o series"
                 class="w-full px-4 py-3 border rounded-lg focus:ring-2 focus:ring-indigo-500" autocomplete="off">
         </div>
 

@@ -2,15 +2,16 @@
 
 <footer class="bg-gradient-to-b from-blue-700 to-red-700 text-gray-200 mt-auto py-8">
     <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+
+        <!-- 1. Logo + Contacto -->
+        <div class="flex justify-center items-center text-center">
+            <a href="{{ route('profile') }}" class="flex items-center justify-center mb-4">
+                <img src="{{ asset('logos/Logo.PNG') }}" alt="Logo" class="h-8 md:h-24 lg:h-28 w-auto fill-current">
+            </a>
+        </div>
+
         <div class="grid grid-cols-1 md:grid-cols-3 gap-8">
-
-            <!-- 1. Logo + Contacto -->
-            <div class="text-center md:text-left">
-                <a href="{{ route('profile') }}"
-                    class="flex items-center justify-center md:justify-start mb-4">
-                    <img src="{{ asset('logos/Logo.PNG') }}" alt="Logo" class="h-8 md:h-24 lg:h-28 w-auto mr-2 fill-current">
-                </a>
-
+            <div class="space-y-4">
                 <h6 class="text-red-500 text-sm uppercase font-semibold mb-2">¡Hablemos!</h6>
                 <p class="font-bold tracking-wide text-gray-300 sm:text-base leading-snug">
                     ¿Tienes dudas, ideas o sugerencias? Nos encantaría escucharte.
@@ -45,6 +46,7 @@
                 </form>
             </div>
 
+
             <!-- 2. Menú de la página -->
             <div class="text-center md:text-left">
                 <h6 class="text-yellow-400 uppercase text-sm font-semibold mb-3 md:mb-3 mb-1">Explora</h6>
@@ -52,7 +54,8 @@
                     <li><a href="{{ route('inicio') }}" class="hover:text-red-500 transition-colors">Inicio</a></li>
                     <li><a href="{{ route('descubre') }}" class="hover:text-red-500 transition-colors">Descubre</a></li>
                     <li><a href="{{ route('peliculas.index') }}"
-                            class="hover:text-red-500 transition-colors">Películas</a></li>
+                            class="hover:text-red-500 transition-colors">Películas</a>
+                    </li>
                     <li><a href="{{ route('series') }}" class="hover:text-red-500 transition-colors">Series</a></li>
                     <li><a href="{{ route('ayuda') }}" class="hover:text-red-500 transition-colors">Ayuda</a></li>
 
@@ -72,7 +75,8 @@
                         @if (Auth::user()->role === 'admin')
                             {{-- Solo para administradores --}}
                             <li><a href="{{ route('admin.dashboard') }}"
-                                    class="hover:text-red-500 transition-colors">Gestionar Usuarios</a></li>
+                                    class="hover:text-red-500 transition-colors">Gestionar
+                                    Usuarios</a></li>
                             <li><a href="{{ route('admin.manage-content') }}"
                                     class="hover:text-red-500 transition-colors">Gestionar
                                     Contenido</a></li>
@@ -102,11 +106,12 @@
                 </p>
             </div>
         </div>
+    </div>
 
-        <!-- 4. Copyright -->
-        <div class="text-center mt-8 pt-4 border-t border-yellow-400 text-sm text-gray-300">
-            &copy; {{ date('Y') }} Marvelpedia. Todos los derechos reservados. ¡Sigue explorando el universo Marvel
-            con nosotros!
-        </div>
+    <!-- 4. Copyright -->
+    <div class="text-center mt-8 pt-4 border-t border-yellow-400 text-sm text-gray-300">
+        &copy; {{ date('Y') }} Marvelpedia. Todos los derechos reservados. ¡Sigue explorando el universo Marvel
+        con nosotros!
+    </div>
     </div>
 </footer>

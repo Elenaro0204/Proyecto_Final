@@ -30,7 +30,9 @@ class ContenidoActualizadoMail extends Mailable
 
     public function build()
     {
-        $subject = $this->tipo ? "Tu {$this->tipo} ha sido actualizado" : "Contenido Actualizado";
+        $genero = ($this->tipo === 'resena') ? 'actualizada' : 'actualizado';
+
+        $subject = $this->tipo ? "Tu {$this->tipo} ha sido {$genero}" : "Contenido Actualizado";
         return $this->from('soportemarvelpedia@gmail.com', 'Marvelpedia Soporte')
             ->subject($subject)
             ->view('emails.contenido-actualizado')

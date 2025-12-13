@@ -27,7 +27,12 @@ class ContenidoEliminadoMail extends Mailable
 
     public function build()
     {
-        $subject = $this->tipo ? "Tu {$this->tipo} ha sido eliminado" : "Contenido Eliminado";
+        $genero = ($this->tipo === 'resena') ? 'eliminada' : 'eliminado';
+
+        $subject = $this->tipo
+            ? "Tu {$this->tipo} ha sido {$genero}"
+            : "Contenido Eliminado";
+
         return $this->from('soportemarvelpedia@gmail.com', 'Marvelpedia Soporte')
             ->subject($subject)
             ->view('emails.contenido-eliminado')
