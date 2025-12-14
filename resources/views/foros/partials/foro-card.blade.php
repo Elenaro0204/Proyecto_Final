@@ -104,7 +104,8 @@
                             Editar
                         </a>
                         @if (!Auth::user()->isAdmin())
-                            <form action="{{ route('foros.destroy', $foro->id) }}" method="POST" class="flex-1">
+                            <form action="{{ route('foros.destroy', $foro->id) }}" method="POST" class="flex-1"
+                                onsubmit="return confirm('¿Seguro que quieres eliminar este foro?');">
                                 @csrf
                                 @method('DELETE')
                                 <button type="submit"

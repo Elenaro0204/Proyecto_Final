@@ -50,20 +50,22 @@
                                 'titulo' => 'Guía para el Usuario',
                                 'descripcion' => 'Explicación general del sistema.',
                                 'icono' => 'fa-file-alt',
-                                'link' => '#',
+                                'link' =>
+                                    'https://drive.google.com/u/0/uc?id=1XccbrfmZNv-Kc_dzYPmaiFBaOLHnUxkb&export=download',
                             ],
                             [
                                 'titulo' => 'Memoria del Proyecto',
                                 'descripcion' => 'Documentación completa del desarrollo.',
                                 'icono' => 'fa-tools',
                                 'link' =>
-                                    'https://docs.google.com/document/d/1lYClhyg8zDwgL5H8gzTb54w_i8V-s2liVkfexSv_PZc/edit?usp=drive_link',
+                                    'https://drive.google.com/u/0/uc?id=13Cz41zEHQ9PHJshodHc_cqxImr386H9o&export=download',
                             ],
                             [
                                 'titulo' => 'Presentación del Proyecto',
                                 'descripcion' => 'Slides del resumen final.',
                                 'icono' => 'fa-chalkboard',
-                                'link' => '#',
+                                'link' =>
+                                    'https://drive.google.com/u/0/uc?id=1z8PWqAAhhvB-G6FvOK4Xthunj8-AAzfw&export=download',
                             ],
                         ];
                     @endphp
