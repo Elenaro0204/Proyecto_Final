@@ -26,7 +26,7 @@
             <form id="reviews-filter-form" method="GET" action="{{ route('admin.manage-content') }}"
                 class="relative z-10 mb-4 flex flex-col sm:flex-row gap-2 items-stretch sm:items-center">
 
-                <input type="text" name="q" value="{{ request('q') }}" placeholder="🔍 Buscar reseñas..."
+                <input type="text" name="q" value="{{ request('q') }}" placeholder="🔍 Buscar reseñas por el contenido..."
                     class="border rounded p-2 w-full">
 
                 <select name="type" class="border rounded p-2 w-full sm:w-1/4">

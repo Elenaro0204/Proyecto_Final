@@ -140,9 +140,37 @@ class AdminController extends Controller
         $reviewsQuery = Review::with(['user', 'report.reporter'])->latest();
 
         if ($request->filled('q')) {
-            $reviewsQuery->where(function ($q) use ($request) {
-                $q->where('content', 'like', "%{$request->q}%")
-                    ->orWhere('entity_id', 'like', "%{$request->q}%");
+
+            $busqueda = $request->q;
+
+            // 1️⃣ Buscar coincidencias en TMDB
+            $apiKey = '068f9f8748c67a559a92eafb6a8eeda7';
+
+            $tmdbPeliculas = Http::get("https://api.themoviedb.org/3/search/movie", [
+                'api_key' => $apiKey,
+                'query' => $busqueda,
+                'language' => 'es-ES'
+            ]);
+
+            $tmdbSeries = Http::get("https://api.themoviedb.org/3/search/tv", [
+                'api_key' => $apiKey,
+                'query' => $busqueda,
+                'language' => 'es-ES'
+            ]);
+
+            // 2️⃣ Extraer IDs encontrados
+            $peliculasIds = $tmdbPeliculas->ok() ? collect($tmdbPeliculas->json()['results'])->pluck('id')->toArray() : [];
+            $seriesIds = $tmdbSeries->ok() ? collect($tmdbSeries->json()['results'])->pluck('id')->toArray() : [];
+
+            $todosLosIdsEncontrados = array_merge($peliculasIds, $seriesIds);
+
+            // 3️⃣ Filtrar reseñas por IDs de TMDB O por texto en la reseña
+            $reviewsQuery->where(function ($q) use ($busqueda, $todosLosIdsEncontrados) {
+                $q->where('content', 'like', "%{$busqueda}%");
+
+                if (!empty($todosLosIdsEncontrados)) {
+                    $q->orWhereIn('entity_id', $todosLosIdsEncontrados);
+                }
             });
         }
 
@@ -189,8 +217,16 @@ class AdminController extends Controller
 
         $foros = $forosQuery->paginate(10, ['*'], 'foros_page');
 
+        // AJAX PARA FOROS (primero)
         if ($request->ajax() && $request->type_ajax === 'foros') {
             return view('admin.foros.partials.foros-table', compact('foros'))->render();
+        }
+
+        // AJAX PARA RESEÑAS (después)
+        if ($request->ajax()) {
+            return view('admin.resenas.partials.reviews-table', [
+                'reviews' => $reviews
+            ]);
         }
 
         return view('admin.manage-content', compact('reviews', 'foros'));
